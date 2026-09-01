@@ -1,4 +1,5 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "gh-flow-skills",
   "description": "One-shot issue-to-PR composition skills — chain the atomic GitHub skills into a single run, on a reachable remote or a push-blocked one",
   "owner": {
@@ -9,6 +10,7 @@
     {
       "name": "gh-flow",
       "description": "Carry a GitHub issue all the way to a reviewed PR in one run. Four skills on two axes: the ordinary path, where the issue and the PR live on the same reachable remote, and the relay path, for a destination remote whose git push a proxy blocks.",
+      "homepage": "https://github.com/dEitY719/gh-flow-skills",
       "version": "0.1.0",
       "source": "./",
       "author": {

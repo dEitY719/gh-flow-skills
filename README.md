@@ -32,6 +32,9 @@ skill runs when a plain `git push` works.
 - `issue-relay` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/issue-relay.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/issue-relay-usage.html) (issue on a push-blocked remote to a relayed handoff)
 - `relay-merge` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/relay-merge.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/relay-merge-usage.html) (commit range to gist patches and an apply-guide)
 
+Each page is generated from a Markdown source under
+[`docs/skill-guides/`](docs/skill-guides) and [`docs/skill-output/`](docs/skill-output).
+
 ## Requirements
 
 | Need | Why |
