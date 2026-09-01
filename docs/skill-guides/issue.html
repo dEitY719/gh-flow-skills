@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko" class="theme-dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gh-flow:issue - 스킬 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { interpolate-size: allow-keywords; }
+
+    html.theme-dark {
+      --bg: #0A0A0A; --surface: #141414; --surface-hover: #1C1C1C;
+      --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14);
+      --text: #EDEDED; --text-secondary: #8b8b8b;
+      --accent: #3b82f6; --accent-secondary: #8b5cf6;
+      --positive: #10b981; --negative: #f43f5e; --warning: #f59e0b;
+      --code-bg: #0f0f0f; --hero-glow: rgba(59,130,246,0.10);
+    }
+    html.theme-light {
+      --bg: #FAFAF9; --surface: #FFFFFF; --surface-hover: #F5F5F4;
+      --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.16);
+      --text: #0f172a; --text-secondary: #64748b;
+      --accent: #2563eb; --accent-secondary: #7c3aed;
+      --positive: #059669; --negative: #e11d48; --warning: #d97706;
+      --code-bg: #f4f4f5; --hero-glow: rgba(37,99,235,0.07);
+    }
+
+    body {
+      font-family: 'Inter','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.65; -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.011em; transition: background .3s, color .3s;
+      scrollbar-gutter: stable;
+    }
+    h1,h2,h3,h4 { color: var(--text); letter-spacing: -0.03em; line-height: 1.12; text-wrap: balance; }
+    h1 { font-weight: 800; }
+    h2 { font-weight: 700; }
+    h3 { font-weight: 600; }
+    p,li,td,th,span,label { color: var(--text); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, kbd, pre { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px 96px; }
+
+    /* HERO */
+    .hero { position: relative; padding: 88px 0 44px; overflow: hidden; }
+    .hero::after {
+      content:''; position:absolute; inset:-40% -20% auto -20%; height: 420px;
+      background: radial-gradient(60% 60% at 50% 0%, var(--hero-glow), transparent 70%);
+      pointer-events:none; z-index:-1;
+    }
+    .eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+      color: var(--text-secondary); border:1px solid var(--border); border-radius:999px;
+      padding:5px 12px; background: var(--surface);
+    }
+    .eyebrow .dot { width:6px; height:6px; border-radius:50%; background: var(--accent); }
+    .hero h1 { font-size: clamp(34px, 5.4vw, 56px); margin: 18px 0 0; }
+    .hero h1 .mono { font-family:'JetBrains Mono',monospace; font-weight:700; letter-spacing:-0.04em; }
+    .lede { font-size: clamp(16px, 1.9vw, 19px); color: var(--text-secondary); max-width: 66ch; margin-top: 16px; line-height:1.6; }
+    .lede strong { color: var(--text); font-weight:600; }
+
+    .meta-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+    .chip {
+      display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:500;
+      padding:6px 12px; border-radius:8px; background: var(--surface);
+      border:1px solid var(--border); color: var(--text-secondary);
+    }
+    .chip svg { width:14px; height:14px; flex:none; }
+    .chip.neg { color: var(--negative); border-color: color-mix(in srgb, var(--negative) 30%, var(--border)); }
+    .chip.pos { color: var(--positive); border-color: color-mix(in srgb, var(--positive) 30%, var(--border)); }
+
+    /* SECTION */
+    section { margin-top: 62px; }
+    .sec-head { display:flex; align-items:baseline; gap:14px; margin-bottom: 22px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+    .sec-num { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600; color: var(--accent); flex:none; }
+    .sec-head h2 { font-size: clamp(21px, 2.6vw, 27px); }
+    .sec-sub { font-size:13.5px; color: var(--text-secondary); margin-left:auto; text-align:right; }
+
+    /* CARD */
+    .card { background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px; transition: box-shadow .2s ease, border-color .2s ease; }
+    .card:hover { border-color: var(--border-strong); box-shadow: 0 8px 24px rgba(0,0,0,.10); }
+    .grid { display:grid; gap:14px; }
+    .g2 { grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); }
+    .g3 { grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); }
+
+    .pick { border-left:3px solid var(--border-strong); }
+    .pick.this { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+    .pick h3 { font-size:14.5px; margin-bottom:8px; color: var(--text-secondary); font-weight:600; }
+    .pick .verdict { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:600; color: var(--text); display:block; margin-bottom:4px; }
+    .pick.this .verdict { color: var(--accent); }
+    .pick p { font-size:13.5px; color: var(--text-secondary); }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background: var(--surface); }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { text-align:left; padding:13px 16px; border-bottom:1px solid var(--border); vertical-align:top; }
+    thead th { font-size:11.5px; letter-spacing:.07em; text-transform:uppercase; color: var(--text-secondary); font-weight:600; background: color-mix(in srgb, var(--text) 3%, var(--surface)); }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background: var(--surface-hover); }
+    td code, th code, p code, li code { font-size:12.5px; padding:2px 6px; border-radius:5px; background: var(--code-bg); border:1px solid var(--border); }
+    td.step { font-family:'JetBrains Mono',monospace; font-weight:600; color: var(--accent); white-space:nowrap; }
+
+    /* CODE */
+    pre {
+      background: var(--code-bg); border:1px solid var(--border); border-radius:12px;
+      padding:18px 20px; overflow-x:auto; font-size:13px; line-height:1.75;
+      color: var(--text);
+    }
+    pre .c { color: var(--text-secondary); }
+    pre .k { color: var(--accent); font-weight:600; }
+    pre .ok { color: var(--positive); }
+    pre .err { color: var(--negative); }
+    .term { position:relative; padding-top:44px; }
+    .term::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:32px;
+      background: color-mix(in srgb, var(--text) 5%, var(--code-bg));
+      border-bottom:1px solid var(--border); border-radius:12px 12px 0 0;
+    }
+    .term::after {
+      content:'shell'; position:absolute; top:7px; left:16px; font-size:11px;
+      letter-spacing:.08em; text-transform:uppercase; color: var(--text-secondary);
+      font-family:'Inter',sans-serif; font-weight:600;
+    }
+
+    /* PIPELINE */
+    .pipe { display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin-top:8px; }
+    .pipe-node {
+      flex:1 1 200px; background: var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:18px 20px; text-align:center;
+    }
+    .pipe-node .lbl { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color: var(--text-secondary); font-weight:600; }
+    .pipe-node .val { display:block; margin-top:7px; font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color: var(--text); word-break:break-word; }
+    .pipe-node.mid { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+    .pipe-node.mid .val { color: var(--accent); }
+    .pipe-arrow { display:flex; align-items:center; justify-content:center; padding:0 12px; color: var(--text-secondary); flex:none; }
+    .pipe-arrow svg { width:26px; height:26px; }
+    @media (max-width:720px){ .pipe-arrow { transform:rotate(90deg); padding:10px 0; width:100%; } }
+
+    /* NOTE */
+    .note { display:flex; gap:14px; padding:16px 18px; border-radius:12px; background: var(--surface); border:1px solid var(--border); border-left:3px solid var(--warning); }
+    .note.danger { border-left-color: var(--negative); }
+    .note.info { border-left-color: var(--accent); }
+    .note svg { width:18px; height:18px; flex:none; margin-top:3px; color: var(--warning); }
+    .note.danger svg { color: var(--negative); }
+    .note.info svg { color: var(--accent); }
+    .note p { font-size:14px; }
+    .note strong { font-weight:650; }
+
+    ul.rules { list-style:none; display:grid; gap:11px; }
+    ul.rules li { position:relative; padding-left:30px; font-size:14.2px; color: var(--text); }
+    ul.rules li::before {
+      content:''; position:absolute; left:8px; top:9px; width:7px; height:7px;
+      border-radius:2px; background: var(--negative); transform:rotate(45deg);
+    }
+    ul.rules li.allow::before { background: var(--positive); }
+    ul.rules li strong { font-weight:650; }
+
+    footer.pg { margin-top:80px; padding-top:24px; border-top:1px solid var(--border); font-size:13px; color: var(--text-secondary); display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; }
+
+    /* MENU */
+    .viz-menu { position: fixed; top:16px; right:16px; z-index:9999; }
+    .viz-menu-toggle { width:44px; height:44px; border-radius:12px; background: var(--surface); border:1px solid var(--border); color: var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(12px); transition: all .2s; }
+    .viz-menu-toggle:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown { position:absolute; top:52px; right:0; min-width:200px; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:8px; opacity:0; visibility:hidden; transform:translateY(-8px); transition: all .2s; backdrop-filter: blur(16px); box-shadow:0 12px 32px rgba(0,0,0,.18); }
+    .viz-menu-dropdown.open { opacity:1; visibility:visible; transform:translateY(0); }
+    .viz-menu-dropdown button { width:100%; padding:10px 12px; border:none; border-radius:8px; background:transparent; color: var(--text); font-size:14px; font-family:inherit; cursor:pointer; text-align:left; display:flex; align-items:center; gap:10px; transition: background .15s; }
+    .viz-menu-dropdown button:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown svg { width:16px; height:16px; flex:none; color: var(--text-secondary); }
+
+    @keyframes fadeInUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform:none; } }
+    .animate { animation: fadeInUp .6s ease-out both; }
+    .animate.delay-1 { animation-delay:.08s; } .animate.delay-2 { animation-delay:.16s; }
+    .animate.delay-3 { animation-delay:.24s; } .animate.delay-4 { animation-delay:.32s; }
+    .reveal { opacity:0; transform:translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } .reveal { opacity:1; transform:none; } }
+
+    @media print {
+      body { background:#fff !important; color:#000 !important; }
+      .viz-menu { display:none; }
+      .reveal { opacity:1 !important; transform:none !important; }
+      .card, .tbl-wrap, pre { break-inside: avoid; border:1px solid #ddd; box-shadow:none; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+    @page { margin: 1in; }
+  </style>
+</head>
+<body>
+  <div class="viz-menu">
+    <button class="viz-menu-toggle" onclick="toggleMenu()" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/></svg>
+    </button>
+    <div class="viz-menu-dropdown" id="vizMenuDropdown">
+      <button onclick="cycleTheme()">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span id="themeLabel">Dark</span>
+      </button>
+      <button onclick="downloadImage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download PNG</span>
+      </button>
+      <button onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span>Print / PDF</span>
+      </button>
+    </div>
+  </div>
+  <main class="wrap" id="main-content">
+    <header class="hero">
+      <span class="eyebrow animate"><span class="dot"></span>gh-flow plugin &middot; composition skill</span>
+      <h1 class="animate delay-1"><span class="mono">gh-flow:issue</span></h1>
+      <p class="lede animate delay-2">이슈 번호 1건을 받아 <strong>리뷰 게이트까지 통과한 열린 Pull Request 1개</strong>와, 어느 단계까지 갔는지를 담은 <strong>[OK]/[FAIL] 리포트</strong>를 산출한다. 머지는 하지 않는다.</p>
+      <div class="meta-row animate delay-3">
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v12H7l-3 3z"/></svg>입력: 이슈 번호</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>출력: 리뷰된 PR</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20"/></svg>원자 스킬 6개 체인</span>
+        <span class="chip neg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>머지 안 함</span>
+      </div>
+    </header>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">01</span><h2>언제 쓰고, 언제 안 쓰는가</h2><span class="sec-sub">형제 스킬과의 경계</span></div>
+      <div class="grid g2">
+        <div class="card pick this">
+          <h3>목적지 remote 에 이슈가 이미 있고, <code>git push</code> 가 정상 동작</h3>
+          <span class="verdict">gh-flow:issue</span>
+          <p>이 스킬. 이슈 번호 하나로 PR URL 까지 한 번에.</p>
+        </div>
+        <div class="card pick">
+          <h3>이슈가 아직 없고 승인된 spec 만 있다</h3>
+          <span class="verdict">gh-flow:autopilot</span>
+          <p>한 단계 앞에서 시작해 계획과 이슈까지 직접 만든다.</p>
+        </div>
+        <div class="card pick">
+          <h3>목적지 remote 가 프록시로 push 차단</h3>
+          <span class="verdict">gh-flow:issue-relay</span>
+          <p>브랜치 → 구현 위임 → 검증 → 패치 릴레이 인계.</p>
+        </div>
+        <div class="card pick">
+          <h3>커밋 전 검토 / plan &middot; brainstorming 모드 필요</h3>
+          <span class="verdict">원자 스킬을 따로</span>
+          <p><code>gh-issue:implement</code> + <code>gh-pr:commit</code> + <code>gh-pr:create</code></p>
+        </div>
+      </div>
+      <div class="note info" style="margin-top:16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <p>이 스킬은 구현을 <strong>direct 모드로만</strong> 돌린다. plan/brainstorming 이 필요하면 이 스킬이 아니라 <code>gh-issue:implement</code> 를 직접 부르는 것이 맞다.</p>
+      </div>
+    </section>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">02</span><h2>호출 형식</h2></div>
+      <pre><span class="k">/gh-flow:issue</span> &lt;issue-number&gt; [remote]
+<span class="k">/gh-flow:issue</span> -h | --help | help</pre>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <thead><tr><th style="width:44px">#</th><th style="width:190px">인자</th><th style="width:110px">기본값</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td class="step">1</td><td><code>&lt;issue-number&gt;</code></td><td>&mdash;</td><td>구현할 GitHub 이슈 번호</td></tr>
+            <tr><td class="step">2</td><td><code>[remote]</code></td><td><code>origin</code></td><td>이슈를 소유한 git remote. 하위 스킬 전부에 그대로 전달되어 implement / commit / PR / review 가 모두 이 remote 를 향한다 (#1405)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info" style="margin-top:14px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <p><code>-h</code> 경로는 <code>references/help.md</code> 를 그대로 출력하고 멈춘다 &mdash; <strong>API 호출이 전혀 없다.</strong></p>
+      </div>
+    </section>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">03</span><h2>동작 단계</h2><span class="sec-sub">각 단계는 직전 단계 성공 시에만</span></div>
+      <p class="lede" style="margin:0 0 18px">Step 1 에서 remote URL 로부터 <code>TARGET_HOST</code> / <code>TARGET_REPO</code> 를 한 번 바인딩하고(#1403), <code>START_TS</code> 를 기록한다. 이후 Step 2 에서 원자 스킬 6개를 순서대로 체인한다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:74px">단계</th><th style="width:290px">위임 대상</th><th>하는 일</th></tr></thead>
+          <tbody>
+            <tr><td class="step">2.1</td><td><code>gh-issue:implement</code><br><span style="font-size:12px;color:var(--text-secondary)">&lt;N&gt; direct &lt;remote&gt; --no-next-hint</span></td><td>이슈를 읽고 파일 수정 + 테스트 실행</td></tr>
+            <tr><td class="step">2.2</td><td><code>gh-pr:commit</code><br><span style="font-size:12px;color:var(--text-secondary)">&lt;N&gt; &lt;remote&gt;</span></td><td>레포 스타일의 커밋 생성, ai-metrics / 보드 동기화</td></tr>
+            <tr><td class="step">2.3</td><td><code>gh-pr:create</code><br><span style="font-size:12px;color:var(--text-secondary)">&lt;N&gt; &lt;remote&gt;</span></td><td>브랜치 push + PR 개설, <code>Closes #&lt;N&gt;</code> 보장, <code>PR_NUM</code> 추출</td></tr>
+            <tr><td class="step">2.4</td><td><code>gh-verify:review-all</code><br><span style="font-size:12px;color:var(--text-secondary)">&lt;PR_NUM&gt; &lt;remote&gt; --defer-reply 4</span></td><td>품질 게이트(agy &parallel; codex &parallel; <code>/simplify</code>) 병렬 실행, simplify 변경은 동기 커밋+push, <code>gh-pr:reply</code> 는 4분 뒤로 예약. <strong style="color:var(--warning)">soft-fail</strong></td></tr>
+            <tr><td class="step">2.4.1</td><td><code>aicron run merge-train</code><br><span style="font-size:12px;color:var(--text-secondary)">Bash, 비치명</span></td><td>merge-train 디스패처 백그라운드 기동. <code>&lt;remote&gt;</code> 가 <code>$HOME/dotfiles</code> 의 <code>origin</code> 과 같은 URL 일 때만</td></tr>
+            <tr><td class="step">2.5</td><td><code>gh-resolve:conflict</code><br><span style="font-size:12px;color:var(--text-secondary)">&lt;PR_NUM&gt;</span></td><td>리베이스로 충돌 해소. 신규 PR 이면 보통 skip</td></tr>
+            <tr><td class="step">2.5.1</td><td><code>gh-resolve:outdated</code><br><span style="font-size:12px;color:var(--text-secondary)">&lt;PR_NUM&gt;</span></td><td>base 가 앞서갔을 때 clean 리베이스 sync</td></tr>
+            <tr><td class="step">2.6</td><td>인라인 Bash</td><td>이슈에 flow 단위 AI metrics 코멘트. <strong style="color:var(--warning)">soft-fail</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note" style="margin-top:16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <p>Step 3 은 <code>[OK]</code>/<code>[FAIL]</code>/<code>[SKIP]</code> 리포트를 <strong>평문 assistant 텍스트로</strong> 출력한다 &mdash; <code>Bash</code> heredoc 이나 <code>Write</code> 로 내보내지 않는다 (#1270).</p>
+      </div>
+    </section>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">04</span><h2>주의사항 / 제약</h2><span class="sec-sub">조언이 아니라 인수 기준</span></div>
+      <div class="grid g2">
+        <div class="card">
+          <h3 style="font-size:15px;margin-bottom:12px">전제조건과 중단 규칙</h3>
+          <ul class="rules">
+            <li class="allow"><strong>전제조건</strong> &mdash; 이미 전용 worktree 의 feature 브랜치 위, working tree 깨끗. 이 스킬은 worktree 도 브랜치도 만들지 않는다.</li>
+            <li><strong>첫 실패에서 즉시 중단.</strong> 재시도 없음, 건너뛰기 없음.</li>
+            <li><strong>부분 진행은 롤백하지 않는다.</strong> commit 이 성공하고 PR 이 실패했으면 커밋은 남는다 &mdash; 리포트의 재개 힌트로 수동 재개.</li>
+            <li><strong>soft-fail 예외는 정확히 3개</strong> &mdash; <code>gh-verify:review-all</code>, merge-train wake, metrics 코멘트. 네 번째를 추가하려면 <code>references/constraints.md</code> 를 함께 고쳐야 한다.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="font-size:15px;margin-bottom:12px">early-stop 가드와 hook 계약</h3>
+          <ul class="rules">
+            <li><strong>체인된 <code>Skill()</code> 호출 사이에 대화 텍스트를 넣지 않는다</strong>, 그리고 2.1 의 <code>--no-next-hint</code> 를 제거하지 않는다. 둘 다 기계적 가드이며 스타일 조언이 아니다.</li>
+            <li>세 번째 가드인 하네스 Stop hook 은 <code>dEitY719/dotfiles</code> 에 있다.</li>
+            <li><strong>리포트 문자열은 hook 계약이다.</strong> <code>gh-flow:issue complete (#&lt;N&gt;)</code> / <code>gh-flow:issue stopped at step &lt;i&gt;/6</code> 는 Stop guard 가 파싱하는 종료 마커다.</li>
+            <li><strong>CI 실패는 해결하지 않는다.</strong> <code>$HOME/dotfiles</code> 의 <code>origin</code> 이 아닌 remote 에는 자동 CI-fail 재처리 트리거가 아예 없으므로 <code>/gh-pr:merge-train &lt;remote&gt;</code> 를 직접 돌려야 한다 (#1610).</li>
+            <li><strong>머지하지 않는다.</strong> 리뷰와 머지는 사람 몫이다.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer class="pg">
+      <span>source: <code>skills/issue/SKILL.md</code> &middot; <code>skills/issue/references/help.md</code></span>
+      <span>dEitY719/gh-flow-skills</span>
+    </footer>
+  </main>
+  <script>
+    function toggleMenu() { var d = document.getElementById('vizMenuDropdown'); if (d) d.classList.toggle('open'); }
+    document.addEventListener('click', function(e){ if (!e.target.closest('.viz-menu')) { var d = document.getElementById('vizMenuDropdown'); if (d) d.classList.remove('open'); } });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { var d = document.getElementById('vizMenuDropdown'); if (d) d.classList.remove('open'); } });
+
+    var MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    var SUN  = '<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>';
+    var savedTheme = localStorage.getItem('viz-theme');
+    var currentTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    function applyTheme(t) {
+      document.documentElement.className = 'theme-' + t;
+      document.getElementById('themeIcon').innerHTML = t === 'dark' ? MOON : SUN;
+      document.getElementById('themeLabel').textContent = t === 'dark' ? 'Dark' : 'Light';
+      localStorage.setItem('viz-theme', t); currentTheme = t;
+    }
+    function cycleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+    applyTheme(currentTheme);
+
+    document.querySelectorAll('[data-reveal]').forEach(function(el){ el.classList.add('reveal'); });
+    var revealObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(function(el){ revealObserver.observe(el); });
+
+    async function downloadImage() {
+      var menu = document.querySelector('.viz-menu'); menu.style.display = 'none';
+      try {
+        var url = await htmlToImage.toPng(document.body, { quality: 1, pixelRatio: 2, filter: function(n){ return !n.classList || !n.classList.contains('viz-menu'); } });
+        var a = document.createElement('a'); a.href = url;
+        a.download = document.title.replace(/\s+/g,'-').toLowerCase() + '.png'; a.click();
+      } catch(e) { console.error('Download failed:', e); }
+      menu.style.display = '';
+    }
+  </script>
+</body>
+</html>

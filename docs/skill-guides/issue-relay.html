@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko" class="theme-dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gh-flow:issue-relay - 스킬 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { interpolate-size: allow-keywords; }
+
+    html.theme-dark {
+      --bg: #0A0A0A; --surface: #141414; --surface-hover: #1C1C1C;
+      --border: rgba(255,255,255,0.07); --border-strong: rgba(255,255,255,0.14);
+      --text: #EDEDED; --text-secondary: #8b8b8b;
+      --accent: #3b82f6; --accent-secondary: #8b5cf6;
+      --positive: #10b981; --negative: #f43f5e; --warning: #f59e0b;
+      --code-bg: #0f0f0f; --hero-glow: rgba(59,130,246,0.10);
+    }
+    html.theme-light {
+      --bg: #FAFAF9; --surface: #FFFFFF; --surface-hover: #F5F5F4;
+      --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.16);
+      --text: #0f172a; --text-secondary: #64748b;
+      --accent: #2563eb; --accent-secondary: #7c3aed;
+      --positive: #059669; --negative: #e11d48; --warning: #d97706;
+      --code-bg: #f4f4f5; --hero-glow: rgba(37,99,235,0.07);
+    }
+
+    body {
+      font-family: 'Inter','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.65; -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.011em; transition: background .3s, color .3s;
+      scrollbar-gutter: stable;
+    }
+    h1,h2,h3,h4 { color: var(--text); letter-spacing: -0.03em; line-height: 1.12; text-wrap: balance; }
+    h1 { font-weight: 800; }
+    h2 { font-weight: 700; }
+    h3 { font-weight: 600; }
+    p,li,td,th,span,label { color: var(--text); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, kbd, pre { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px 96px; }
+
+    /* HERO */
+    .hero { position: relative; padding: 88px 0 44px; overflow: hidden; }
+    .hero::after {
+      content:''; position:absolute; inset:-40% -20% auto -20%; height: 420px;
+      background: radial-gradient(60% 60% at 50% 0%, var(--hero-glow), transparent 70%);
+      pointer-events:none; z-index:-1;
+    }
+    .eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+      color: var(--text-secondary); border:1px solid var(--border); border-radius:999px;
+      padding:5px 12px; background: var(--surface);
+    }
+    .eyebrow .dot { width:6px; height:6px; border-radius:50%; background: var(--accent); }
+    .hero h1 { font-size: clamp(34px, 5.4vw, 56px); margin: 18px 0 0; }
+    .hero h1 .mono { font-family:'JetBrains Mono',monospace; font-weight:700; letter-spacing:-0.04em; }
+    .lede { font-size: clamp(16px, 1.9vw, 19px); color: var(--text-secondary); max-width: 66ch; margin-top: 16px; line-height:1.6; }
+    .lede strong { color: var(--text); font-weight:600; }
+
+    .meta-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+    .chip {
+      display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:500;
+      padding:6px 12px; border-radius:8px; background: var(--surface);
+      border:1px solid var(--border); color: var(--text-secondary);
+    }
+    .chip svg { width:14px; height:14px; flex:none; }
+    .chip.neg { color: var(--negative); border-color: color-mix(in srgb, var(--negative) 30%, var(--border)); }
+    .chip.pos { color: var(--positive); border-color: color-mix(in srgb, var(--positive) 30%, var(--border)); }
+
+    /* SECTION */
+    section { margin-top: 62px; }
+    .sec-head { display:flex; align-items:baseline; gap:14px; margin-bottom: 22px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+    .sec-num { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600; color: var(--accent); flex:none; }
+    .sec-head h2 { font-size: clamp(21px, 2.6vw, 27px); }
+    .sec-sub { font-size:13.5px; color: var(--text-secondary); margin-left:auto; text-align:right; }
+
+    /* CARD */
+    .card { background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px; transition: box-shadow .2s ease, border-color .2s ease; }
+    .card:hover { border-color: var(--border-strong); box-shadow: 0 8px 24px rgba(0,0,0,.10); }
+    .grid { display:grid; gap:14px; }
+    .g2 { grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); }
+    .g3 { grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); }
+
+    .pick { border-left:3px solid var(--border-strong); }
+    .pick.this { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+    .pick h3 { font-size:14.5px; margin-bottom:8px; color: var(--text-secondary); font-weight:600; }
+    .pick .verdict { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:600; color: var(--text); display:block; margin-bottom:4px; }
+    .pick.this .verdict { color: var(--accent); }
+    .pick p { font-size:13.5px; color: var(--text-secondary); }
+
+    /* TABLE */
+    .tbl-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:12px; background: var(--surface); }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { text-align:left; padding:13px 16px; border-bottom:1px solid var(--border); vertical-align:top; }
+    thead th { font-size:11.5px; letter-spacing:.07em; text-transform:uppercase; color: var(--text-secondary); font-weight:600; background: color-mix(in srgb, var(--text) 3%, var(--surface)); }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background: var(--surface-hover); }
+    td code, th code, p code, li code { font-size:12.5px; padding:2px 6px; border-radius:5px; background: var(--code-bg); border:1px solid var(--border); }
+    td.step { font-family:'JetBrains Mono',monospace; font-weight:600; color: var(--accent); white-space:nowrap; }
+
+    /* CODE */
+    pre {
+      background: var(--code-bg); border:1px solid var(--border); border-radius:12px;
+      padding:18px 20px; overflow-x:auto; font-size:13px; line-height:1.75;
+      color: var(--text);
+    }
+    pre .c { color: var(--text-secondary); }
+    pre .k { color: var(--accent); font-weight:600; }
+    pre .ok { color: var(--positive); }
+    pre .err { color: var(--negative); }
+    .term { position:relative; padding-top:44px; }
+    .term::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:32px;
+      background: color-mix(in srgb, var(--text) 5%, var(--code-bg));
+      border-bottom:1px solid var(--border); border-radius:12px 12px 0 0;
+    }
+    .term::after {
+      content:'shell'; position:absolute; top:7px; left:16px; font-size:11px;
+      letter-spacing:.08em; text-transform:uppercase; color: var(--text-secondary);
+      font-family:'Inter',sans-serif; font-weight:600;
+    }
+
+    /* PIPELINE */
+    .pipe { display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin-top:8px; }
+    .pipe-node {
+      flex:1 1 200px; background: var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:18px 20px; text-align:center;
+    }
+    .pipe-node .lbl { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color: var(--text-secondary); font-weight:600; }
+    .pipe-node .val { display:block; margin-top:7px; font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color: var(--text); word-break:break-word; }
+    .pipe-node.mid { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+    .pipe-node.mid .val { color: var(--accent); }
+    .pipe-arrow { display:flex; align-items:center; justify-content:center; padding:0 12px; color: var(--text-secondary); flex:none; }
+    .pipe-arrow svg { width:26px; height:26px; }
+    @media (max-width:720px){ .pipe-arrow { transform:rotate(90deg); padding:10px 0; width:100%; } }
+
+    /* NOTE */
+    .note { display:flex; gap:14px; padding:16px 18px; border-radius:12px; background: var(--surface); border:1px solid var(--border); border-left:3px solid var(--warning); }
+    .note.danger { border-left-color: var(--negative); }
+    .note.info { border-left-color: var(--accent); }
+    .note svg { width:18px; height:18px; flex:none; margin-top:3px; color: var(--warning); }
+    .note.danger svg { color: var(--negative); }
+    .note.info svg { color: var(--accent); }
+    .note p { font-size:14px; }
+    .note strong { font-weight:650; }
+
+    ul.rules { list-style:none; display:grid; gap:11px; }
+    ul.rules li { position:relative; padding-left:30px; font-size:14.2px; color: var(--text); }
+    ul.rules li::before {
+      content:''; position:absolute; left:8px; top:9px; width:7px; height:7px;
+      border-radius:2px; background: var(--negative); transform:rotate(45deg);
+    }
+    ul.rules li.allow::before { background: var(--positive); }
+    ul.rules li strong { font-weight:650; }
+
+    footer.pg { margin-top:80px; padding-top:24px; border-top:1px solid var(--border); font-size:13px; color: var(--text-secondary); display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; }
+
+    /* MENU */
+    .viz-menu { position: fixed; top:16px; right:16px; z-index:9999; }
+    .viz-menu-toggle { width:44px; height:44px; border-radius:12px; background: var(--surface); border:1px solid var(--border); color: var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(12px); transition: all .2s; }
+    .viz-menu-toggle:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown { position:absolute; top:52px; right:0; min-width:200px; background: var(--surface); border:1px solid var(--border); border-radius:12px; padding:8px; opacity:0; visibility:hidden; transform:translateY(-8px); transition: all .2s; backdrop-filter: blur(16px); box-shadow:0 12px 32px rgba(0,0,0,.18); }
+    .viz-menu-dropdown.open { opacity:1; visibility:visible; transform:translateY(0); }
+    .viz-menu-dropdown button { width:100%; padding:10px 12px; border:none; border-radius:8px; background:transparent; color: var(--text); font-size:14px; font-family:inherit; cursor:pointer; text-align:left; display:flex; align-items:center; gap:10px; transition: background .15s; }
+    .viz-menu-dropdown button:hover { background: var(--surface-hover); }
+    .viz-menu-dropdown svg { width:16px; height:16px; flex:none; color: var(--text-secondary); }
+
+    @keyframes fadeInUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform:none; } }
+    .animate { animation: fadeInUp .6s ease-out both; }
+    .animate.delay-1 { animation-delay:.08s; } .animate.delay-2 { animation-delay:.16s; }
+    .animate.delay-3 { animation-delay:.24s; } .animate.delay-4 { animation-delay:.32s; }
+    .reveal { opacity:0; transform:translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } .reveal { opacity:1; transform:none; } }
+
+    @media print {
+      body { background:#fff !important; color:#000 !important; }
+      .viz-menu { display:none; }
+      .reveal { opacity:1 !important; transform:none !important; }
+      .card, .tbl-wrap, pre { break-inside: avoid; border:1px solid #ddd; box-shadow:none; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+    @page { margin: 1in; }
+  </style>
+</head>
+<body>
+  <div class="viz-menu">
+    <button class="viz-menu-toggle" onclick="toggleMenu()" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/></svg>
+    </button>
+    <div class="viz-menu-dropdown" id="vizMenuDropdown">
+      <button onclick="cycleTheme()">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span id="themeLabel">Dark</span>
+      </button>
+      <button onclick="downloadImage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download PNG</span>
+      </button>
+      <button onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span>Print / PDF</span>
+      </button>
+    </div>
+  </div>
+  <main class="wrap" id="main-content">
+    <header class="hero">
+      <span class="eyebrow animate"><span class="dot"></span>gh-flow plugin &middot; assembly skill</span>
+      <h1 class="animate delay-1"><span class="mono">gh-flow:issue-relay</span></h1>
+      <p class="lede animate delay-2">push 로 막힌 목적지 remote 에 <strong>이미 등록된</strong> 이슈 1건을 받아, 로컬 feature 브랜치와 검증된 커밋들, 그리고 그 커밋을 목적지에 적용할 수 있는 <strong>git am apply-guide 코멘트</strong>(또는 push 가 멀쩡하면 그냥 PR)를 산출한다.</p>
+      <div class="meta-row animate delay-3">
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v12H7l-3 3z"/></svg>입력: 이슈 번호 + 차단된 remote</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>출력: apply-guide 코멘트</span>
+        <span class="chip neg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>비대칭 네트워크 전용</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.2 4.2l4.3 4.3M15.5 15.5l4.3 4.3M1 12h6M17 12h6"/></svg>Advisor / Worker 위임</span>
+      </div>
+    </header>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">01</span><h2>언제 쓰고, 언제 안 쓰는가</h2><span class="sec-sub">형제 스킬과의 경계</span></div>
+      <div class="grid g2">
+        <div class="card pick this">
+          <h3>이슈가 push 차단된 목적지에 이미 있고, 브랜치&rarr;구현&rarr;검증&rarr;릴레이 루프를 한 번에</h3>
+          <span class="verdict">gh-flow:issue-relay</span>
+          <p>이 스킬.</p>
+        </div>
+        <div class="card pick">
+          <h3>이슈가 아직 등록되지 않았다</h3>
+          <span class="verdict">gh-issue:create &lt;remote&gt;</span>
+          <p>먼저 목적지 remote 에 이슈를 만든다. 등록은 이 스킬의 범위 밖이다.</p>
+        </div>
+        <div class="card pick">
+          <h3><code>git push &lt;remote&gt;</code> 가 실제로 동작한다</h3>
+          <span class="verdict">gh-flow:issue</span>
+          <p>이 스킬의 가치는 끝단의 릴레이 인계뿐이다.</p>
+        </div>
+        <div class="card pick">
+          <h3>커밋 범위가 이미 준비되어 있고 릴레이만 필요하다</h3>
+          <span class="verdict">gh-flow:relay-merge</span>
+          <p><code>--commits &lt;base&gt;..&lt;head&gt;</code> 로 직접 호출.</p>
+        </div>
+      </div>
+    </section>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">02</span><h2>호출 형식</h2></div>
+      <pre><span class="k">/gh-flow:issue-relay</span> &lt;issue-number&gt; [--remote &lt;name&gt;] [--base &lt;branch&gt;]
+<span class="k">/gh-flow:issue-relay</span> -h | --help | help</pre>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <thead><tr><th style="width:230px">인자</th><th style="width:130px">기본값</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;issue-number&gt;</code></td><td>&mdash;</td><td>목적지 remote 에 이미 등록된 이슈 번호 (양의 정수)</td></tr>
+            <tr><td><code>--remote &lt;name&gt;</code></td><td><code>upstream</code></td><td>목적지 remote. 끝에서 <code>gh-flow:relay-merge</code> 가 겨냥할 바로 그 remote</td></tr>
+            <tr><td><code>--base &lt;branch&gt;</code></td><td>자동 감지</td><td>목적지 기본 브랜치 override (<code>git ls-remote --symref</code> 생략)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">03</span><h2>동작 단계</h2><span class="sec-sub">stop-on-error, 건너뛰기 없음</span></div>
+      <p class="lede" style="margin:0 0 18px">Step 1 에서 인자를 파싱하고 <code>BASE_TS</code> 를 기록한다. Steps 2~5 는 순서대로, 각각 직전 단계가 성공했을 때만 실행된다 &mdash; 실패하면 즉시 체인을 멈추고 그 단계 고유의 안내를 낸다.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:64px">단계</th><th style="width:230px">참조</th><th>하는 일</th></tr></thead>
+          <tbody>
+            <tr><td class="step">2</td><td><code>references/branch-setup.md</code></td><td><code>--remote</code> 해석(없으면 하드 에러, <code>origin</code> 폴백 금지), <code>DEST_REPO</code>+<code>DEST_HOST</code> 를 그 remote URL 하나에서 바인딩, 목적지 기본 브랜치 감지 + fetch, <code>issue-&lt;N&gt;-&lt;title-slug&gt;</code> 브랜치 생성 또는 재사용 판단</td></tr>
+            <tr><td class="step">3</td><td><code>references/worker-brief-checklist.md</code></td><td>이슈 본문&middot;코멘트 수집, 미결 Open Questions 를 사용자와 먼저 해소, 자립적 브리프를 만들어 opus Worker 서브에이전트에 위임. 직전에 <code>BASE_SHA</code> 기록</td></tr>
+            <tr><td class="step">4</td><td><code>references/verification.md</code></td><td>Worker 의 완료 보고를 믿지 않고 Advisor 가 <code>git diff &lt;BASE_SHA&gt;..HEAD</code> 를 직접 읽고, 대상 레포의 lint/test 를 찾아 실행. 실패하면 브리프를 날카롭게 다듬어 재위임</td></tr>
+            <tr><td class="step">5</td><td>&mdash;</td><td><code>HEAD_SHA</code> 기록 후 <code>Skill(gh-flow:relay-merge, "--commits &lt;BASE_SHA&gt;..&lt;HEAD_SHA&gt; --target-issue &lt;N&gt; --remote &lt;remote&gt;")</code> 를 <strong>그대로</strong> 호출</td></tr>
+            <tr><td class="step">6</td><td>&mdash;</td><td><code>gh-flow:relay-merge</code> 의 Step 8 출력을 그대로 중계 + 체인 전체의 <code>[OK]</code>/<code>[FAIL]</code> 1줄 + 다음 행동을 지목하는 <code>Next:</code> 줄</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info" style="margin-top:16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <p>목적지는 구조상 <code>origin</code> 과 다른 호스트이므로 <strong>전역 <code>GH_HOST</code> 를 두지 않는다.</strong> 목적지 <code>gh</code> 호출은 전부 <code>GH_HOST="$DEST_HOST" gh ... --repo "$DEST_REPO"</code> 형태다 (#1403 / #1407).</p>
+      </div>
+    </section>
+
+    <section data-reveal>
+      <div class="sec-head"><span class="sec-num">04</span><h2>주의사항 / 제약</h2><span class="sec-sub">조언이 아니라 인수 기준</span></div>
+      <div class="card">
+        <ul class="rules">
+          <li><strong><code>origin</code> 으로 폴백하지 않는다.</strong> 요청한 <code>--remote</code> 가 없으면 하드 에러다.</li>
+          <li><strong>이슈 등록은 범위 밖이다.</strong> 목적지에 이슈가 없으면 <code>gh-issue:create &lt;remote&gt;</code> 를 먼저.</li>
+          <li><strong>미결 Open Questions 가 남은 채로 구현을 위임하지 않는다.</strong></li>
+          <li><strong>재사용 브랜치를 자동 reset 하지 않는다.</strong> 목적지 기본 브랜치에 없는 고유 커밋이 있으면 반드시 먼저 묻는다.</li>
+          <li><strong><code>gh-flow:relay-merge</code> 의 책임을 복제하지 않는다.</strong> 패치 생성, 크기 컷오프, gist 업로드, apply-guide 게시는 전부 그 스킬 안에 있다.</li>
+          <li><strong>목적지 remote 에 history 를 rewrite 하지 않는다.</strong></li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="pg">
+      <span>source: <code>skills/issue-relay/SKILL.md</code> &middot; <code>skills/issue-relay/references/help.md</code></span>
+      <span>dEitY719/gh-flow-skills</span>
+    </footer>
+  </main>
+  <script>
+    function toggleMenu() { var d = document.getElementById('vizMenuDropdown'); if (d) d.classList.toggle('open'); }
+    document.addEventListener('click', function(e){ if (!e.target.closest('.viz-menu')) { var d = document.getElementById('vizMenuDropdown'); if (d) d.classList.remove('open'); } });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { var d = document.getElementById('vizMenuDropdown'); if (d) d.classList.remove('open'); } });
+
+    var MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    var SUN  = '<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>';
+    var savedTheme = localStorage.getItem('viz-theme');
+    var currentTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    function applyTheme(t) {
+      document.documentElement.className = 'theme-' + t;
+      document.getElementById('themeIcon').innerHTML = t === 'dark' ? MOON : SUN;
+      document.getElementById('themeLabel').textContent = t === 'dark' ? 'Dark' : 'Light';
+      localStorage.setItem('viz-theme', t); currentTheme = t;
+    }
+    function cycleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+    applyTheme(currentTheme);
+
+    document.querySelectorAll('[data-reveal]').forEach(function(el){ el.classList.add('reveal'); });
+    var revealObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(function(el){ revealObserver.observe(el); });
+
+    async function downloadImage() {
+      var menu = document.querySelector('.viz-menu'); menu.style.display = 'none';
+      try {
+        var url = await htmlToImage.toPng(document.body, { quality: 1, pixelRatio: 2, filter: function(n){ return !n.classList || !n.classList.contains('viz-menu'); } });
+        var a = document.createElement('a'); a.href = url;
+        a.download = document.title.replace(/\s+/g,'-').toLowerCase() + '.png'; a.click();
+      } catch(e) { console.error('Download failed:', e); }
+      menu.style.display = '';
+    }
+  </script>
+</body>
+</html>

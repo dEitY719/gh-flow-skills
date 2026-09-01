@@ -25,6 +25,13 @@ Pick by where you are starting and whether the destination accepts a push.
 `issue` refuses to invent a spec; `autopilot` refuses to skip one; neither relay
 skill runs when a plain `git push` works.
 
+### Visual guides and worked examples (GitHub Pages)
+
+- `issue` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/issue.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/issue-usage.html) (issue number to reviewed PR)
+- `autopilot` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/autopilot.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/autopilot-usage.html) (approved spec to plan, issue and PR)
+- `issue-relay` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/issue-relay.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/issue-relay-usage.html) (issue on a push-blocked remote to a relayed handoff)
+- `relay-merge` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/relay-merge.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/relay-merge-usage.html) (commit range to gist patches and an apply-guide)
+
 ## Requirements
 
 | Need | Why |
