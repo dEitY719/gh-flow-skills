@@ -1,0 +1,42 @@
+{
+  "name": "gh-flow",
+  "version": "0.1.0",
+  "description": "One-shot issue-to-PR compositions: the ordinary chain, and a relay path for a push-blocked remote.",
+  "author": {
+    "name": "dEitY719",
+    "url": "https://github.com/dEitY719"
+  },
+  "homepage": "https://github.com/dEitY719/gh-flow-skills",
+  "repository": "https://github.com/dEitY719/gh-flow-skills",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "issue",
+    "pull-request",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "hooks": {},
+  "interface": {
+    "displayName": "GH Flow",
+    "shortDescription": "Carry a GitHub issue to a reviewed PR in one run",
+    "longDescription": "gh-flow owns the composition axis of the GitHub workflow: taking one issue all the way to a reviewed pull request in a single run, by chaining the atomic skills that live in the sibling repos. issue is the ordinary path - implement, commit, open the PR, run the review gate, then rebase-sync - and it stops dead at the first failing step with a resume hint rather than limping on. autopilot starts a step earlier, from an approved spec: it writes the plan, files the issue, implements, opens the PR, and answers review comments without asking for approval along the way, but it never merges - that stays a human decision. issue-relay and relay-merge cover the asymmetric-network case, where the destination remote accepts gh api calls but a proxy blocks git push: they probe whether a normal push actually works first, and only fall back to a per-commit patch plus gist with a git am apply-guide when a push is genuinely blocked. All four are compositions, not reimplementations - each delegates to the atomic skill that owns the step, and none of them merges a PR.",
+    "developerName": "dEitY719",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Take issue 42 from implementation all the way to a reviewed PR.",
+      "This spec is approved - run it through to a PR without checking in with me."
+    ],
+    "websiteURL": "https://github.com/dEitY719/gh-flow-skills",
+    "brandColor": "#1F6FEB",
+    "screenshots": []
+  }
+}

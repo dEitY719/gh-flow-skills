@@ -1,0 +1,21 @@
+{
+  "name": "gh-flow",
+  "description": "Carry a GitHub issue all the way to a reviewed PR in one run. Four skills on two axes: the ordinary path, where the issue and the PR live on the same reachable remote, and the relay path, for a destination remote whose git push a proxy blocks.",
+  "version": "0.1.0",
+  "author": {
+    "name": "dEitY719",
+    "url": "https://github.com/dEitY719"
+  },
+  "homepage": "https://github.com/dEitY719/gh-flow-skills",
+  "repository": "https://github.com/dEitY719/gh-flow-skills",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "issue",
+    "pull-request",
+    "automation"
+  ]
+}

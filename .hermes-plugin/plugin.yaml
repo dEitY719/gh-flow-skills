@@ -1,0 +1,4 @@
+name: gh-flow
+version: 0.1.0
+description: Skills that chain one GitHub issue to a reviewed PR - ordinary remote, or relayed past a blocked push
+author: dEitY719

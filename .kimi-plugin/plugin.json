@@ -1,0 +1,34 @@
+{
+  "name": "gh-flow",
+  "version": "0.1.0",
+  "description": "One-shot issue-to-PR compositions: the ordinary chain, and a relay path for a push-blocked remote.",
+  "author": {
+    "name": "dEitY719",
+    "url": "https://github.com/dEitY719"
+  },
+  "homepage": "https://github.com/dEitY719/gh-flow-skills",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "issue",
+    "pull-request",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "skillInstructions": "Kimi Code tool mapping for the gh-flow skills.\n\nThe authoritative mapping is not in this repo. It lives in the sibling repo `dEitY719/harness-skills` at `references/kimi-tools.md` (https://github.com/dEitY719/harness-skills/blob/main/references/kimi-tools.md) and is the single source of truth for every repo in the `dEitY719/*-skills` family; do not copy it here. Summary:\n\n- `TodoWrite` -> Kimi Code's `TodoList` tool.\n- \"Dispatch a subagent\" -> `Agent` with `subagent_type: \"coder\"` (implementation) or `\"explore\"` (read-only). Never pass `general-purpose`. `gh-flow:issue-relay` and `gh-flow:autopilot` delegate implementation this way; the delegating session still verifies the diff and runs the tests itself rather than trusting the worker's report.\n- \"Ask the user\" -> `AskUserQuestion`. Only `gh-flow:relay-merge` asks, and only when a patch is too large to relay safely.\n- Read / Write / Edit / Bash / Grep / Glob keep their exposed Kimi names. Every `git` and `gh` call in these skills is a plain shell command - run it with `Bash` and surface its `[OK]` / `[WARN]` / `[FAIL]` lines verbatim.\n- `gh` must be installed and authenticated. Each skill binds `TARGET_HOST` and `TARGET_REPO` from the remote URL and prefixes every call with `GH_HOST=` before any API call (#1403). Do not drop that prefix; a GHES remote resolves to the wrong server without it.\n- Kimi Code has no `Skill` tool, and these four skills are compositions whose whole job is calling other skills. Without it they cannot run as written: print the ordered list of atomic skills the chain would have invoked, run the ones you can as plain shell, and stop at the first step that genuinely needs another skill. Do not inline a reimplementation of an atomic skill.\n\nSafety contracts. These are part of the skills, not advice:\n\n- None of the four merges a pull request. `gh-flow:autopilot` explicitly stops at review; merging is a human decision.\n- `gh-flow:issue` stops at the first failing step and reports a resume hint. It never retries a step and never skips one.\n- Zero conversational text between the chained skill calls of `gh-flow:issue` and `gh-flow:autopilot`. A self-authored progress report between calls reads as a final answer and ends the run early - this is the failure mode both skills exist to prevent.\n- `gh-flow:relay-merge` probes whether `git push` actually works before relaying. If it does, it hands off to `gh-pr:create` and stops; the patch+gist relay is a fallback, never the default.\n- Neither relay skill truncates a patch silently. An oversized patch is surfaced, not trimmed.\n",
+  "interface": {
+    "displayName": "GH Flow",
+    "shortDescription": "Carry a GitHub issue to a reviewed PR in one run",
+    "longDescription": "gh-flow bundles the four issue-to-PR composition skills: issue, autopilot, issue-relay, and relay-merge.",
+    "developerName": "dEitY719",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/dEitY719/gh-flow-skills"
+  }
+}

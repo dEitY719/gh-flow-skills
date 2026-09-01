@@ -1,0 +1,21 @@
+{
+  "name": "gh-flow-skills",
+  "version": "0.1.0",
+  "description": "Skills that chain one GitHub issue to a reviewed PR — on a reachable remote, or relayed to a push-blocked one",
+  "type": "module",
+  "main": ".opencode/plugins/gh-flow.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dEitY719/gh-flow-skills.git"
+  },
+  "keywords": [
+    "skills",
+    "plugin",
+    "marketplace",
+    "github",
+    "issue",
+    "pull-request",
+    "automation"
+  ]
+}
