@@ -19,7 +19,7 @@ metadata:
 ## Role
 
 **승인된 spec 이 이미 있다는 전제**에서 Stage-B(구현계획 → 신규 이슈 → 구현 → PR → `/simplify`
-→ `/gh-pr-reply`)를 사용자 승인·체크인 없이 끝까지 자율 실행하는 composition 스킬.
+→ `/gh-pr:reply`)를 사용자 승인·체크인 없이 끝까지 자율 실행하는 composition 스킬.
 **Stage-A(brainstorming · spec 작성)는 대상이 아니다** — spec 이 준비된 뒤에 부른다.
 **PR 머지도 하지 않는다 — 리뷰와 머지는 사람 몫이다.**
 
@@ -72,7 +72,7 @@ No API calls.
   `PR_NUM` 추출. 완료 후 `printf '[step:gh-flow-autopilot/pr] OK\n'`.
 - **Step 4 — /simplify** — `Skill(simplify, "<PR_NUM>")`. 품질 픽스 적용·커밋·push. 완료 후
   `printf '[step:gh-flow-autopilot/simplify] OK\n'`.
-- **Step 5 — /gh-pr-reply** — `Skill(gh-pr-reply, "<PR_NUM>")` **즉시**. 코멘트 없으면 no-op
+- **Step 5 — /gh-pr:reply** — `Skill(gh-pr:reply, "<PR_NUM>")` **즉시**. 코멘트 없으면 no-op
   `[SKIP]` 보고. 코멘트 유무와 무관하게 항상 완료 후
   `printf '[step:gh-flow-autopilot/pr-reply] OK\n'`.
 - **Step 6 — 보고** — `references/report-template.md` 의 `[OK]/[FAIL]` 구조화(이슈·PR URL·선택
@@ -89,5 +89,5 @@ No API calls.
 ## Related Skills
 
 원자 단계: `gh-issue:create` · `superpowers:writing-plans` ·
-`superpowers:subagent-driven-development` · `gh-pr:create` · `simplify` · `gh-pr-reply`.
+`superpowers:subagent-driven-development` · `gh-pr:create` · `simplify` · `gh-pr:reply`.
 사촌: `gh-flow:issue`(spec 이 아니라 이슈 번호에서 시작). 중단 재개: `session:restart`.

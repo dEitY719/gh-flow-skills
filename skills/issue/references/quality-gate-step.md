@@ -14,7 +14,7 @@ Skill(gh-verify:review-all, "<PR_NUM> <remote> --defer-reply 4")
 ```
 
 One call replaces the former inline gate (codex ∥ /simplify + commit/push)
-AND the former `devx:schedule` pr-reply step. Inside `gh-verify:review-all`:
+AND the former `session:schedule` pr-reply step. Inside `gh-verify:review-all`:
 
 - **agy ∥ codex ∥ /simplify** run as parallel Agent subagents in one turn.
   agy review is now included (it was missing from the old inline gate).
@@ -23,14 +23,14 @@ AND the former `devx:schedule` pr-reply step. Inside `gh-verify:review-all`:
 - **simplify commit + push** happens **synchronously inside** the skill,
   before it returns. It uses an explicit `-m` message (never a bare
   `git commit`, which would hang on the editor in a non-interactive shell).
-- **pr-reply is deferred** — `--defer-reply 4` schedules `/gh-pr-reply
-  <PR_NUM>` 4 minutes later (5 min under the old `devx:schedule` step, then
+- **pr-reply is deferred** — `--defer-reply 4` schedules `/gh-pr:reply
+  <PR_NUM>` 4 minutes later (5 min under the old `session:schedule` step, then
   8 min under `--defer-reply` before #1379), giving CI and reviewers time to
   post before the reply pass runs. #1379 shortened this from 8 to 4 min
   based on observed run logs where CI/reviewer comments routinely arrived
   well before 8 minutes; the accepted tradeoff is that a CI check or human
   reviewer slower than 4 minutes may be missed by the automated pass — the
-  fallback is a manual `/gh-pr-reply <PR_NUM>` re-run, not a longer default.
+  fallback is a manual `/gh-pr:reply <PR_NUM>` re-run, not a longer default.
 
 ## Ordering is preserved
 

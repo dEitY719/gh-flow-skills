@@ -64,7 +64,7 @@ bullets** (see CRITICAL CONTRACT). After each call, proceed to the next.
 4. **Step 2.4 — gh-verify:review-all** (only if 2.3 succeeded; soft-fail) — one
    delegated call runs the post-PR quality gate (agy ∥ codex ∥ `/simplify`),
    commits + pushes any simplify change synchronously (so the tree is clean
-   before the rebase steps), and defers `/gh-pr-reply <PR_NUM>` by 4 min. Detail:
+   before the rebase steps), and defers `/gh-pr:reply <PR_NUM>` by 4 min. Detail:
    `references/quality-gate-step.md`.
    `Skill(gh-verify:review-all, "<PR_NUM> <remote> --defer-reply 4")`
 5. **Step 2.4.1 — Wake merge-train dispatcher** (only if 2.3 succeeded, whatever

@@ -2,7 +2,7 @@
 
     /gh-flow:autopilot [spec-path] [--mode auto|sdd|inline] [remote]
 
-Stage-B 를 spec 으로부터 자율 실행: 구현계획 → 신규 이슈 → 구현 → PR → /simplify → /gh-pr-reply.
+Stage-B 를 spec 으로부터 자율 실행: 구현계획 → 신규 이슈 → 구현 → PR → /simplify → /gh-pr:reply.
 승인 없이 끝까지 진행하며 PR 머지는 하지 않는다(사람 몫).
 
 ## Arguments
@@ -24,4 +24,4 @@ Stage-A(brainstorming/spec 작성) · PR 머지 · 릴리스 · 디폴트 브랜
 
 ## 관련
 
-gh-flow:issue(이슈→PR 사촌) · subagent-driven-development · simplify · gh-pr-reply · session:restart(중단 재개)
+gh-flow:issue(이슈→PR 사촌) · subagent-driven-development · simplify · gh-pr:reply · session:restart(중단 재개)

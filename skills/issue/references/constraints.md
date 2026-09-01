@@ -34,20 +34,20 @@
   2.5.1 call only `gh-resolve:conflict` / `gh-resolve:outdated` —
   never `gh-resolve:ci-fail`. CI checks haven't finished by the time
   this flow reaches those steps, so a synchronous call would be
-  meaningless; `gh:pr-merge-train` routes a CI-red PR to
+  meaningless; `gh-pr:merge-train` routes a CI-red PR to
   `gh-resolve:ci-fail` whenever it next processes that PR — via Step
   2.4.1's best-effort wake (see above) or, failing that, its own cron
-  backstop. Detail: `gh-pr-merge-train/references/routing-table.md`.
+  backstop. Detail: `gh-pr:merge-train`'s `references/routing-table.md`.
   **Neither path exists for any other `<remote>`** (#1610): the wake
   silently skips every `<remote>` whose resolved URL isn't `$HOME/dotfiles`'s
   own `origin` (#1498 — URL comparison, not a remote-name match: a
   differently-named remote pointing at that same URL still fires), and this
   machine's `merge-train` cron entry — `shell-common/tools/custom/cron-jobs.json`,
   installed via `aicron add merge-train`, never a hand-edited crontab line
-  (`gh-pr-merge-train/references/cron-dispatcher.md`) — only targets
+  (`gh-pr:merge-train`'s `references/cron-dispatcher.md`) — only targets
   `--cwd $HOME/dotfiles`. A PR opened via `/gh-flow:issue <N> <other-remote>`
   that lands CI-red has no automated remediation trigger at all — the human
-  must call `/gh-pr-merge-train <other-remote>` manually.
+  must call `/gh-pr:merge-train <other-remote>` manually.
 - **Never fall back to `_dotfiles_setup_mode` alone for the host (#1403).**
   Step 1 exports `GH_HOST`/`TARGET_REPO`/`TARGET_HOST` from the `[remote]`'s
   URL, and every GitHub-touching sub-skill receives `[remote]` as an explicit

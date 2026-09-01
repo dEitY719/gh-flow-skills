@@ -10,7 +10,7 @@ point here for the *mechanism*.
 `gh-pr:create` → `gh-verify:review-all` → `gh-resolve:conflict` →
 `gh-resolve:outdated`) plus a final Step 3 report. The post-PR quality
 gate (agy ∥ codex ∥ `/simplify`, with commit+push) and the deferred
-`/gh-pr-reply` scheduling now live *inside* the delegated
+`/gh-pr:reply` scheduling now live *inside* the delegated
 `gh-verify:review-all` (Step 2.4) — they are no longer dispatched inline by
 gh-flow:issue. `gh-verify:review-all` is the 4th entry of the hook's
 `EXPECTED_CHAIN`, and `gh-resolve:outdated` is the 6th. Across multiple
@@ -27,7 +27,7 @@ turn-end until a Step 3 marker appears.
 > History (pre-#1160): the quality gate used to be dispatched inline as
 > steps 2.3.1 (codex review) ∥ 2.3.2 (`/simplify`) → 2.3.3 (commit+push)
 > via Agent/git tool calls, and pr-reply was scheduled by a separate
-> `devx:schedule` step that occupied the 4th `EXPECTED_CHAIN` slot. Both
+> `session:schedule` step that occupied the 4th `EXPECTED_CHAIN` slot. Both
 > were consolidated into `gh-verify:review-all`.
 
 Two earlier mitigations help but are not sufficient:

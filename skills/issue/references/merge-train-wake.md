@@ -18,7 +18,7 @@ the PR exists.
 dispatcher's target count excludes any PR updated within the last
 `_PMT_QUIET_MINUTES` (11 minutes — D-6 quiet period, see
 `shell-common/tools/custom/pr_merge_train_cron.sh` →
-`_pmt_target_count`, and `gh-pr-merge-train/references/ordering.md` for why
+`_pmt_target_count`, and `gh-pr:merge-train`'s `references/ordering.md` for why
 11). The PR this step just created has an `updatedAt` of "just now", so it
 fails that filter on this very tick — if no other PR in the queue has already
 cleared the quiet period, the wake call ends in "No target PR — nothing to
@@ -37,15 +37,15 @@ The cron job is not removed. Its backstop period is shortened to `*/5 * * *
 event trigger — e.g. this step running while a previous train is still
 `live` — is still picked up within 5 minutes instead of 23.
 
-## Why the dispatcher, not `gh:pr-merge-train` or `--admin-merge`
+## Why the dispatcher, not `gh-pr:merge-train` or `--admin-merge`
 
 Both alternatives were considered and rejected (issue #1482 body, "대안"):
 
-- **Calling `Skill(gh:pr-merge-train)` directly** would bypass NF-1's
+- **Calling `Skill(gh-pr:merge-train)` directly** would bypass NF-1's
   flock + `herdr agent get mt-…` double-lock — if several `gh-flow:issue`
   sessions finish at the same moment, each would start its own train.
   `pr_merge_train_cron.sh` already implements both locks
-  (`claude/skills/gh-pr-merge-train/references/cron-dispatcher.md`); calling
+  (`gh-pr:merge-train`'s `references/cron-dispatcher.md`); calling
   it, not the skill, reuses that protection for free.
 - **Adding `--admin-merge` to the flow** was rejected because this repo has
   `required_approving_review_count=0` (no approval to bypass) and an admin

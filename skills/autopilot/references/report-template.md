@@ -7,7 +7,7 @@
     - 구현:   <task N 완료 | inline 커밋 M>  · 검증 <테스트 결과·typecheck·lint>
     - PR:     #<PR>  <pr-url>  (Closes #<N>)
     - simplify: <적용 K건 | 이미 clean>
-    - pr-reply: <응답 R건 | 아직 코멘트 없음(뒤늦은 봇 리뷰는 /gh-pr-reply 재실행)>
+    - pr-reply: <응답 R건 | 아직 코멘트 없음(뒤늦은 봇 리뷰는 /gh-pr:reply 재실행)>
     Next: PR #<PR> 리뷰·머지 (autopilot 은 머지하지 않음)
 
 ## 실패 ([FAIL]) — 하드 실패 지점에서 정지
