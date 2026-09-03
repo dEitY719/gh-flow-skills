@@ -47,7 +47,7 @@ asymmetric-network setup is `origin` = internal (isolated GHE),
 
    ```bash
    _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-   [ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+   [ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
    . "$_SC/functions/gh_host.sh"
    REMOTE_URL=$(git remote get-url "$REMOTE_NAME") || exit 1   # or "$REMOTE_URL" on the raw-URL path
    DEST_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL") || exit 1
