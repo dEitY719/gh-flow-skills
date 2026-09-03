@@ -24,7 +24,9 @@ export below remains useful for anything that stays within Step 1's own
 Bash call, and for consistency with the rest of the skill suite.
 
 ```bash
-. "${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/gh_host.sh"
+_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
+[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_host.sh"
 REMOTE="${REMOTE:-origin}"
 REMOTE_URL=$(git remote get-url "$REMOTE")
 TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")

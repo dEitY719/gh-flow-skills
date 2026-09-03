@@ -43,7 +43,9 @@ e. Post the aggregate comment on the linked issue (body template below),
 f. On failure: print `[WARN] ai-metrics comment failed (<reason>) — continuing.`
 
 ```bash
-. "${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/gh_host.sh"
+_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
+[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+. "$_SC/functions/gh_host.sh"
 REMOTE_URL=$(git remote get-url "<remote>")
 TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
 TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
