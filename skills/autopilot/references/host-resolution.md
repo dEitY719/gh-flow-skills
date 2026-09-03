@@ -3,7 +3,7 @@
 origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
 
     _SC="$DOTFILES_ROOT/shell-common"
-    [ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+    [ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
     . "$_SC/functions/gh_host.sh"
     HOST="$(_gh_resolve_host)"        # internal→github.samsungds.net, 그 외→github.com
 
