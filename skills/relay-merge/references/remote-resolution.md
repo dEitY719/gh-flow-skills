@@ -46,7 +46,9 @@ asymmetric-network setup is `origin` = internal (isolated GHE),
    the #1403 misroute:
 
    ```bash
-   . "${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common/functions/gh_host.sh"
+   _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
+   [ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"
+   . "$_SC/functions/gh_host.sh"
    REMOTE_URL=$(git remote get-url "$REMOTE_NAME") || exit 1   # or "$REMOTE_URL" on the raw-URL path
    DEST_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL") || exit 1
    DEST_HOST=$(_gh_host_from_url "$REMOTE_URL") || DEST_HOST=$(_gh_resolve_host)
