@@ -24,8 +24,15 @@ export below remains useful for anything that stays within Step 1's own
 Bash call, and for consistency with the rest of the skill suite.
 
 ```bash
+# plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
 _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-[ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
+[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_host.sh" ] || {
+    printf '[gh-flow:issue] shell-common not found under %s. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "$_SC" >&2
+    return 1 2>/dev/null || exit 1
+}
+export SHELL_COMMON="$_SC"
 . "$_SC/functions/gh_host.sh"
 REMOTE="${REMOTE:-origin}"
 REMOTE_URL=$(git remote get-url "$REMOTE")

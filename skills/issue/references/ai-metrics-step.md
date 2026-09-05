@@ -41,10 +41,20 @@ e. Post the aggregate comment on the linked issue (body template below),
    `references/target-binding.md`'s block again here with `<remote>`
    substituted literally, same as Step 1 did.
 f. On failure: print `[WARN] ai-metrics comment failed (<reason>) — continuing.`
+   The block's own tier-5 stop is one such failure — it prints that warning
+   itself and exits non-zero, ending only the pasted block's shell. This step
+   is soft-fail, so the flow continues.
 
 ```bash
+# plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
 _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-[ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
+[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common"
+[ -f "$_SC/functions/gh_host.sh" ] || {
+    printf '[WARN] ai-metrics comment failed (shell-common not found under %s — on Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first) — continuing.\n' \
+        "$_SC" >&2
+    return 1 2>/dev/null || exit 1
+}
+export SHELL_COMMON="$_SC"
 . "$_SC/functions/gh_host.sh"
 REMOTE_URL=$(git remote get-url "<remote>")
 TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
