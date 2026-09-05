@@ -25,8 +25,8 @@ AND the former `session:schedule` pr-reply step. Inside `gh-verify:review-all`:
   `git commit`, which would hang on the editor in a non-interactive shell).
 - **pr-reply is deferred** — `--defer-reply 4` schedules `/gh-pr:reply
   <PR_NUM>` 4 minutes later (5 min under the old `session:schedule` step, then
-  8 min under `--defer-reply` before #1379), giving CI and reviewers time to
-  post before the reply pass runs. #1379 shortened this from 8 to 4 min
+  8 min under `--defer-reply` before dEitY719/dotfiles#1379), giving CI and reviewers time to
+  post before the reply pass runs. dEitY719/dotfiles#1379 shortened this from 8 to 4 min
   based on observed run logs where CI/reviewer comments routinely arrived
   well before 8 minutes; the accepted tradeoff is that a CI check or human
   reviewer slower than 4 minutes may be missed by the automated pass — the

@@ -5,6 +5,7 @@ description: >-
   branch → delegated implementation → verification → gh-flow:relay-merge. Use for
   /gh-flow:issue-relay, "이슈 번호로 브랜치 따고 relay까지",
   "사내PC에서 구현해서 upstream으로 릴레이해줘".
+license: MIT
 allowed-tools: Bash, Read, Grep, Agent
 metadata:
   model_recommendation:
@@ -53,7 +54,7 @@ Follow `references/branch-setup.md`. Resolves `--remote` (hard error on a missin
 (or honors `--base`), fetches it, computes the branch name `issue-<N>-<title-slug>`, and either creates a fresh
 branch or handles the "branch already exists" reuse/reset decision (never auto-resets a branch with unique
 commits without asking). Destination `gh` calls run as `GH_HOST="$DEST_HOST" gh ... --repo "$DEST_REPO"` — the
-destination is a different host from `origin` by construction, so there is no global `GH_HOST` (#1403 / #1407).
+destination is a different host from `origin` by construction, so there is no global `GH_HOST` (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 ## Step 3: Delegate Implementation (Advisor/Worker)
 

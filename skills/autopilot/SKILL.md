@@ -5,6 +5,7 @@ description: >-
   승인 없이 끝까지 자율 실행한다 — 머지는 하지 않는다(사람 몫). Use for
   /gh-flow:autopilot, "spec 부터 PR까지 자동으로", "stage-B 자동 실행",
   "autopilot 돌려", "내 승인 없이 끝까지 완수해". Stage-A(spec 작성)는 대상 아님.
+license: MIT
 allowed-tools: Bash, Read, Edit, Write, Grep, Skill, Agent, TaskCreate, TaskUpdate, TaskList
 metadata:
   model_recommendation:
@@ -60,7 +61,7 @@ No API calls.
   `printf '[step:gh-flow-autopilot/plan] OK\n'`.
 - **Step 0b — 이슈** — `Skill(gh-issue:create, "--no-ask")` — host-aware(`references/host-resolution.md`)로
   추적 이슈 생성, `ISSUE_NUM`·URL 확보. `--no-ask` 는 미결 게이트가 무인 체인을 멈추지 않게
-  한다 (#1446). 완료 후 `printf '[step:gh-flow-autopilot/issue] OK\n'`.
+  한다 (dEitY719/dotfiles#1446). 완료 후 `printf '[step:gh-flow-autopilot/issue] OK\n'`.
 - **Step 1 — 모드 선택** (`references/mode-heuristic.md`) — `auto` 면 계획을 읽어 판정,
   `mode=<sdd|inline> reason=...` 1줄 로그. `--mode` 우선. 완료 후
   `printf '[step:gh-flow-autopilot/mode] OK\n'`.

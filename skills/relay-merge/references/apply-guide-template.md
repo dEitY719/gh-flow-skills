@@ -25,7 +25,7 @@ Step 6. Post this to the destination: a NEW issue (default) or the
 forms safely. `GH_HOST="$DEST_HOST"` comes from that same remote URL and is
 what actually pins the server — `--repo` alone carries no host, so on a
 dual-host login the apply-guide would land on whichever repo
-`gh repo set-default` happens to name (issues #1403 / #1407). This skill
+`gh repo set-default` happens to name (issues dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407). This skill
 crosses hosts by design, so it never exports one global `GH_HOST`.
 
 ## Body template
@@ -161,6 +161,6 @@ What was verified on the origin side (from `gh pr view` in Step 1):
   if you already know the destination uses a different name. Never leave
   an unresolved `<placeholder>` in those two code blocks — that forces a
   manual edit before every single command, which is the exact friction
-  this template exists to remove (#1346 review: an earlier draft used
+  this template exists to remove (dEitY719/dotfiles#1346 review: an earlier draft used
   `<remote-name>` here and the destination-side reader could not copy-paste
   any of the three commands that referenced it).

@@ -5,6 +5,7 @@ description: >-
   blocks `git push` — probe first, then patch+gist with a `git am` apply-guide.
   Use for /gh-flow:relay-merge, "origin PR를 upstream 으로 릴레이",
   "push 막혀서 gist 로 넘겨줘".
+license: MIT
 allowed-tools: Bash, Read, Write, Grep, Glob
 metadata:
   model_recommendation:
@@ -41,7 +42,7 @@ Shared flags: `--remote`, `--target-issue`, `--known-failures`, `--generated-pat
 Resolve `--remote` per `references/remote-resolution.md`; missing `upstream` with no explicit `--remote` → hard
 error, never fall back to `origin`. Confirm the destination is reachable (`git fetch` / `git ls-remote`) first.
 It also binds `SOURCE_REPO`/`SOURCE_HOST` + `DEST_REPO`/`DEST_HOST`, each pair from **one** remote URL. Two hosts
-in one run → no global `GH_HOST`: every `gh` call carries its own side's host inline (#1403 / #1407).
+in one run → no global `GH_HOST`: every `gh` call carries its own side's host inline (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 ## Step 2: Push-Capability Probe (branch point)
 

@@ -15,7 +15,7 @@ destination remote URL. Both are required downstream: Step 3's issue fetch
 runs as `GH_HOST="$DEST_HOST" gh issue view <N> --repo "$DEST_REPO" ...`,
 and `gh-flow:relay-merge` re-resolves the same pair for its own calls. Never
 export a single global `GH_HOST` in this flow — `origin` and the destination
-are deliberately different hosts (#1403 / #1407).
+are deliberately different hosts (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 ```
 Error: no 'upstream' remote and no --remote given.
@@ -39,7 +39,7 @@ directly; treat `$BASE` as `$DEFAULT_BRANCH` for the rest of this file.
 ## Branch naming: `issue-<N>-<title-slug>`
 
 Slugify the issue title: lowercase, strip punctuation, collapse
-whitespace/special characters to single hyphens. Example: issue #1346
+whitespace/special characters to single hyphens. Example: issue dEitY719/dotfiles#1346
 titled "feat(skills): gh-flow:issue-relay 신설 + gh-flow:relay-merge push-probe
 버그 수정" → `issue-1346-feat-skills-gh-flow-issue-relay` (truncate an
 overlong slug; the issue number prefix is what matters for lookup).
@@ -48,7 +48,7 @@ overlong slug; the issue number prefix is what matters for lookup).
 on a worktree branch prefixed `issue-1346` (e.g. `wt/issue-1346/1`), so an
 issue-number-first branch name greps consistently alongside it — searching
 `issue-1346` finds both the worktree branch and this flow's working branch.
-This is deliberately a *different* namespace from `ai-worktree-spawn`'s
+This is deliberately a *different* namespace from `session:worktree-spawn`'s
 `wt/<agent>/<N>` convention — that one names a *worktree* (an agent-owned
 sandbox), this one names a *working branch inside an existing worktree*
 that will be pushed via relay. Do not conflate the two.

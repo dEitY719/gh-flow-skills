@@ -2,7 +2,7 @@
 
 origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
 
-    _SC="$DOTFILES_ROOT/shell-common"
+    _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
     [ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
     . "$_SC/functions/gh_host.sh"
     HOST="$(_gh_resolve_host)"        # internal→github.samsungds.net, 그 외→github.com
@@ -13,4 +13,4 @@ origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
 - setup-mode 판정은 `_dotfiles_setup_mode` 를 따른다(gh_host.sh 내부에서 처리).
 - gh_host.sh 부재/기타 모드 → github.com fail-safe(회귀 0).
 
-근거: gh_host.sh 파일 주석(issue #703/#704) — "미래 GHE 도메인 추가 시 이 파일만 수정".
+근거: gh_host.sh 파일 주석(dEitY719/dotfiles#703, dEitY719/dotfiles#704) — "미래 GHE 도메인 추가 시 이 파일만 수정".

@@ -5,6 +5,7 @@ description: >-
   rebase-sync. Use for /gh-flow:issue, "이슈 #16 처음부터 PR까지
   자동으로", "이슈 구현하고 PR까지 한방에", "full flow on #42". Takes an issue
   number, not a spec (gh-flow:autopilot).
+license: MIT
 allowed-tools: Bash, Read, Grep, Agent
 metadata:
   model_recommendation:
@@ -28,11 +29,10 @@ worktree 의 feature 브랜치 위.
 **Recurring failure mode: early-stop after Step 2.x.** Three layered guards
 prevent it — (1) `--no-next-hint` on Step 2.1, (2) zero conversational text
 between the six `Skill()` calls in Step 2, (3) the harness Stop/SubagentStop
-guard in `dEitY719/dotfiles`, which accepts this skill's `gh-flow:issue`
-markers alongside its pre-migration `gh:issue-flow` ones (#1434, #1678 D-12).
-**Do not remove any of them.** Only prose is forbidden between the calls; the
-gate is delegated to Step 2.4. History and detection contract:
-`references/critical-contract.md`, `references/stop-guard.md`.
+guard in `dEitY719/dotfiles`, which tracks this skill's `gh-flow:issue`
+markers (dEitY719/dotfiles#1434). **Do not remove any of them.** Only prose is
+forbidden between the calls; the gate is delegated to Step 2.4. History and
+detection contract: `references/critical-contract.md`, `references/stop-guard.md`.
 
 ## Step 1: Parse Args
 
@@ -41,11 +41,11 @@ path — which prints `references/help.md` verbatim and stops, no API calls:
 `references/help.md`. No `mode` arg — implementation is always `direct`.
 Record `START_TS=$(date +%s)` for elapsed-time tracking in Step 2.6.
 
-**Bind the GitHub target once, here (#1403)** — resolve `GH_HOST` /
+**Bind the GitHub target once, here (dEitY719/dotfiles#1403)** — resolve `GH_HOST` /
 `TARGET_REPO` / `TARGET_HOST` / `REMOTE` from the `[remote]`'s URL, and thread
-`[remote]` explicitly into 2.1–2.4 (#1405). The two inline Bash steps (2.4.1,
+`[remote]` explicitly into 2.1–2.4 (dEitY719/dotfiles#1405). The two inline Bash steps (2.4.1,
 2.6) re-derive their own target from the literal `<remote>` instead of trusting
-that export to reach a later Bash call (#1498). Block + rationale:
+that export to reach a later Bash call (dEitY719/dotfiles#1498). Block + rationale:
 `references/target-binding.md`.
 
 ## Step 2: Chain the Skills
@@ -57,9 +57,9 @@ bullets** (see CRITICAL CONTRACT). After each call, proceed to the next.
 1. **Step 2.1 — gh-issue:implement** — `--no-next-hint` is load-bearing.
    `Skill(gh-issue:implement, "<N> direct <remote> --no-next-hint")`
 2. **Step 2.2 — gh-pr:commit** (only if 2.1 succeeded) — `[remote]` pins the
-   metrics/board target (#1405). `Skill(gh-pr:commit, "<N> <remote>")`
+   metrics/board target (dEitY719/dotfiles#1405). `Skill(gh-pr:commit, "<N> <remote>")`
 3. **Step 2.3 — gh-pr:create** (only if 2.2 succeeded) — ensures `Closes #<N>`,
-   pushes and opens the PR on `<remote>` (#1405); extract `<PR_NUM>` from the PR
+   pushes and opens the PR on `<remote>` (dEitY719/dotfiles#1405); extract `<PR_NUM>` from the PR
    URL. `Skill(gh-pr:create, "<N> <remote>")`
 4. **Step 2.4 — gh-verify:review-all** (only if 2.3 succeeded; soft-fail) — one
    delegated call runs the post-PR quality gate (agy ∥ codex ∥ `/simplify`),
@@ -72,7 +72,7 @@ bullets** (see CRITICAL CONTRACT). After each call, proceed to the next.
    merge-train` backgrounded, and only when the literal `<remote>` resolves to
    the same repo URL as `$HOME/dotfiles`'s own `origin`; any other remote is a
    silent skip leaving no automated CI-fail remediation trigger at all
-   (#1498, #1610). Detail: `references/merge-train-wake.md`.
+   (dEitY719/dotfiles#1498, dEitY719/dotfiles#1610). Detail: `references/merge-train-wake.md`.
 6. **Step 2.5 — gh-resolve:conflict** (only if 2.4 succeeded) —
    rebase-resolve; a fresh PR usually prints "이미 충돌 없음 — skip".
    `Skill(gh-resolve:conflict, "<PR_NUM>")`
@@ -87,7 +87,7 @@ bullets** (see CRITICAL CONTRACT). After each call, proceed to the next.
 
 Output format (templates + resume-hint logic): `references/report-template.md`.
 Always end with the `[OK]`/`[FAIL]`/`[SKIP]` report as plain assistant text —
-never via `Bash` heredoc or `Write` (#1270).
+never via `Bash` heredoc or `Write` (dEitY719/dotfiles#1270).
 
 ## Constraints
 

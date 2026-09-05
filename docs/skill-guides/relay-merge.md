@@ -66,4 +66,4 @@ gist 패치 + 목적지 이슈에 붙은 `git am` apply-guide 코멘트**를 산
 - **origin 쪽 이슈를 명시적 확인 없이 close 하지 않는다.**
 - **목적지 remote 에 history 를 rewrite 하지 않는다.**
 - 두 호스트가 한 실행에 공존하므로 전역 `GH_HOST` 를 두지 않는다 — 모든 `gh` 호출이 자기
-  쪽 호스트를 인라인으로 달고 나간다 (#1403 / #1407).
+  쪽 호스트를 인라인으로 달고 나간다 (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).

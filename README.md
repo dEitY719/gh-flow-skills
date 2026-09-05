@@ -40,7 +40,7 @@ Each page is generated from a Markdown source under
 | Need | Why |
 |------|-----|
 | `git` | All four commit, push, or format patches. |
-| `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
+| `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (dEitY719/dotfiles#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
 | A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. |
 | The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve`. These are compositions; the steps they call live in those repos. |
 
@@ -139,10 +139,9 @@ step markers are a **hook contract, not prose**. `gh-flow:issue complete (#<N>)`
 `[OK] gh-flow:autopilot`, `[FAIL] gh-flow:autopilot` — change one without the
 matching hook change and the regression comes straight back.
 
-Those hooks currently accept **both** namespaces: this repo's `gh-flow:*` form
-and the pre-migration `gh:issue-flow` / `devx-autopilot` form still emitted by
-the dotfiles originals (dotfiles #1678, decision D-12). The old form is dropped
-in Phase 4 of that repo's migration.
+Those hooks accept **only** this repo's `gh-flow:*` namespace. The
+pre-migration `gh:issue-flow` / `devx-autopilot` form was dropped in Phase 4 of
+that repo's migration (dEitY719/dotfiles#1410) and now appears in neither hook.
 
 ## Shared assets
 
@@ -206,8 +205,9 @@ The four skills were extracted from
 (`claude/skills/{gh-issue-flow,devx-autopilot,gh-issue-relay-flow,gh-relay-merge}`)
 as a content snapshot at source commit
 `96c90bc8d961d51d9c3286dae730e8b928afdfc8` — no history rewriting. The dotfiles
-copies remain in place until Phase 4 of that repo's migration plan (#1410
-NF-1 / NF-3). This repo is the last of Phase 3 (tracking issue #1678).
+originals are gone: `claude/skills/` was deleted there in Phase 4-1 of that
+repo's migration plan (dEitY719/dotfiles#1410 NF-1 / NF-3, tracking issue
+dEitY719/dotfiles#1678).
 
 The old prefixes were stripped on the way in: `/gh:issue-flow` became
 `/gh-flow:issue`, `/devx:autopilot` became `/gh-flow:autopilot`,

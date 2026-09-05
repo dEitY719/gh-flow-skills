@@ -32,9 +32,10 @@ Look for, in order:
    the diff actually changed).
 3. If neither states a command, ask the user rather than guessing at one.
 
-**Concrete example — this dotfiles repo itself**: if `gh-flow:issue-relay`
-is ever run with this repo as the target, the standard commands are
-`mise run lint && mise run test` (see the repo's own `mise.toml`).
+**Concrete example**: if `gh-flow:issue-relay` is ever run with
+`dEitY719/dotfiles` as the target, the standard commands are `mise run lint &&
+mise run test` (see that repo's own `mise.toml`). This repo ships no
+`mise.toml`, so it is not its own example.
 
 ## Run them and gate on the result
 

@@ -12,14 +12,14 @@
   simplify changes **synchronously inside `gh-verify:review-all`** before it
   returns, so the tree is clean before the rebase steps 2.5 / 2.5.1 — a
   dirty working tree breaks `git rebase`.
-- **Merge-train wake soft-fail exception (#1482).** Step 2.4.1
+- **Merge-train wake soft-fail exception (dEitY719/dotfiles#1482).** Step 2.4.1
   (`aicron run merge-train`) fires right after Step 2.4, whether or not 2.4
   succeeded — it is not a `Skill()` call and never stops the flow. It only
   fires when the literal `<remote>` resolves to the same repo URL as
   `$HOME/dotfiles`'s own `origin`; any other remote is a silent skip, not a
-  failure (#1498 — see "Guarded to `$HOME/dotfiles`'s own `origin` only" in
+  failure (dEitY719/dotfiles#1498 — see "Guarded to `$HOME/dotfiles`'s own `origin` only" in
   `references/merge-train-wake.md`). This guard is never a live `$REMOTE`
-  env-var read — PR #1539 review found that fragile (a Bash tool call is
+  env-var read — PR dEitY719/dotfiles#1539 review found that fragile (a Bash tool call is
   not guaranteed to inherit an earlier call's exports). When it does fire,
   it is launched **backgrounded** (harness `run_in_background`, not awaited) so
   the dispatcher's own up-to-~4-min `herdr agent prompt --wait` never
@@ -38,9 +38,9 @@
   `gh-resolve:ci-fail` whenever it next processes that PR — via Step
   2.4.1's best-effort wake (see above) or, failing that, its own cron
   backstop. Detail: `gh-pr:merge-train`'s `references/routing-table.md`.
-  **Neither path exists for any other `<remote>`** (#1610): the wake
+  **Neither path exists for any other `<remote>`** (dEitY719/dotfiles#1610): the wake
   silently skips every `<remote>` whose resolved URL isn't `$HOME/dotfiles`'s
-  own `origin` (#1498 — URL comparison, not a remote-name match: a
+  own `origin` (dEitY719/dotfiles#1498 — URL comparison, not a remote-name match: a
   differently-named remote pointing at that same URL still fires), and this
   machine's `merge-train` cron entry — `shell-common/tools/custom/cron-jobs.json`,
   installed via `aicron add merge-train`, never a hand-edited crontab line
@@ -48,10 +48,10 @@
   `--cwd $HOME/dotfiles`. A PR opened via `/gh-flow:issue <N> <other-remote>`
   that lands CI-red has no automated remediation trigger at all — the human
   must call `/gh-pr:merge-train <other-remote>` manually.
-- **Never fall back to `_dotfiles_setup_mode` alone for the host (#1403).**
+- **Never fall back to `_dotfiles_setup_mode` alone for the host (dEitY719/dotfiles#1403).**
   Step 1 exports `GH_HOST`/`TARGET_REPO`/`TARGET_HOST` from the `[remote]`'s
   URL, and every GitHub-touching sub-skill receives `[remote]` as an explicit
-  positional (#1405): 2.1 `gh-issue:implement`, 2.2 `gh-pr:commit`, 2.3 `gh-pr:create`,
+  positional (dEitY719/dotfiles#1405): 2.1 `gh-issue:implement`, 2.2 `gh-pr:commit`, 2.3 `gh-pr:create`,
   2.4 `gh-verify:review-all`. Each re-derives its own target with
   `_gh_host_from_url`/`_gh_parse_owner_repo_url` over **that** remote's URL, so
   the whole chain lands on the same repo and host. A sub-skill falling back
@@ -68,7 +68,7 @@
   `_gh_pr_edit_safe_label` / `_gh_pr_edit_safe_body`
   (`shell-common/functions/gh_pr_edit_safe.sh`); plain `gh pr edit
   --add-label` / `--body-file` silently exits 1 on repos with classic
-  Projects attached (issue #326 Bug B).
+  Projects attached (issue dEitY719/dotfiles#326 Bug B).
 - Do NOT preface or summarize beyond the compact report.
 - Do NOT end the turn until the Step 3 report is issued (success or
   failure template). A `Next:` / resume-hint from a sub-skill
@@ -88,7 +88,7 @@
   gate runs inside the delegated Step 2.4 (`gh-verify:review-all`), so
   Step 2 is a six-`Skill()` sequence with no inline gate dispatch or
   Bash commit+push between calls — **except** the one documented,
-  backgrounded, non-fatal Step 2.4.1 dispatcher wake (#1482), which is
+  backgrounded, non-fatal Step 2.4.1 dispatcher wake (dEitY719/dotfiles#1482), which is
   not a `Skill()` call and adds no prose. It is the sole intentional
   exception; do not add a second one without updating this line.
 - **Do NOT stop after any sub-skill completes.** Each step (2.1 through
