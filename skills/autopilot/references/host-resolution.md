@@ -18,6 +18,6 @@ origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
   host 를 판단하므로, 이슈/PR 생성 전 대상 repo 가 그 host 에 있는지 remote 로 확인한다.
 - owner/repo 파싱도 gh_host.sh 의 파서를 재사용(별도 정규식 복제 금지).
 - setup-mode 판정은 `_dotfiles_setup_mode` 를 따른다(gh_host.sh 내부에서 처리).
-- gh_host.sh 부재 → 위 블록의 tier 5 가 경로를 밝히고 중단. 기타 setup 모드 → github.com fail-safe(회귀 0).
+- gh_host.sh 부재 → 위 블록이 시도한 경로를 밝히고 중단. 기타 setup 모드 → github.com fail-safe(회귀 0).
 
 근거: gh_host.sh 파일 주석(dEitY719/dotfiles#703, dEitY719/dotfiles#704) — "미래 GHE 도메인 추가 시 이 파일만 수정".
