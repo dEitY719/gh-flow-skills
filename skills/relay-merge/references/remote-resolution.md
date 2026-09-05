@@ -46,8 +46,15 @@ asymmetric-network setup is `origin` = internal (isolated GHE),
    the dEitY719/dotfiles#1403 misroute:
 
    ```bash
+   # plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
    _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-   [ -f "$_SC/functions/gh_host.sh" ] || { _SC="${CLAUDE_PLUGIN_ROOT:-}/lib/vendor/shell-common"; export SHELL_COMMON="$_SC"; }
+   [ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common"
+   [ -f "$_SC/functions/gh_host.sh" ] || {
+       printf '[gh-flow:relay-merge] shell-common not found under %s. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+           "$_SC" >&2
+       return 1 2>/dev/null || exit 1
+   }
+   export SHELL_COMMON="$_SC"
    . "$_SC/functions/gh_host.sh"
    REMOTE_URL=$(git remote get-url "$REMOTE_NAME") || exit 1   # or "$REMOTE_URL" on the raw-URL path
    DEST_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL") || exit 1
