@@ -5,14 +5,14 @@
 self-authored success block as a turn-ending answer and stops mid-chain —
 leaving the user to manually re-trigger the rest. Reported by users as
 "100번 실행하면 50번은 stop" (half of all runs stop early). History:
-issue #333 (introduced `--no-next-hint`), issue #383 (re-occurred even
+issue dEitY719/dotfiles#333 (introduced `--no-next-hint`), issue dEitY719/dotfiles#383 (re-occurred even
 with `--no-next-hint`).
 
 **Three guards are layered against this — do not remove any of them.**
 
 1. **`--no-next-hint` on Step 2.1** — suppresses `gh-issue:implement`'s
-   trailing `Next:` hint, the original trip-wire from #333. Load-bearing
-   even though insufficient on its own (see #383).
+   trailing `Next:` hint, the original trip-wire from dEitY719/dotfiles#333. Load-bearing
+   even though insufficient on its own (see dEitY719/dotfiles#383).
 2. **Zero conversational text between the six `Skill()` calls in Step 2** —
    no recap, no "now committing", no markdown headers, no progress
    bullets. Those tokens read as a turn-ending summary and re-introduce
@@ -23,7 +23,7 @@ with `--no-next-hint`).
    it runs inside the delegated `gh-verify:review-all` (Step 2.4), so
    issue-flow makes only that one `Skill()` call with no inline Agent
    dispatch or Bash commit+push between calls. (Historically, in the
-   pre-#1160 inline gate, the 2.3.1/2.3.2 Agent dispatch and the 2.3.3
+   pre-dEitY719/dotfiles#1160 inline gate, the 2.3.1/2.3.2 Agent dispatch and the 2.3.3
    Bash commit+push ran between Skill() calls and were permitted as
    non-prose tool calls; that gate work now lives in the delegated skill.)
    Terminal-marker gating (see guard 3) covers any tool steps automatically.
@@ -35,7 +35,7 @@ with `--no-next-hint`).
    See `references/stop-guard.md` for the detection logic, safety rails,
    and how to disable it temporarily for debugging.
 
-**One narrow exception — async delegation (#1550).** When a sub-skill's own
+**One narrow exception — async delegation (dEitY719/dotfiles#1550).** When a sub-skill's own
 work is itself handed to a background/async `Agent` mid-chain (the
 Advisor/Worker delegation the global `CLAUDE.md` mandates for multi-file
 implementation), the outstanding step genuinely cannot finish inside this
@@ -43,7 +43,7 @@ turn. Print the single line `[flow:async-wait] step=<skill>/<step>
 agent=<id> reason=background-worker-delegated` as assistant text and end the
 turn; the harness guard grants a small number of consecutive grace turns
 before blocking resumes (limit and mechanism: `references/stop-guard.md` →
-"Async-wait exception (#1550)"). This is **not** a license to stop mid-Step-2 for any
+"Async-wait exception (dEitY719/dotfiles#1550)"). This is **not** a license to stop mid-Step-2 for any
 other reason, and it does not relax guard #2 — the marker line is the only
 prose permitted, everything else in the zero-conversational-text rule
 stands.

@@ -1,8 +1,8 @@
-# gh-flow:issue — Binding the GitHub target (#1403)
+# gh-flow:issue — Binding the GitHub target (dEitY719/dotfiles#1403)
 
 Step 1 resolves the host and repo from the `[remote]`'s URL once and exports
 them, so the composition's own `gh` call cannot drift to another server. It
-also exports `REMOTE` itself (#1498), matching the convention `gh-pr:commit` and
+also exports `REMOTE` itself (dEitY719/dotfiles#1498), matching the convention `gh-pr:commit` and
 `gh-pr:create` already use.
 
 Set `REMOTE` to the parsed `[remote]` argument from Step 1 **before** running
@@ -13,7 +13,7 @@ below verbatim without that assignment; `${REMOTE:-origin}` silently reads as
 threading `[remote]` through the chain.
 
 **This export is not load-bearing for the flow's two non-`Skill()` inline
-Bash steps (2.4.1, 2.6)** — PR #1539 review (agy + codex) found that a Bash
+Bash steps (2.4.1, 2.6)** — PR dEitY719/dotfiles#1539 review (agy + codex) found that a Bash
 tool call is not guaranteed to inherit an earlier call's exports, so a step
 several `Skill()` calls downstream that trusted `$REMOTE` alone could
 silently read the wrong value. Both steps instead re-derive their target
@@ -43,20 +43,20 @@ repo slug is already in its path. Without the host, `gh` follows its own
 `gh repo set-default` rather than git's `origin`, and on a dual-host login
 (github.com + GHES) it hits the wrong server with no error.
 
-## Chain-wide since #1405
+## Chain-wide since dEitY719/dotfiles#1405
 
 The export used to be a best-effort default only: `gh-pr:commit` and `gh-pr:create` each
 re-resolved their own target from `origin`, so `/gh-flow:issue <N> upstream`
 still landed the commit's ai-metrics call and the PR itself on `origin` (PR
-#1404 review, codex). That gap is closed — `[remote]` is now threaded
+dEitY719/dotfiles#1404 review, codex). That gap is closed — `[remote]` is now threaded
 explicitly into every sub-skill that talks to GitHub:
 
 | Step | Sub-skill | Receives `[remote]` |
 |---|---|---|
 | 2.1 | `gh-issue:implement` | yes |
-| 2.2 | `gh-pr:commit` | yes (#1405) |
-| 2.3 | `gh-pr:create` | yes (#1405) |
-| 2.4 | `gh-verify:review-all` | yes (#1405) |
+| 2.2 | `gh-pr:commit` | yes (dEitY719/dotfiles#1405) |
+| 2.3 | `gh-pr:create` | yes (dEitY719/dotfiles#1405) |
+| 2.4 | `gh-verify:review-all` | yes (dEitY719/dotfiles#1405) |
 
 So `/gh-flow:issue <N> upstream` implements, commits, opens the PR and reviews
 it on `upstream`, never on `origin`.

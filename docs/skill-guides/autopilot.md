@@ -47,7 +47,7 @@ Step 1 이전에 `START_TS` 를 기록하고 전제조건을 검사한다 — �
 | 5 | `gh-pr:reply <PR_NUM>` | 즉시 실행. 코멘트 없으면 no-op `[SKIP]` 보고 후에도 마커는 출력 | `pr-reply` |
 | 6 | (리포트) | `[OK]`/`[FAIL]` 구조화 리포트 + AI metrics(soft-fail) | `report` |
 
-`--no-ask` 는 미결 게이트가 무인 체인을 멈추지 않게 한다 (#1446).
+`--no-ask` 는 미결 게이트가 무인 체인을 멈추지 않게 한다 (dEitY719/dotfiles#1446).
 
 ## 주의사항 / 제약
 

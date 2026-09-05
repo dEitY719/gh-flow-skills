@@ -43,7 +43,7 @@ asymmetric-network setup is `origin` = internal (isolated GHE),
 6. Extract `owner/repo` **and the host** from the resolved URL. Both must
    come from that one URL — this skill exists to cross hosts, so a host
    taken from anywhere else (setup-mode, `gh repo set-default`) is exactly
-   the #1403 misroute:
+   the dEitY719/dotfiles#1403 misroute:
 
    ```bash
    _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
@@ -78,7 +78,7 @@ Downstream steps (2-6) refer to the resolved destination as `$REMOTE` — the
 remote name on the name path, or the `relay-tmp` name added on the raw-URL
 path.
 
-## Host targeting rule (issues #1403 / #1407)
+## Host targeting rule (issues dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407)
 
 This skill talks to **two** hosts in one run, so it never exports a single
 global `GH_HOST`. Every `gh` call carries the host of the side it targets,

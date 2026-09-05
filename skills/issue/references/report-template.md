@@ -4,7 +4,7 @@
 tool — no `Bash` heredoc (`cat <<'EOF'`), no `printf`, no `Write`/`Edit`.
 Any other channel may be invisible to the harness Stop guard, which then
 blocks the turn. The guard's detection contract is the SSOT in
-`references/stop-guard.md` (#1270).
+`references/stop-guard.md` (dEitY719/dotfiles#1270).
 
 If all steps succeeded:
 
@@ -30,12 +30,12 @@ detail):
 
 If Step 2.6 soft-failed, show `[WARN] Step 6: ai-metrics  (skipped — <reason>)` instead.
 
-Step 4.1 (merge-train wake, #1482) is also soft-fail — never a `stopped at`
+Step 4.1 (merge-train wake, dEitY719/dotfiles#1482) is also soft-fail — never a `stopped at`
 report, never counted in the `<i>/6` step index. It fires in the background
 and is not awaited, so its own exit code is never observed:
 - `[SKIP] Step 4.1: merge-train wake  (remote != origin)` — `<remote>`'s URL
   didn't match `$HOME/dotfiles`'s own `origin`; the dispatcher only tracks
-  that one remote (#1498).
+  that one remote (dEitY719/dotfiles#1498).
 - `[WARN] Step 4.1: merge-train wake  (aicron.sh missing)` — the one
   synchronously-checked failure path on the `origin` path.
 

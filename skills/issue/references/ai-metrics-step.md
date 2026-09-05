@@ -30,13 +30,13 @@ d. Token estimate: character count of (issue body + implementation file
 e. Post the aggregate comment on the linked issue (body template below),
    with `GH_HOST` and the repo slug both explicit — this is the flow's only
    direct `gh` call, and a bare `gh api` would follow gh CLI's own default
-   repo instead of the `<remote>` the flow was invoked with (#1403).
-   Skip the post entirely when `GH_DISABLE_AI_METRICS=1` (issue #399);
+   repo instead of the `<remote>` the flow was invoked with (dEitY719/dotfiles#1403).
+   Skip the post entirely when `GH_DISABLE_AI_METRICS=1` (issue dEitY719/dotfiles#399);
    the six sub-skills already honour the same env var, so a disabled
    run leaves zero ai-metrics artifacts on the issue or PR.
    **Re-derive `GH_HOST`/`TARGET_REPO` fresh in this same Bash call from the
    literal `<remote>` value** — do not trust that Step 1's export survived
-   the five `Skill()` calls in between (#1498, PR #1539 review: a Bash tool
+   the five `Skill()` calls in between (dEitY719/dotfiles#1498, PR dEitY719/dotfiles#1539 review: a Bash tool
    call is not guaranteed to inherit an earlier call's exports). Paste
    `references/target-binding.md`'s block again here with `<remote>`
    substituted literally, same as Step 1 did.

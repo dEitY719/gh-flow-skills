@@ -27,13 +27,13 @@
 | # | 인자 | 기본값 | 설명 |
 |---|---|---|---|
 | 1 | `<issue-number>` | — | 구현할 GitHub 이슈 번호 |
-| 2 | `[remote]` | `origin` | 이슈를 소유한 git remote. 하위 스킬 전부에 그대로 전달되어 implement / commit / PR / review 가 모두 이 remote 를 향한다 (#1405) |
+| 2 | `[remote]` | `origin` | 이슈를 소유한 git remote. 하위 스킬 전부에 그대로 전달되어 implement / commit / PR / review 가 모두 이 remote 를 향한다 (dEitY719/dotfiles#1405) |
 
 `-h` 경로는 `references/help.md` 를 그대로 출력하고 멈춘다 — API 호출이 전혀 없다.
 
 ## 동작 단계
 
-Step 1 에서 remote URL 로부터 `TARGET_HOST` / `TARGET_REPO` 를 한 번 바인딩하고(#1403),
+Step 1 에서 remote URL 로부터 `TARGET_HOST` / `TARGET_REPO` 를 한 번 바인딩하고(dEitY719/dotfiles#1403),
 `START_TS` 를 기록한다. 이후 Step 2 에서 원자 스킬 6개를 순서대로 체인한다 — 각 단계는 직전
 단계가 성공했을 때만 실행된다.
 
@@ -49,7 +49,7 @@ Step 1 에서 remote URL 로부터 `TARGET_HOST` / `TARGET_REPO` 를 한 번 바
 | 2.6 | (인라인 Bash) | 이슈에 flow 단위 AI metrics 코멘트. **soft-fail** |
 
 Step 3 은 `[OK]`/`[FAIL]`/`[SKIP]` 리포트를 **평문 assistant 텍스트로** 출력한다 —
-`Bash` heredoc 이나 `Write` 로 내보내지 않는다 (#1270).
+`Bash` heredoc 이나 `Write` 로 내보내지 않는다 (dEitY719/dotfiles#1270).
 
 ## 주의사항 / 제약
 
@@ -66,5 +66,5 @@ Step 3 은 `[OK]`/`[FAIL]`/`[SKIP]` 리포트를 **평문 assistant 텍스트로
   `gh-flow:issue stopped at step <i>/6` 는 Stop guard 가 파싱하는 종료 마커다.
 - **CI 실패는 해결하지 않는다.** 갓 만든 PR 은 체크가 아직 보고되지 않았다. `$HOME/dotfiles`
   의 `origin` 이 아닌 remote 에는 자동 CI-fail 재처리 트리거가 아예 없으므로
-  `/gh-pr:merge-train <remote>` 를 직접 돌려야 한다 (#1610).
+  `/gh-pr:merge-train <remote>` 를 직접 돌려야 한다 (dEitY719/dotfiles#1610).
 - **머지하지 않는다.** 리뷰와 머지는 사람 몫이다.

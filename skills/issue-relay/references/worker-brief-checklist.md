@@ -18,7 +18,7 @@ both resolved in Step 2's remote resolution (`gh-flow:relay-merge`'s
 **both** halves: `--repo` names the repo but carries no host, so a bare `gh`
 would follow its own `gh repo set-default` — and this flow exists precisely
 because the destination is a *different* host from `origin`, so that default
-is the wrong server by construction (#1403 / #1407).
+is the wrong server by construction (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 This is the brief's raw material — body **and** comments, verbatim, not
 summarized away (later steps, and the Worker, need the full context).
@@ -35,7 +35,7 @@ section. If it lists **unresolved** items:
 
 **Never delegate implementation while an Open Question is still genuinely
 unresolved.** This is not hypothetical — the session that authored this
-skill hit exactly this gap on issue #1346 itself (its own Open Questions
+skill hit exactly this gap on issue dEitY719/dotfiles#1346 itself (its own Open Questions
 section had no answer recorded yet at delegation time). See
 `references/constraints.md` and the SKILL.md Error Cases for the hard rule.
 

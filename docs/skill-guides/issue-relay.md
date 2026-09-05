@@ -42,7 +42,7 @@ Step 1 에서 인자를 파싱하고 `BASE_TS` 를 기록한다. Steps 2~5 는 �
 | 6 | — | `gh-flow:relay-merge` 의 Step 8 출력을 그대로 중계 + 체인 전체의 `[OK]`/`[FAIL]` 1줄 + 다음 행동을 지목하는 `Next:` 줄 |
 
 목적지는 구조상 `origin` 과 다른 호스트이므로 전역 `GH_HOST` 를 두지 않는다. 목적지 `gh`
-호출은 전부 `GH_HOST="$DEST_HOST" gh ... --repo "$DEST_REPO"` 형태다 (#1403 / #1407).
+호출은 전부 `GH_HOST="$DEST_HOST" gh ... --repo "$DEST_REPO"` 형태다 (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
 ## 주의사항 / 제약
 

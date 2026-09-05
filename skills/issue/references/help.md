@@ -5,7 +5,7 @@
 | # | Name | Default | Description |
 |---|------|---------|-------------|
 | 1 | `<issue-number>` or `-h`/`--help`/`help` | — | GitHub issue number |
-| 2 | remote-name | `origin` | Git remote whose repo owns the issue. Threaded into every GitHub-touching sub-skill (#1405), so implement / commit / PR / review all target it |
+| 2 | remote-name | `origin` | Git remote whose repo owns the issue. Threaded into every GitHub-touching sub-skill (dEitY719/dotfiles#1405), so implement / commit / PR / review all target it |
 
 ## Usage
 
@@ -18,10 +18,10 @@
 This skill invokes **6 skills in sequence** (each step runs only if the previous succeeded), plus one non-fatal bash dispatcher call right after the 4th:
 
 1. **`gh-issue:implement <N> direct <remote>`** — reads the issue, edits files, runs tests. No human intervention.
-2. **`gh-pr:commit <N> <remote>`** — creates a commit for the changes with a message derived from the conversation (follows the repo's commit style); the ai-metrics comment and board sync go to `<remote>`'s repo (#1405).
-3. **`gh-pr:create <N> <remote>`** — pushes the branch to `<remote>` and opens the PR there, auto-linking `Closes #<N>` (#1405).
+2. **`gh-pr:commit <N> <remote>`** — creates a commit for the changes with a message derived from the conversation (follows the repo's commit style); the ai-metrics comment and board sync go to `<remote>`'s repo (dEitY719/dotfiles#1405).
+3. **`gh-pr:create <N> <remote>`** — pushes the branch to `<remote>` and opens the PR there, auto-linking `Closes #<N>` (dEitY719/dotfiles#1405).
 4. **`gh-verify:review-all` `<PR_NUM> <remote> --defer-reply 4`** — one delegated call runs the post-PR quality gate (soft-fail, parallel): agy ∥ codex second-opinion reviews (each skipped if its CLI is absent) ∥ built-in `/simplify` on the branch diff. Any simplify changes are committed + pushed synchronously before it returns (so they land before the rebase steps), and `/gh-pr:reply <PR_NUM>` is scheduled 4 minutes later — giving CI and reviewers time to post before the reply pass runs. Failures warn and continue — they never stop the chain.
-   - **`aicron run merge-train`** (non-fatal, not a `Skill()` call; only when `<remote>` resolves to the same repo URL as `$HOME/dotfiles`'s own `origin`, silently skipped otherwise — the dispatcher only tracks that one URL, not a remote name, #1498) — fires the merge-train dispatcher once, in the background (not awaited — a real train launch can block minutes), so it checks the new PR immediately **on that one matching-remote path** instead of waiting for the cron backstop; a non-matching `<remote>` has no cron backstop either (see "What this skill will NOT do" below). A missing binary is the only synchronously-observed failure on the matching-remote path, printed as a single `[WARN]` line; the dispatcher's own locking prevents a duplicate train.
+   - **`aicron run merge-train`** (non-fatal, not a `Skill()` call; only when `<remote>` resolves to the same repo URL as `$HOME/dotfiles`'s own `origin`, silently skipped otherwise — the dispatcher only tracks that one URL, not a remote name, dEitY719/dotfiles#1498) — fires the merge-train dispatcher once, in the background (not awaited — a real train launch can block minutes), so it checks the new PR immediately **on that one matching-remote path** instead of waiting for the cron backstop; a non-matching `<remote>` has no cron backstop either (see "What this skill will NOT do" below). A missing binary is the only synchronously-observed failure on the matching-remote path, printed as a single `[WARN]` line; the dispatcher's own locking prevents a duplicate train.
 5. **`gh-resolve:conflict` `<PR_NUM>`** — checks and resolves any merge conflicts in the new PR via rebase. Exits cleanly if the PR has no conflicts (expected for a freshly created branch).
 6. **`gh-resolve:outdated` `<PR_NUM>`** — clean rebase-sync when the base branch has moved forward with no conflicts. No-op if the PR is already up to date.
 
@@ -60,5 +60,5 @@ on a feature branch with a clean working tree.
   `$HOME/dotfiles`'s own `origin` remote has a trigger at all — the wake and
   the cron backstop are both scoped to that one repo URL. Any other
   `<remote>` gets **no** automated CI-fail remediation — run
-  `/gh-pr:merge-train <remote>` by hand (#1610). Detail:
+  `/gh-pr:merge-train <remote>` by hand (dEitY719/dotfiles#1610). Detail:
   `references/constraints.md`.

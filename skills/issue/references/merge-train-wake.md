@@ -1,4 +1,4 @@
-# gh-flow:issue — Wake the merge-train dispatcher (Step 2.4.1, #1482)
+# gh-flow:issue — Wake the merge-train dispatcher (Step 2.4.1, dEitY719/dotfiles#1482)
 
 Runs immediately after Step 2.4 (`gh-verify:review-all`) has been dispatched,
 whenever Step 2.3 (`gh-pr:create`) produced a PR — regardless of whether Step 2.4
@@ -7,7 +7,7 @@ itself succeeded, soft-failed, or warned. It sits between Step 2.4 and Step
 
 ## Why this exists
 
-Before #1482, the only thing that could start a merge attempt on a fresh PR
+Before dEitY719/dotfiles#1482, the only thing that could start a merge attempt on a fresh PR
 was `pr_merge_train_cron.sh` firing on its own schedule (`*/23 * * * *`
 originally). A PR finished by `gh-flow:issue` could therefore sit idle for up
 to 23 minutes before anything looked at it. This step closes part of that gap
@@ -39,7 +39,7 @@ event trigger — e.g. this step running while a previous train is still
 
 ## Why the dispatcher, not `gh-pr:merge-train` or `--admin-merge`
 
-Both alternatives were considered and rejected (issue #1482 body, "대안"):
+Both alternatives were considered and rejected (issue dEitY719/dotfiles#1482 body, "대안"):
 
 - **Calling `Skill(gh-pr:merge-train)` directly** would bypass NF-1's
   flock + `herdr agent get mt-…` double-lock — if several `gh-flow:issue`
@@ -52,7 +52,7 @@ Both alternatives were considered and rejected (issue #1482 body, "대안"):
   bypass would also skip the project-board Status gate — a standing
   exception the issue's NF-2 explicitly rules out.
 
-## Guarded to `$HOME/dotfiles`'s own `origin` only (#1498, PR #1539 review)
+## Guarded to `$HOME/dotfiles`'s own `origin` only (dEitY719/dotfiles#1498, PR dEitY719/dotfiles#1539 review)
 
 `pr_merge_train_cron.sh` (the script `aicron run merge-train` launches) only
 ever operates on `$HOME/dotfiles`'s own `origin` remote — see "Why the
@@ -62,14 +62,14 @@ that will never find that PR: harmless, but pointless. The call is gated on
 whether `<remote>` — the same `[remote]` positional Step 1 resolved
 (`references/target-binding.md`) — points at that **same repo**.
 
-Two failure modes were found and closed together, both from PR #1539 review
+Two failure modes were found and closed together, both from PR dEitY719/dotfiles#1539 review
 (agy + codex, independently, both BLOCKER):
 
 - **Don't gate on a re-read of `$REMOTE` from the environment.** An earlier
-  draft (dangling commit d3e12471, PR #1489 review) read `${REMOTE:-origin}`
-  before Step 1 ever exported it, so the guard was always true. #1498's first
+  draft (dangling commit d3e12471, PR dEitY719/dotfiles#1489 review) read `${REMOTE:-origin}`
+  before Step 1 ever exported it, so the guard was always true. dEitY719/dotfiles#1498's first
   fix exported `REMOTE` in Step 1 for this to read — but a Bash tool call is
-  not guaranteed to inherit a prior call's exports (agy, PR #1539): if the
+  not guaranteed to inherit a prior call's exports (agy, PR dEitY719/dotfiles#1539): if the
   export doesn't survive to this call, `${REMOTE:-origin}` silently falls
   back to `origin` and fires anyway — the exact failure this guard exists to
   prevent. **The fix: the executing agent substitutes the literal, already-
@@ -78,7 +78,7 @@ Two failure modes were found and closed together, both from PR #1539 review
   value lives in its own conversational context, not in shell state that can
   reset between tool calls.
 - **Don't compare by remote *name* alone.** Comparing `<remote> = "origin"`
-  as a string (codex, PR #1539) conflates "named origin" with "is the repo
+  as a string (codex, PR dEitY719/dotfiles#1539) conflates "named origin" with "is the repo
   the dispatcher watches" — a fork workflow (`origin` = fork, `upstream` =
   canonical) would still wake the wrong train on a same-named-but-different
   remote. The fix: compare the resolved remote's URL against
@@ -143,7 +143,7 @@ is the correct target. The `${SHELL_COMMON:-${DOTFILES_ROOT:-$HOME/dotfiles}/she
 chain reaches that target in two tiers, not by falling through past a
 worktree-scoped value:
 
-1. **`SHELL_COMMON` is already canonical (#589).** An interactive shell that
+1. **`SHELL_COMMON` is already canonical (dEitY719/dotfiles#589).** An interactive shell that
    started this skill session sourced `bash/main.bash` / `zsh/main.zsh`,
    which calls `_dotfiles_root_canonicalize` (`shell-common/functions/dotfiles_root.sh:110`)
    at loader entry. That function walks a linked worktree back to the main

@@ -37,28 +37,28 @@ The skills were extracted from `dEitY719/dotfiles`
 (`claude/skills/{gh-issue-flow,devx-autopilot,gh-issue-relay-flow,gh-relay-merge}`)
 as a content snapshot at source commit
 `96c90bc8d961d51d9c3286dae730e8b928afdfc8` — no history rewriting. The dotfiles
-copies remain in place; they are removed in Phase 4 of that repo's migration
-plan (#1410 NF-1 / NF-3). This is the last repo of Phase 3 (tracking issue
-#1678).
+originals are gone: `claude/skills/` was deleted there in Phase 4-1 of that
+repo's migration plan (dEitY719/dotfiles#1410 NF-1 / NF-3, tracking issue
+dEitY719/dotfiles#1678).
 
 The `gh-issue-flow` / `devx-autopilot` prefixes were stripped on the way in. The
 plugin name already supplies the namespace at invocation time, so
 `/gh:issue-flow` became `/gh-flow:issue` and `/devx:autopilot` became
-`/gh-flow:autopilot` (#1410 §4, issue #1678 F-2). Do not reintroduce the
+`/gh-flow:autopilot` (dEitY719/dotfiles#1410 §4, issue dEitY719/dotfiles#1678 F-2). Do not reintroduce the
 prefixes or the old dash-form aliases.
 
-## Both name forms are live during the transition (D-12)
+## This repo's namespace is the only one the hooks accept
 
 The two Stop hooks that keep `issue` and `autopilot` from ending a run early
 live in `dEitY719/dotfiles`, not here:
 `claude/hooks/gh_issue_flow_stop_guard.py` and
-`claude/hooks/devx_autopilot_stop_guard.py`. Until dotfiles Phase 4 they accept
-**both** namespaces — this repo's `gh-flow:issue` / `gh-flow-autopilot` markers
-and the pre-migration `gh:issue-flow` / `devx-autopilot` ones — because the
-dotfiles originals are still installed and its automation
-(`shell-common/functions/gh_flow.sh`,
-`shell-common/tools/custom/issue_watcher_cron.sh`) still dispatches the old
-slash commands (#1678 D-12).
+`claude/hooks/devx_autopilot_stop_guard.py`. Since that repo's Phase 4 they
+match **only** this repo's markers — `gh-flow:issue` / `gh-flow-issue` and
+`gh-flow-autopilot`. The pre-migration `gh:issue-flow` / `devx-autopilot` forms
+appear in neither hook, `claude/skills/` has been deleted there, and its
+automation (`shell-common/functions/gh_flow.sh`,
+`shell-common/tools/custom/issue_watcher_cron.sh`) dispatches `/gh-flow:issue`
+(dEitY719/dotfiles#1410 Phase 4, superseding D-12).
 
 The consequence for this repo: **the terminal report strings and step markers in
 `skills/issue/references/report-template.md` and `skills/autopilot/SKILL.md` are
@@ -66,7 +66,7 @@ a hook contract, not prose.** `gh-flow:issue complete (#<N>)`,
 `gh-flow:issue stopped at step <i>/6`, `[step:gh-flow-autopilot/<id>] OK`,
 `[OK] gh-flow:autopilot`, `[FAIL] gh-flow:autopilot` — changing any of them
 without the matching hook change re-opens the early-stop regression those hooks
-exist to prevent (dotfiles #333, #383, and four later recurrences).
+exist to prevent (dEitY719/dotfiles#333, dEitY719/dotfiles#383, and four later recurrences).
 
 ## Layout: root manifests, one flat `skills/`
 
@@ -98,7 +98,7 @@ points at the same path.
 
 This repo owns none. Both belong to `dEitY719/harness-skills`:
 
-**1. Per-harness tool mappings** (`references/*-tools.md` there, dotfiles #1410
+**1. Per-harness tool mappings** (`references/*-tools.md` there, dEitY719/dotfiles#1410
 F-5). Do not create a `references/` directory at this repo's root — the only
 `references/` here are the per-skill ones under `skills/<name>/`. If a doc here
 needs a mapping, link to
@@ -123,12 +123,12 @@ should apply here on the next run, which is the whole point.
 - **Invocation form in prose is namespaced.** Body text referring to a skill in
   this repo as a command writes `/gh-flow:issue`.
 - **Cross-repo references keep their own namespace.** `gh-issue:implement`,
-  `gh-issue:create`, `gh-pr:commit`, `gh-pr:create`, `gh-verify:review-all`,
-  `gh-resolve:conflict`, `gh-resolve:outdated`, and `session:restart` live in
-  other repos of this family; `gh:pr-reply`, `gh:pr-merge-train`, and
-  `devx:schedule` are still in `dEitY719/dotfiles` under their old names. Leave
-  each exactly as written; only siblings inside `skills/` take the `gh-flow:`
-  prefix.
+  `gh-issue:create`, `gh-pr:commit`, `gh-pr:create`, `gh-pr:reply`,
+  `gh-pr:merge-train`, `gh-verify:review-all`, `gh-resolve:conflict`,
+  `gh-resolve:outdated`, `session:restart`, `session:schedule`, and
+  `session:worktree-spawn` all live in other repos of this family, each under
+  its own plugin's namespace. Write each exactly as its owning repo does; only
+  siblings inside `skills/` take the `gh-flow:` prefix.
 - **Progressive disclosure.** `SKILL.md` stays at or under 100 lines (CI
   enforces it) and names which `references/` file to read and when. Detail lives
   in `references/`. All four are within a line or two of the limit — when a step
@@ -154,7 +154,7 @@ should apply here on the next run, which is the whole point.
   - Neither relay skill rewrites history on the destination remote.
 - **Host pinning is not optional.** Every skill binds `TARGET_HOST` +
   `TARGET_REPO` from the remote URL before any `gh` call and prefixes each call
-  with `GH_HOST=` (#1403). Dropping the prefix sends a GHES repo's request to
+  with `GH_HOST=` (dEitY719/dotfiles#1403). Dropping the prefix sends a GHES repo's request to
   `github.com`, and `gh` reports no error when it lands on the wrong host — the
   divergence surfaces later as a "missing" issue or PR.
 
@@ -164,12 +164,12 @@ The version appears in seven manifests: `.claude-plugin/marketplace.json`
 (`plugins[0].version`), `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
 `.kimi-plugin/plugin.json`, `.hermes-plugin/plugin.yaml`,
 `gemini-extension.json`, and `package.json`. CI checks that they agree — bump
-all of them together. Versioning is independent per repo (#1410 D-9); this repo
+all of them together. Versioning is independent per repo (dEitY719/dotfiles#1410 D-9); this repo
 does not move in lockstep with its siblings.
 
 ## No emojis
 
 Anywhere in this repo. Token efficiency, and CI rejects them (it flags any
 codepoint at or above `U+1F000`, plus `U+FE0F`). The dotfiles `ai-metrics`
-footer exception (#317 F-2) does **not** travel with the skills — the migrated
+footer exception (dEitY719/dotfiles#317 F-2) does **not** travel with the skills — the migrated
 copies render that footer as plain text.

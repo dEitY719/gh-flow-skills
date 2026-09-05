@@ -24,7 +24,7 @@
   want the full "branch → implement → verify → relay" loop in one call
   instead of doing each step by hand.
 - You expect to repeat this loop often for the same push-blocked
-  destination (this is exactly the workflow issue #1346 was filed to
+  destination (this is exactly the workflow issue dEitY719/dotfiles#1346 was filed to
   standardize).
 
 ## When NOT to use

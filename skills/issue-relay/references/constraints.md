@@ -19,7 +19,7 @@ that have no recorded answer (from this conversation or a prior one),
 first. A Worker that receives an ambiguous brief will guess, and a wrong
 guess on a design question is far more expensive to unwind after
 implementation than before it. This is not a hypothetical: this exact skill
-was authored on an issue (#1346) whose own Open Questions section had no
+was authored on an issue (dEitY719/dotfiles#1346) whose own Open Questions section had no
 answer recorded at delegation time.
 
 ## Never auto-reset a reused branch that has unique commits
