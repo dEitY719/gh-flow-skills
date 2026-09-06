@@ -40,7 +40,9 @@ API 호출 없음): `references/help.md`.
 설명은 여기 적용되지 않는다. **없는 remote 는 조용히 `origin` 으로 떨어지지 말고**
 `git remote -v` 를 출력하고 정지한다.
 
-`--author @me` 로 본인 이슈만 대상으로 한다(D-4).
+`[owner/repo]` 는 스위치가 아니라 **가드**다 — remote 슬러그와 다르면 둘 다 출력하고
+정지한다. `--author @me` 로 본인 이슈만 본다(D-4). 두 규칙의 근거와 이 스킬이
+GitHub 에 쓰는 것(승격 이슈 · `blocked` 라벨 · 차단 코멘트): `references/help.md`.
 
 ## Step 2: Round Loop
 
