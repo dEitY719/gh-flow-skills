@@ -25,15 +25,23 @@ Bash call, and for consistency with the rest of the skill suite.
 
 ```bash
 # plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
-_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"
-[ -f "$_SC/functions/gh_host.sh" ] || _SC="${CLAUDE_PLUGIN_ROOT:-$PWD}/lib/vendor/shell-common"
-[ -f "$_SC/functions/gh_host.sh" ] || {
-    printf '[gh-flow:issue] shell-common not found under %s. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                                  # tier 1
+if [ ! -f "$_SC/functions/gh_host.sh" ]; then
+    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
+        printf '[gh-flow:issue] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+            "$_SC" >&2
+        return 1 2>/dev/null || exit 1
+    }
+    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
+fi
+unset -f _gh_resolve_host 2>/dev/null || :
+[ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
+command -v _gh_resolve_host >/dev/null 2>&1 || {                                     # tier 5
+    printf '[gh-flow:issue] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
         "$_SC" >&2
     return 1 2>/dev/null || exit 1
 }
 export SHELL_COMMON="$_SC"
-. "$_SC/functions/gh_host.sh"
 REMOTE="${REMOTE:-origin}"
 REMOTE_URL=$(git remote get-url "$REMOTE")
 TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
