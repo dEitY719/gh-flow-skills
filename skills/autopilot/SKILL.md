@@ -26,12 +26,9 @@ metadata:
 
 ## CRITICAL CONTRACT — read before editing
 
-**Recurring failure mode: early-stop between chained steps.** Three layered
-guards prevent it — (1) `--no-next-hint` 계열 옵션으로 하위 스킬 trailing hint 억제,
-(2) 체이닝된 `Skill()` 호출(Step 0a·0b·2·3·4·5) 사이 **대화 텍스트 0**,
-(3) 하네스 Stop hook (`claude/hooks/devx_autopilot_stop_guard.py`) — 순서화된 단계
-완료 마커 `[step:gh-flow-autopilot/<id>] OK` 를 추적한다. **Do not remove any of them.**
-전체 근거는 `references/critical-contract.md` — Step 편집 전 반드시 읽는다.
+**Recurring failure mode: early-stop between chained steps.** 세 겹 가드가 막고
+있으며 어느 것도 제거 금지 — Step 편집 전 반드시 `references/critical-contract.md`
+를 읽는다.
 
 ## Help
 
@@ -40,12 +37,8 @@ No API calls.
 
 ## Step 1 이전: Parse Args & Preconditions
 
-| 인자 | 설명 | 기본 |
-|---|---|---|
-| `[spec-path]` | spec 파일 경로 | 최신 `docs/superpowers/specs/*-design.md` 자동 감지(+세션 교차확인) |
-| `--mode auto\|sdd\|inline` | 구현 방식 | `auto` |
-| `[remote]` | git remote | `origin` |
-| `-h`/`--help`/`help` | usage 출력 후 정지 | — |
+인자 표(`[spec-path]`, `--mode auto|sdd|inline`, `[remote]`, `-h`/`--help`/`help`):
+`references/help.md`.
 
 `START_TS=$(date +%s)` 를 즉시 기록(리포트 elapsed 용). Preconditions(실패 시 즉시 정지):
 전용 worktree 의 feature 브랜치(디폴트 브랜치면 정지) · 승인된 spec 존재(자동 감지 실패 시
