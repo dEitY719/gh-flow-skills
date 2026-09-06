@@ -27,31 +27,32 @@ gh-flow:drain complete  (<owner/repo>, <r> rounds)
   opened this run <n>
 
 왜 아직 0이 아닌가
-  #<N> <title> — <one line: blocked cause / awaiting human merge / failed 3x>
+  #<N> <title> — <one line: blocked cause / awaiting human merge>
   #<N> <title> — <one line>
 
 Next: <the single most useful command>
 ```
 
-`왜 아직 0이 아닌가` carries one line per remaining open issue. No remaining
-issues means the section reads `없음 — 열린 이슈 0, 이연 항목 0`.
+`왜 아직 0이 아닌가` carries one line per remaining open issue. Every remaining
+issue is either blocked (three failed attempts is one blocked cause, not a
+separate category — `references/blocked.md`) or awaiting a human merge. No
+remaining issues means the section reads `없음 — 열린 이슈 0, 이연 항목 0`.
 
-## Stop reason
+## Ending, and the `Next:` that goes with it
 
 When the run ends on something other than both-conditions-zero, name it on the
-header line:
+header line. One ending, one `Next:` — there is no second lookup table:
 
-- `gh-flow:drain stopped — no progress (round <r>)` — closed 0 and opened 0.
-- `gh-flow:drain stopped — max rounds (<max>)`.
-- `gh-flow:drain stopped — issue list failed (<reason>)`.
+- Both conditions zero — `Next: /gh-pr:merge-train <remote>` when PRs await
+  merge, otherwise nothing is left.
+- `gh-flow:drain stopped — no progress (round <r>)` (closed 0 and opened 0) —
+  `Next:` the `(c)` procedure from the blocking issue's comment when exactly one
+  issue blocks, else `/gh-flow:drain <owner/repo> <remote> --max-rounds <n>`
+  after clearing the named blockers.
+- `gh-flow:drain stopped — max rounds (<max>)` — `Next:`
+  `/gh-flow:drain <owner/repo> <remote> --max-rounds <n>`.
+- `gh-flow:drain stopped — issue list failed (<reason>)` — `Next:` the fix for
+  that failure (`gh auth status` on `$TARGET_HOST`, usually), then re-run.
 - `gh-flow:drain stopped — promotion failed (<reason>)` — the fatal one
-  (`references/promotion.md`).
-
-## Next hints
-
-| Ending | `Next:` |
-|---|---|
-| Both conditions zero | `/gh-pr:merge-train <remote>` when PRs await merge, else nothing left |
-| No progress / max rounds | `/gh-flow:drain <owner/repo> <remote> --max-rounds <n>` after clearing the named blockers |
-| Blocked only | the `(c)` procedure from the single blocking issue's comment |
-| Promotion failed | `/gh-issue:create` for the named item, then re-run the drain |
+  (`references/promotion.md`). `Next:` `/gh-issue:create` for the named item,
+  then re-run the drain.

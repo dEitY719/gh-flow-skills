@@ -4,7 +4,7 @@
 
 - [OpenCode.ai](https://opencode.ai) installed
 - `git` and the GitHub CLI (`gh`), authenticated against every host you open PRs
-  on. All four skills bind `TARGET_HOST` / `TARGET_REPO` from the remote URL and
+  on. Every skill binds `TARGET_HOST` / `TARGET_REPO` from the remote URL and
   prefix each API call with `GH_HOST=`, so a GHES remote works — but only if
   `gh` is logged into that host.
 - A dedicated worktree of the target repo, already on a feature branch. These
@@ -25,7 +25,7 @@ project-level):
 ```
 
 Restart OpenCode. The plugin installs through OpenCode's plugin manager and
-registers all four skills.
+registers every skill under `./skills/`.
 
 OpenCode uses its own plugin install. If you also use Claude Code, Codex, or
 another harness, install this plugin separately for each one.

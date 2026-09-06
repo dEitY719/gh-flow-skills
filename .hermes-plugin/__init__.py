@@ -1,9 +1,9 @@
 """Hermes Agent registration for the `gh-flow` skills plugin.
 
-Registers the four issue-to-PR composition skills with Hermes' native skill
+Registers the issue-to-PR composition skills with Hermes' native skill
 loader so `skill_view("gh-flow:<name>")` can load them on demand.
 
-This plugin injects no session bootstrap context. All four skills are
+This plugin injects no session bootstrap context. All the skills are
 explicitly invoked — you reach for one when you want an issue carried all the
 way to a PR — so there is nothing worth paying for on every first turn. Every
 one of them writes to GitHub, which is another reason a bootstrap preamble

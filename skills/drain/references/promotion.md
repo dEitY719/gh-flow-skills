@@ -22,6 +22,21 @@ Epic closing comment, a session note — none of those count.
   `gh-issue:implement` refuses to fix those by design, so it is not this run's
   deferral. Promote it if the round is what surfaced it as a real defect.
 
+## Enumerate the list; do not recall it
+
+"Zero deferred items" counted from memory is the same gameable number as "zero
+open issues" — the agent controls both. Build the list from artifacts instead,
+per round, with the `Bash`/`Grep` this skill already allows:
+
+- Unresolved review threads on the round's PRs —
+  `gh api graphql` on `reviewThreads(isResolved: false)`.
+- `grep -nE 'TODO|FIXME|ponytail:'` over the round's diff.
+- Skipped / xfail counts from the round's test output.
+- `grep -iE '후속|별건|나중에|follow-up|later'` over the PR body and its comments.
+
+Promotion is then the set difference between that list and the issues already
+filed this round — a number the run can show its work for.
+
 ## Severity is a label, not a filter
 
 "It is only a minor" does not exempt anything (D-3). Triviality is expressed by

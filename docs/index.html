@@ -138,18 +138,18 @@
     <header class="page animate">
       <span class="eyebrow">gh-flow plugin &middot; skill docs</span>
       <h1>gh-flow skills</h1>
-      <p class="lede">원자 스킬을 <strong>순서대로 엮는</strong> 조합(composition) 스킬 4개. 각 단계는 그 단계를 소유한 스킬 &mdash; <code>gh-issue:implement</code>, <code>gh-pr:commit</code>, <code>gh-pr:create</code>, <code>gh-verify:review-all</code>, <code>gh-resolve:*</code> &mdash; 에 그대로 위임하고, 여기서는 아무 원자도 다시 구현하지 않습니다.</p>
+      <p class="lede">원자 스킬을 <strong>순서대로 엮는</strong> 조합(composition) 스킬들. 각 단계는 그 단계를 소유한 스킬 &mdash; <code>gh-issue:implement</code>, <code>gh-pr:commit</code>, <code>gh-pr:create</code>, <code>gh-verify:review-all</code>, <code>gh-resolve:*</code> &mdash; 에 그대로 위임하고, 여기서는 아무 원자도 다시 구현하지 않습니다.</p>
 
       <div class="flow"><span class="node">이슈 #N</span><span class="arrow">&#9472;&#9654;</span> <span class="node">implement</span><span class="arrow">&#9472;&#9654;</span> <span class="node">commit</span><span class="arrow">&#9472;&#9654;</span> <span class="node mid">create</span><span class="arrow">&#9472;&#9654;</span> <span class="node mid">review-all</span><span class="arrow">&#9472;&#9654;</span> <span class="node out">rebase-sync</span></div>
 
       <div class="warn">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <span><strong>체인은 리뷰 앞에서 끝납니다</strong> &mdash; 4개 중 무엇도 PR 을 머지하지 않고, 그건 사람의 판단으로 남습니다. 체인 스킬은 첫 실패 지점에서 즉시 멈추고 재개 힌트를 담은 리포트를 냅니다 &mdash; 실패한 단계를 재시도하거나 건너뛰지 않습니다. 전제조건: 전용 worktree 의 feature 브랜치, 그리고 원자 스킬 플러그인(<code>gh-issue</code> &middot; <code>gh-pr</code> &middot; <code>gh-verify</code> &middot; <code>gh-resolve</code>) 설치.</span>
+        <span><strong>체인은 리뷰 앞에서 끝납니다</strong> &mdash; 어느 스킬도 PR 을 스스로 머지하지 않고, 그건 사람의 판단으로 남습니다(<code>drain --merge</code> 만 예외이고, 그마저 <code>gh-pr:merge-train</code> 에 위임합니다). 체인 스킬은 첫 실패 지점에서 즉시 멈추고 재개 힌트를 담은 리포트를 냅니다 &mdash; 실패한 단계를 재시도하거나 건너뛰지 않습니다. 전제조건: 전용 worktree 의 feature 브랜치, 그리고 원자 스킬 플러그인(<code>gh-issue</code> &middot; <code>gh-pr</code> &middot; <code>gh-verify</code> &middot; <code>gh-resolve</code>) 설치.</span>
       </div>
     </header>
 
     <section data-reveal>
-      <h2><span class="num">1</span>스킬 4개</h2>
+      <h2><span class="num">1</span>조합 스킬</h2>
       <div class="skill-grid">
       <article class="card" data-reveal>
         <h3>issue</h3>
@@ -192,7 +192,7 @@
 
     <section data-reveal>
       <h2><span class="num">2</span>고르는 기준 &mdash; 어디서 시작하고, 목적지가 push 를 받는가</h2>
-      <p>네 스킬은 두 축으로 갈립니다. 하나는 손에 든 것이 이슈 번호인지 spec 인지, 다른 하나는 커밋이 갈 remote 가 평범한 <code>git push</code> 를 받아주는지입니다.</p>
+      <p>이 스킬들은 두 축으로 갈립니다. 하나는 손에 든 것이 이슈 번호인지 spec 인지, 다른 하나는 커밋이 갈 remote 가 평범한 <code>git push</code> 를 받아주는지입니다.</p>
       <div class="pair">
         <article class="card">
           <h3>시작점 &mdash; issue / autopilot</h3>
