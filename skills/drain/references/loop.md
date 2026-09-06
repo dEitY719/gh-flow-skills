@@ -7,8 +7,9 @@ One round is four steps. The loop runs rounds until a stop condition fires.
 ### 1. List
 
 ```
+LIMIT=1000
 GH_HOST="$TARGET_HOST" gh issue list --repo "$TARGET_REPO" \
-  --state open --author @me --limit 200 \
+  --state open --author @me --limit "$LIMIT" \
   [--label "$LABEL"] --json number,title,body,labels \
   --jq '[.[] | {number, title,
                 labels: [.labels[].name],
@@ -17,6 +18,10 @@ GH_HOST="$TARGET_HOST" gh issue list --repo "$TARGET_REPO" \
 
 The `--jq` projection matters: `body` is needed only for the `Depends on #M`
 lines, and without it every issue's full body lands in context on every round.
+
+**A result count equal to `$LIMIT` means the list was truncated** — the backlog
+may not be empty when the loop later says it is. Say so in the report and never
+claim a clean zero on a truncated round.
 
 A failure here **stops the run** before the round starts. Draining without
 knowing the backlog's real state is how work gets redone or lost.
@@ -28,7 +33,11 @@ nothing.
 
 Ascending issue number, skipping any issue that is:
 
-- labelled `blocked` (`references/blocked.md`), or
+- labelled `blocked` — read off this round's own `labels` projection, which is
+  why the label is **mandatory** rather than a nicety (`references/blocked.md`):
+  a blocked issue whose only marker is a comment is invisible to the list query
+  and gets retried forever, and a failed label write means the issue is reported
+  as failed rather than quietly re-entering the queue, or
 - already carried to a PR **by this run** — it stays open only because the
   default run merges nothing, and it is counted `awaiting-merge`, or
 - deferred by a dependency: a `deps` entry `Depends on #M` whose `#M` is still
@@ -67,12 +76,17 @@ re-listing, so the next round's list reflects what the merges closed.
 |---|---|
 | Open issues 0 **and** deferred items 0 | Success. Report the final table. |
 | Closed 0 **and** newly opened 0 in a round | No progress — stop immediately. Everything remaining is blocked, awaiting merge, or failing. |
+| Every listed issue excluded by step 2 | Nothing actionable left. Stop; this is the normal ending of a default (no `--merge`) run, where each issue is open only because its PR awaits a human. |
 | Round count reaches `--max-rounds` (default 5) | Stop and report what is left. |
 | `gh issue list` fails | Stop before the round. |
 | `gh-issue:create` fails while a promotion is pending | Stop the round and say so in the report. |
 
 The no-progress condition is what makes the loop terminate structurally. It
-does not depend on the agent noticing it is going in circles.
+does not depend on the agent noticing it is going in circles. Note what it is
+**not**: a default run that carried every issue to a PR closes nothing and opens
+nothing, and stopping there is correct, not a failure — the report counts those
+issues `awaiting-merge`, and the exclusion row above is the condition that
+actually fires first.
 
 Deferred-items-0 is **established by step 3 each round, not tracked across
 rounds**: promotion is unconditional and its failure is fatal, so the only way

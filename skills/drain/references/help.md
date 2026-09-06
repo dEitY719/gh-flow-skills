@@ -4,13 +4,21 @@
 
 | # | Name | Default | Description |
 |---|------|---------|-------------|
-| 1 | `[owner/repo]` or `-h`/`--help`/`help` | the current repo | Repository whose backlog is drained |
+| 1 | `[owner/repo]` or `-h`/`--help`/`help` | the current repo | **A guard, not a switch.** Implementation happens in the current checkout via `gh-flow:issue`, so another repo's backlog cannot be drained from this worktree. Given, it must match the slug parsed from `[remote]`'s URL; on a mismatch both values are printed and the run stops — silently ignoring the argument and draining the current remote is the failure this guard exists to prevent |
 | 2 | `[remote]` | `origin` | Git remote whose URL binds `TARGET_HOST` + `TARGET_REPO`. A missing remote stops the run — there is no silent `origin` fallback |
 | - | `--merge` | off | Hand each round's finished PRs to `gh-pr:merge-train` before re-listing. Off by default: merging is a human decision |
 | - | `--max-rounds N` | `5` | Stop after N rounds and report what is left |
 | - | `--label L` | none | Only drain issues carrying label `L`. Zero matches is a clean 0-issue finish, not an error |
 
-Only issues authored by the invoking user are drained (`--author @me`).
+Only issues authored by the invoking user are drained (`--author @me`). `@me`
+is whoever `gh` is authenticated as **on this machine**, not the repo owner — on
+a shared account or a CI runner that identity's issues are what gets drained.
+
+## What this skill writes to GitHub
+
+Promoted issues (delegated to `gh-issue:create`), and, on a blocked issue, the
+mandatory `blocked` label plus one comment — both plain `gh` calls through
+`Bash`. Everything else is written by the sub-skills it delegates to.
 
 ## Usage
 

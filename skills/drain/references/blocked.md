@@ -37,8 +37,20 @@ Three parts, always all three:
 should be checkable — "`#42` is closed", "`gh auth status` lists the host",
 "the user replied on this issue" — not "when it seems ready".
 
-Add the repo's blocked-equivalent label if it has one; do not invent a new
-label taxonomy here.
+**The label is mandatory, and it is the only thing the round loop can see.**
+Step 2's exclusion reads the list query's `labels` projection, so a block
+recorded only as a comment is invisible and the issue is retried every round:
+
+```
+GH_HOST="$TARGET_HOST" gh label create blocked --repo "$TARGET_REPO" \
+  --color b60205 --description "gh-flow:drain — cannot proceed; see the newest comment" 2>/dev/null || true
+GH_HOST="$TARGET_HOST" gh issue edit "$N" --repo "$TARGET_REPO" --add-label blocked
+```
+
+Use the repo's own blocked-equivalent label when it already has one rather than
+inventing a second taxonomy — but there must be exactly one label, and it must
+be applied. If the label write fails, report that issue as failed; do not leave
+it unlabelled in the queue.
 
 ## Not blocked
 
