@@ -1,0 +1,67 @@
+[
+  {
+    "query": "이슈가 0건이 될 때까지 반복해서 구현하고 기능을 완성해",
+    "should_trigger": true
+  },
+  {
+    "query": "백로그 다 비워줘. 이연된 것도 전부 이슈로 등록하고",
+    "should_trigger": true
+  },
+  {
+    "query": "drain the backlog to zero — and file an issue for anything you defer",
+    "should_trigger": true
+  },
+  {
+    "query": "/gh-flow:drain",
+    "should_trigger": true,
+    "note": "slash-literal: update if the skill is renamed"
+  },
+  {
+    "query": "/gh-flow:drain dEitY719/foo upstream --merge",
+    "should_trigger": true
+  },
+  {
+    "query": "열린 이슈 하나씩 다 처리하고, 남는 건 왜 남았는지 알려줘",
+    "should_trigger": true
+  },
+  {
+    "query": "keep going issue by issue until there is nothing open left in this repo",
+    "should_trigger": true
+  },
+  {
+    "query": "bug 라벨 붙은 이슈만 전부 처리해줘",
+    "should_trigger": true
+  },
+  {
+    "query": "이슈 #16 처음부터 PR까지 자동으로 해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "이 spec 문서 가지고 계획부터 PR까지 자동으로 진행해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "열린 PR 순차로 정리하고 머지해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "이 대화 내용 이슈로 등록해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "read issue 13 and give me a structured summary",
+    "should_trigger": false
+  },
+  {
+    "query": "PR 99 코드 리뷰 돌려줘",
+    "should_trigger": false
+  },
+  {
+    "query": "사내 PC 라 push 가 막혀 있는데, 이 이슈 구현해서 upstream 으로 릴레이해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "열린 이슈 목록만 보여줘",
+    "should_trigger": false
+  }
+]

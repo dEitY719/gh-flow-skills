@@ -1,9 +1,9 @@
 # gh-flow — skill index
 
-Four skills for one job: carrying a GitHub issue all the way to a reviewed pull
+Five skills for one job: carrying a GitHub issue all the way to a reviewed pull
 request in a single run. Each lives in this extension's `skills/` directory.
 They are explicitly invoked, never ambient: load the one that matches your
-starting point by reading its `SKILL.md`, then follow it. Do not load all four.
+starting point by reading its `SKILL.md`, then follow it. Do not load all five.
 
 | Skill | Read | Use when |
 |-------|------|----------|
@@ -55,7 +55,7 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
 
 ## Capability gaps on Gemini CLI
 
-- **These four skills are compositions, and Gemini has no skill-invocation
+- **These five skills are compositions, and Gemini has no skill-invocation
   tool.** `issue` and `autopilot` are ordered chains of other skills; without a
   `Skill` equivalent they cannot run as written. Print the ordered list of
   atomic skills the chain would have invoked, run what is plain shell, and stop

@@ -17,8 +17,13 @@ sibling repos of this family.
 | `autopilot` | An approved spec | One step earlier: writes the plan, files the issue, implements, opens the PR, answers review comments — with no approval checkpoints. Never merges. |
 | `issue-relay` | An issue on a push-blocked remote | Branch, delegate the implementation, verify it, then hand the commits to `relay-merge`. |
 | `relay-merge` | A PR whose `git push` a proxy blocks | Probe whether a normal push actually works; only when it is genuinely blocked, relay per-commit patches through a gist with a `git am` apply-guide. |
+| `drain` | A repo's open backlog | The whole backlog, one issue at a time through `issue`, with every deferred item promoted to a new issue. Ends only when open issues **and** deferred items are both zero. |
 
-The four split along two axes: how much of the lifecycle they own (`issue`
+`drain` sits on top of `issue`: it is the only one that starts from a backlog
+rather than a single unit of work, and its reason for existing is that "zero
+open issues" is a gameable number — an agent reaches it by not filing issues.
+
+The other four split along two axes: how much of the lifecycle they own (`issue`
 starts at an issue, `autopilot` at a spec) and whether the destination remote is
 reachable (`issue`/`autopilot`) or push-blocked (`issue-relay`/`relay-merge`).
 Merging them would erase exactly the distinction that decides which one is safe
@@ -31,7 +36,10 @@ atomic skill that owns it — `gh-issue:implement`, `gh-pr:commit`,
 step needs to change, it changes in the repo that owns it.
 
 **None of them merges a PR.** `autopilot` stops at review on purpose; merging
-stays a human decision.
+stays a human decision. The single explicit exception is `drain --merge`, which
+does not merge anything itself either — it delegates to `gh-pr:merge-train`,
+whose own approval and label gates still apply. Default `drain` merges nothing,
+and `gh-pr:merge-emergency` is never called from this repo by any path.
 
 The skills were extracted from `dEitY719/dotfiles`
 (`claude/skills/{gh-issue-flow,devx-autopilot,gh-issue-relay-flow,gh-relay-merge}`)
@@ -131,7 +139,7 @@ should apply here on the next run, which is the whole point.
   siblings inside `skills/` take the `gh-flow:` prefix.
 - **Progressive disclosure.** `SKILL.md` stays at or under 100 lines (CI
   enforces it) and names which `references/` file to read and when. Detail lives
-  in `references/`. All four are within a line or two of the limit — when a step
+  in `references/`. All five are within a line or two of the limit — when a step
   grows, move prose out; never delete a safety rule to buy lines.
 - **Description budget.** CI sums every skill description and fails past 5,440
   characters — Codex's context budget — with a per-description cap of 1,024.

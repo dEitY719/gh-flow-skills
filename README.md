@@ -10,7 +10,8 @@ These are compositions, not implementations. Each step delegates to the skill
 that owns it (`gh-issue:implement`, `gh-pr:commit`, `gh-pr:create`,
 `gh-verify:review-all`, `gh-resolve:conflict`, `gh-resolve:outdated`). Nothing
 here reimplements an atom, and **nothing here merges a PR** — that stays a human
-decision.
+decision. `drain --merge` is the one explicit exception, and even it only
+delegates to `gh-pr:merge-train`, whose approval and label gates still apply.
 
 ## Skills
 
@@ -20,10 +21,13 @@ decision.
 | `autopilot` | `/gh-flow:autopilot <spec>` | An approved spec | One step earlier: plan, file the issue, implement, open the PR, answer review comments — no approval checkpoints. Stops at review. |
 | `issue-relay` | `/gh-flow:issue-relay <N> <remote>` | An issue on a push-blocked remote | Branch, delegate the implementation, verify it, then hand the commits to `relay-merge`. |
 | `relay-merge` | `/gh-flow:relay-merge <PR>` | Commits bound for a push-blocked remote | Probe whether push actually works; only when it is genuinely blocked, relay per-commit patches through a gist with a `git am` apply-guide. |
+| `drain` | `/gh-flow:drain [owner/repo] [remote]` | A repo's open backlog | Run the whole backlog through `issue`, one issue at a time, promoting every deferred item to a new issue. Ends only when open issues and deferred items are both zero. |
 
 Pick by where you are starting and whether the destination accepts a push.
 `issue` refuses to invent a spec; `autopilot` refuses to skip one; neither relay
-skill runs when a plain `git push` works.
+skill runs when a plain `git push` works; `drain` starts from a backlog that
+already exists and refuses to finish while anything found along the way is
+sitting in a ledger instead of an issue.
 
 ### Visual guides and worked examples (GitHub Pages)
 
@@ -39,7 +43,7 @@ Each page is generated from a Markdown source under
 
 | Need | Why |
 |------|-----|
-| `git` | All four commit, push, or format patches. |
+| `git` | All five commit, push, or format patches. |
 | `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (dEitY719/dotfiles#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
 | A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. |
 | The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve`. These are compositions; the steps they call live in those repos. |
@@ -99,6 +103,7 @@ read the one file for the harness you are on.
 | `autopilot` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 | `issue-relay` | full | full, verify by hand | full | full | full | full |
 | `relay-merge` | full | full, confirm in chat | full | full (Antigravity: confirm in chat) | full, confirm in chat | full, confirm in chat |
+| `drain` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 
 *manual chain* — without a `Skill` tool, print the ordered list of atomic skills
 the chain would have invoked, run what is plain shell, and stop at the first
@@ -166,7 +171,8 @@ gh-flow-skills/
 │   ├── issue/SKILL.md        + references/ + evals/
 │   ├── autopilot/SKILL.md    + references/
 │   ├── issue-relay/SKILL.md  + references/ + evals/
-│   └── relay-merge/SKILL.md  + references/
+│   ├── relay-merge/SKILL.md  + references/
+│   └── drain/SKILL.md        + references/ + evals/
 ├── .claude-plugin/{marketplace,plugin}.json   Claude Code
 ├── .codex-plugin/plugin.json                  Codex
 ├── .kimi-plugin/plugin.json                   Kimi CLI
@@ -200,7 +206,7 @@ at all.
 
 ## Provenance
 
-The four skills were extracted from
+The original four skills were extracted from
 [`dEitY719/dotfiles`](https://github.com/dEitY719/dotfiles)
 (`claude/skills/{gh-issue-flow,devx-autopilot,gh-issue-relay-flow,gh-relay-merge}`)
 as a content snapshot at source commit
@@ -214,6 +220,10 @@ The old prefixes were stripped on the way in: `/gh:issue-flow` became
 `/gh:issue-relay-flow` became `/gh-flow:issue-relay`, and `/gh:relay-merge`
 became `/gh-flow:relay-merge`. The plugin name already supplies the namespace at
 invocation time.
+
+`drain` has no dotfiles ancestor — it was written here (issue #13), after a
+session that reached "zero open issues" while four unresolved items lived only
+in a closing comment.
 
 ## License
 
