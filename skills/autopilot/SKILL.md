@@ -37,8 +37,7 @@ No API calls.
 
 ## Step 1 이전: Parse Args & Preconditions
 
-인자 표(`[spec-path]`, `--mode auto|sdd|inline`, `[remote]`, `-h`/`--help`/`help`):
-`references/help.md`.
+인자 표: `references/help.md`.
 
 `START_TS=$(date +%s)` 를 즉시 기록(리포트 elapsed 용). Preconditions(실패 시 즉시 정지):
 전용 worktree 의 feature 브랜치(디폴트 브랜치면 정지) · 승인된 spec 존재(자동 감지 실패 시
