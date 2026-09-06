@@ -1,6 +1,6 @@
 {
   "name": "gh-flow",
-  "description": "Carry a GitHub issue all the way to a reviewed PR in one run. Four skills on two axes: the ordinary path, where the issue and the PR live on the same reachable remote, and the relay path, for a destination remote whose git push a proxy blocks.",
+  "description": "Carry a GitHub issue all the way to a reviewed PR in one run. Five skills: the ordinary path, where the issue and the PR live on the same reachable remote; the relay path, for a destination remote whose git push a proxy blocks; and a backlog drain that finishes only when every deferred item has become an issue of its own.",
   "version": "0.1.0",
   "author": {
     "name": "dEitY719",
