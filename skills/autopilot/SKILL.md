@@ -26,9 +26,11 @@ metadata:
 
 ## CRITICAL CONTRACT — read before editing
 
-**Recurring failure mode: early-stop between chained steps.** 세 겹 가드가 막고
-있으며 어느 것도 제거 금지 — Step 편집 전 반드시 `references/critical-contract.md`
-를 읽는다.
+**Recurring failure mode: early-stop between chained steps.** 세 가드 중 하나도
+제거 금지 — (1) 체이닝된 `Skill()` 호출(Step 0a·0b·2·3·4·5) 사이 **대화 텍스트 0**,
+(2) 하위 스킬 호출에 `--no-next-hint` 계열 옵션 사용, (3) 하네스 Stop hook
+(`claude/hooks/devx_autopilot_stop_guard.py`, 완료 마커 `[step:gh-flow-autopilot/<id>] OK`
+추적). 전체 근거는 `references/critical-contract.md`.
 
 ## Help
 
