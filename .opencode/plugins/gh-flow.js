@@ -3,7 +3,7 @@
  *
  * Auto-registers the skills directory via the config hook (no symlinks needed).
  *
- * This plugin injects no per-session bootstrap context. All five skills are
+ * This plugin injects no per-session bootstrap context. All the skills are
  * explicitly invoked — you reach for one when you want an issue carried to a
  * PR without hand-driving each atom — so OpenCode's native `skill` tool
  * discovering them is all that is needed. Every one of them writes to GitHub

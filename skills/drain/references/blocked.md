@@ -14,8 +14,9 @@ carrying everything a later session needs.
 | Waiting on someone | An unanswered upstream question, a pending third-party fix |
 | Upstream issue open | The parent or the `Depends on #M` issue is not done |
 
-Three failed `gh-flow:issue` attempts on the same issue also converts it to
-`blocked` (F-5), with the failure reason as the cause.
+Three failed `gh-flow:issue` attempts on the same issue **within one run** also
+converts it to `blocked` (F-5), with the failure reason as the cause. The count
+is not persisted across sessions (`references/constraints.md`).
 
 ## The comment
 

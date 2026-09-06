@@ -35,30 +35,30 @@ API 호출 없음): `references/help.md`.
 
 **대상 바인딩** — 하나의 remote URL 에서 `TARGET_HOST` + `TARGET_REPO` 를 뽑고 모든
 `gh` 호출을 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` 로 실행한다.
-바인딩 블록은 형제 스킬의 SSOT 를 그대로 쓴다:
-`../issue/references/target-binding.md` (복사하지 말 것). **없는 remote 는 조용히
-`origin` 으로 떨어지지 말고** `git remote -v` 를 출력하고 정지한다.
+바인딩 블록은 형제 스킬의 SSOT 를 그대로 쓴다 — `../issue/references/target-binding.md`
+의 **bash 블록만** 해당하고(복사하지 말 것), 그 파일의 `gh-flow:issue` Step 2.4.1/2.6
+설명은 여기 적용되지 않는다. **없는 remote 는 조용히 `origin` 으로 떨어지지 말고**
+`git remote -v` 를 출력하고 정지한다.
 
 `--author @me` 로 본인 이슈만 대상으로 한다(D-4).
 
 ## Step 2: Round Loop
 
-라운드 1건의 4단계 — 전체 절차·정지 조건·의존 순서는 `references/loop.md` 가 SSOT:
+라운드 1건은 **조회 → 처리 → 승격(Step 3) → 재조회** 4단계다. 정확한 명령,
+제외 규칙(`blocked` · 이번 런에서 이미 PR 을 만든 이슈 · `Depends on #M`), 정지
+조건은 `references/loop.md` 가 SSOT — 라운드를 시작하기 전에 읽는다.
 
-1. **조회** — `gh issue list --state open --author @me` (`--label` 이 있으면 적용).
-   실패하면 라운드를 시작하지 않고 정지한다(상태를 모른 채 진행 금지).
-2. **처리** — 이슈마다 `Skill(gh-flow:issue, "<N> <remote>")`. 본문의
-   `Depends on #M` 이 열려 있으면 뒤로 미룬다. 한 이슈의 실패는 그 이슈만 실패로
-   기록하고 다음 이슈로 넘어간다 — 드레인 전체를 중단하지 않는다.
-3. **승격** — Step 3.
-4. **재조회** — 새로 등록된 이슈를 포함해 1번으로 돌아간다.
+`gh issue list` 실패는 라운드를 시작하지 않고 정지한다(상태를 모른 채 진행 금지).
+반대로 한 이슈의 실패는 그 이슈만 실패로 기록하고 다음 이슈로 넘어간다 — 드레인
+전체를 중단하지 않는다.
 
 ## Step 3: Promotion — 이 스킬의 핵심
 
-그 라운드에서 고치지 않고 넘어간 리뷰어 finding, "후속"·"별건"·"나중에"·`TODO`,
-`# ponytail:` 로 남긴 천장 — 전부 `Skill(gh-issue:create, ...)` 로 이슈화한다.
-ledger·PR 코멘트·종료 코멘트에만 적고 넘어가는 것은 **금지**다. 무엇이 승격 대상이고
-무엇이 아닌지, 그리고 승격 실패가 왜 치명적인지: `references/promotion.md`.
+그 라운드에서 찾았지만 그 라운드에서 고치지 않은 것은 **예외 없이 전부**
+`Skill(gh-issue:create, ...)` 로 이슈화한다. ledger·PR 코멘트·종료 코멘트에만 적고
+넘어가는 것은 **금지**다. 대상 목록은 기억이 아니라 아티팩트(미해결 리뷰 스레드,
+diff 의 `TODO`/`ponytail:`, skip/xfail 된 테스트)에서 열거한다 — 목록·제외 기준·
+승격 실패가 왜 치명적인지 전부 `references/promotion.md`.
 
 ## Step 4: Blocked 처리
 
@@ -68,11 +68,10 @@ ledger·PR 코멘트·종료 코멘트에만 적고 넘어가는 것은 **금지
 
 ## Step 5: Merge Policy
 
-기본은 **머지하지 않는다** — 이 저장소의 불변식이다. 기본 종료 상태에는 "사람 머지를
-기다리는 PR" 이 남고, 보고서가 그것을 `awaiting-merge` 로 따로 센다. `--merge` 를
-명시할 때만 `Skill(gh-pr:merge-train, "<remote>")` 에 위임한다(승인·라벨 게이트는 그
-스킬 소유 — 여기서 다시 만들지 않는다). **`gh-pr:merge-emergency` 는 어떤 경로로도
-호출하지 않는다.**
+기본은 **머지하지 않는다.** `--merge` 를 명시할 때만, 그 라운드의 재조회 **전에**
+`Skill(gh-pr:merge-train, "<remote>")` 에 위임한다(승인·라벨 게이트는 그 스킬 소유).
+**`gh-pr:merge-emergency` 는 어떤 경로로도 호출하지 않는다.** 기본 종료 상태에 남는
+"사람 머지를 기다리는 PR" 은 보고서가 `awaiting-merge` 로 따로 센다.
 
 ## Step 6: Report
 

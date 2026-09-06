@@ -11,10 +11,12 @@ starting point by reading its `SKILL.md`, then follow it. Do not load all five.
 | `autopilot` | `@./skills/autopilot/SKILL.md` | You have an approved spec, not an issue. Writes the plan, files the issue, implements, opens the PR, answers review comments — no approval checkpoints. Never merges. |
 | `issue-relay` | `@./skills/issue-relay/SKILL.md` | The issue lives on a destination remote whose `git push` is blocked. Branch, delegate the implementation, verify it, then hand off to `relay-merge`. |
 | `relay-merge` | `@./skills/relay-merge/SKILL.md` | You have commits to move to a push-blocked remote. Probes push first; relays per-commit patches through a gist with a `git am` apply-guide only when push is genuinely blocked. |
+| `drain` | `@./skills/drain/SKILL.md` | You have a whole open backlog, not one issue. Runs each issue through `issue` and promotes every deferred item to a new issue; ends only when open issues and deferred items are both zero. |
 
 Pick by where you are starting and whether the destination accepts a push, not
 by which sounds most thorough. `issue` refuses to invent a spec; `autopilot`
-refuses to skip one. Neither relay skill runs when a plain push works.
+refuses to skip one. Neither relay skill runs when a plain push works. `drain`
+starts from a backlog that already exists.
 
 Each skill's `references/` directory holds the detail it loads on demand.
 `SKILL.md` says which file to read and when — do not read `references/` up
