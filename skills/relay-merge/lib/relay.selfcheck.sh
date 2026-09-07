@@ -60,8 +60,8 @@ chk "artifact exclusion: the lock file is reported as stripped" \
     "$(printf '%s\n' "$out" | awk -F'\t' '/^EXCLUDED/ {print $3}')" "package-lock.json"
 chk "artifact exclusion: still one whole patch, not a split" \
     "$(printf '%s\n' "$out" | awk -F'\t' '/^PATCH/ {print $2}')" "0001"
-grep -q 'package-lock' "$(printf '%s\n' "$out" | awk -F'\t' '/^PATCH/ {print $4}')"
-chk "artifact exclusion: the stripped diff is really gone from the patch" "$?" "1"
+chk_grep "artifact exclusion: the stripped diff is really gone from the patch" \
+    'package-lock' "$(printf '%s\n' "$out" | awk -F'\t' '/^PATCH/ {print $4}')" "1"
 
 # --- 4. patches: file-group pre-split of an oversized non-artifact commit --
 FROM4=$(git -C "$W" rev-parse HEAD)
@@ -89,12 +89,9 @@ git -C "$W" add huge.py && git -C "$W" commit -q -m 'feat: one huge file'
 
 (cd "$W" && RELAY_PATCH_MAX_BYTES=14000 bash "$TARGET" patches "$FROM5..HEAD" "$TMP/o5" >"$TMP/o5.out" 2>"$TMP/err")
 chk "no-truncation: exits 3 rather than shipping a truncated patch" "$?" "3"
-grep -q '^\[FAIL\]' "$TMP/err"
-chk "no-truncation: stderr carries the [FAIL] verdict marker" "$?" "0"
-grep -q 'Refusing to truncate' "$TMP/err"
-chk "no-truncation: stderr says why" "$?" "0"
-grep -q 'huge.py' "$TMP/err"
-chk "no-truncation: stderr names the offending path" "$?" "0"
+chk_grep "no-truncation: stderr carries the [FAIL] verdict marker" '^\[FAIL\]' "$TMP/err"
+chk_grep "no-truncation: stderr says why" 'Refusing to truncate' "$TMP/err"
+chk_grep "no-truncation: stderr names the offending path" 'huge.py' "$TMP/err"
 
 # --- 6. probe: push works -> blocked=no, and the probe ref is cleaned up ---
 git init -q --bare "$TMP/bare.git"

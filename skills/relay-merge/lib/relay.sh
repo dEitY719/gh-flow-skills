@@ -132,9 +132,9 @@ cmd_patches() {
         n=$((n + 1))
         local order
         order=$(printf '%04d' "$n")
-        subject=$(git log -1 --format=%s "$sha")
         patch=$(git format-patch -1 "$sha" --start-number "$n" -o "$outdir") \
             || die "git format-patch failed for $sha"
+        subject=$(sed -n 's/^Subject: \[PATCH[^]]*\] //p' "$patch" | head -1)
         bytes=$(wc -c <"$patch")
         if [ "$bytes" -le "$RELAY_PATCH_MAX_BYTES" ]; then
             emit_patch "$order" "$bytes" "$patch" "$subject"
