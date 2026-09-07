@@ -215,19 +215,25 @@ split_commit() {
 }
 
 # write_group <sha> <n> <order> <k> <subject> <outdir> <files...>
-# Renamed to NNNN-<k>-<name>.patch so the sub-patches sort between this
-# commit's slot and the next one — apply order stays unambiguous.
+# Renamed to NNNN-<kk>-<name>.patch so the sub-patches sort between this
+# commit's slot and the next one — apply order stays unambiguous. <k> is
+# zero-padded to 2 digits (0001-02, 0001-10, ...) so plain lexical/glob
+# sort matches numeric apply order — unpadded "0001-10" used to sort before
+# "0001-2" (codex review, PR #22).
+# ponytail: 2-digit padding caps this at 99 sub-groups per commit; if a
+# single commit ever needs a 100th group, widen the printf format below.
 write_group() {
     local sha=$1 n=$2 order=$3 k=$4 subject=$5 outdir=$6
     shift 6
-    local patch dest bytes
+    local patch dest bytes kpad
+    kpad=$(printf '%02d' "$k")
     patch=$(git format-patch -1 "$sha" --start-number "$n" -o "$outdir" -- "$@") \
         || die "git format-patch failed for $sha (file group $k)"
-    dest="$outdir/${order}-${k}-$(basename "$patch" | cut -d- -f2-)"
+    dest="$outdir/${order}-${kpad}-$(basename "$patch" | cut -d- -f2-)"
     mv "$patch" "$dest"
     bytes=$(wc -c <"$dest")
-    [ "$bytes" -le "$RELAY_PATCH_MAX_BYTES" ] || fail_oversized "${order}-${k}" "$bytes" "$*"
-    emit_patch "${order}-${k}" "$bytes" "$dest" "$subject"
+    [ "$bytes" -le "$RELAY_PATCH_MAX_BYTES" ] || fail_oversized "${order}-${kpad}" "$bytes" "$*"
+    emit_patch "${order}-${kpad}" "$bytes" "$dest" "$subject"
 }
 
 fail_oversized() { # <order> <bytes> <path>
@@ -275,12 +281,19 @@ cmd_upload() {
 }
 
 # gist_create <dest-host> <patch> <base> — one transient retry, then stop.
+# Validates the extracted URL is non-empty before declaring success (codex
+# review, PR #22): `gh gist create` returning rc 0 with no URL in its output
+# used to fall through as a "success" with an empty string, which cmd_upload
+# then fed straight into a malformed `gh api gists/` call.
 gist_create() {
-    local out attempt
+    local out attempt url
     for attempt in 1 2; do
         [ "$attempt" = 2 ] && sleep 2
-        out=$(GH_HOST="$1" gh gist create "$2" --desc "relay: $3" 2>&1) \
-            && { printf '%s\n' "$out" | grep -o 'https://[^[:space:]]*' | tail -1; return 0; }
+        out=$(GH_HOST="$1" gh gist create "$2" --desc "relay: $3" 2>&1) || continue
+        url=$(printf '%s\n' "$out" | grep -o 'https://[^[:space:]]*' | tail -1)
+        [ -n "$url" ] || continue
+        printf '%s\n' "$url"
+        return 0
     done
     printf '[gh-flow:relay-merge] gist upload failed for %s after one retry: %s\n' "$3" "$out" >&2
     return 1
