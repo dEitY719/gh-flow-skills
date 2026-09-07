@@ -20,8 +20,8 @@ a. Track per-step timing by recording `STEP_TS=$(date +%s)` at the start of
    `CONFLICT_MIN` (2.5), `OUTDATED_MIN` (2.5.1). Pass `?` for any not yet
    measured.
 b. Parse the conventional-commit prefix from the issue title fetched in
-   Step 2.1 (`feat`, `fix`, `refactor`, `docs`, `chore`, `perf`, `test`;
-   anything else is `misc`).
+   Step 2.1 into `<issue-type>` — the script's own usage header lists the
+   recognized set and its `misc` fallback.
 c. For `feat` only: infer size (`small`/`medium`/`large`) from the
    implementation scope — components touched, diff weight, architectural
    footprint (`gh-issue:create`'s `references/metrics-baseline.md`, same

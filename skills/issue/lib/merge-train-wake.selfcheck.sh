@@ -13,18 +13,9 @@ set -u
 # exercised against the synthetic $HOME below, not the caller's own machine.
 unset DOTFILES_ROOT SHELL_COMMON
 
-ROOT=$(cd -- "$(dirname -- "$0")/../../.." && pwd)
+# shellcheck disable=SC1091  # path is resolved at runtime
+. "$(dirname -- "$0")/selfcheck-common.sh"
 TARGET="$ROOT/skills/issue/lib/merge-train-wake.sh"
-FAIL=0
-
-chk() { # chk <label> <got> <want>
-    if [ "$2" = "$3" ]; then
-        echo "ok    $1"
-    else
-        echo "FAIL  $1: got '$2' want '$3'"
-        FAIL=1
-    fi
-}
 
 TMP=$(mktemp -d) || exit 1
 trap 'rm -rf "$TMP"' EXIT
