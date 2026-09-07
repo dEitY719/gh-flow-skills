@@ -55,7 +55,11 @@ if ! REMOTE_URL=$(git remote get-url "$REMOTE" 2>/dev/null); then
     git remote -v >&2
     return 1 2>/dev/null || exit 1
 fi
-TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
+if ! TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL"); then
+    printf '[gh-flow:issue] could not parse owner/repo from remote "%s" (%s) — refusing to fall back to a guessed host with an empty repo.\n' \
+        "$REMOTE" "$REMOTE_URL" >&2
+    return 1 2>/dev/null || exit 1
+fi
 TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
 export GH_HOST="$TARGET_HOST"
 export REMOTE TARGET_REPO TARGET_HOST

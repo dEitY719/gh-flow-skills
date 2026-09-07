@@ -90,9 +90,17 @@ TOKENS=$(awk -v c="$TOKEN_CHARS" 'BEGIN {
     printf "%d", r
 }')
 
-if ! GH_HOST="$TARGET_HOST" gh api "repos/$TARGET_REPO/issues/$ISSUE_NUMBER/comments" \
-    -X POST \
-    -f body="### gh-flow:issue 완료
+# Body goes through a temp file (`-f body=@file`), not an inline
+# interpolated `-f body="..."` argument — agy review of PR #4: an inline
+# value composed from several separately-sourced fields is exactly the
+# shape that breaks if any of them ever starts with `@` (gh's own
+# from-file marker) or otherwise collides with `-f`'s value parsing.
+# `@file` sidesteps that class entirely rather than trying to enumerate
+# which characters are currently safe.
+_BODY_FILE=$(mktemp)
+trap 'rm -f "$_BODY_FILE"' EXIT
+cat > "$_BODY_FILE" <<EOF
+### gh-flow:issue 완료
 
 | 단계 | AI 소요 |
 |------|---------|
@@ -114,7 +122,12 @@ if ! GH_HOST="$TARGET_HOST" gh api "repos/$TARGET_REPO/issues/$ISSUE_NUMBER/comm
 AI Metrics tokens=~$TOKENS human_h=~$HUMAN_H ai_min=~$ELAPSED
 <!-- /ai-metrics:gh-flow-issue -->
 
-</details>" >/dev/null 2>&1
+</details>
+EOF
+
+if ! GH_HOST="$TARGET_HOST" gh api "repos/$TARGET_REPO/issues/$ISSUE_NUMBER/comments" \
+    -X POST \
+    -f body="@$_BODY_FILE" >/dev/null 2>&1
 then
     printf '[WARN] ai-metrics comment failed (gh api post to issue #%s failed) — continuing.\n' "$ISSUE_NUMBER"
 fi

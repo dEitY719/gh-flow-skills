@@ -12,18 +12,9 @@ set -u
 # against the synthetic CLAUDE_PLUGIN_ROOT below, not the caller's machine.
 unset DOTFILES_ROOT SHELL_COMMON
 
-ROOT=$(cd -- "$(dirname -- "$0")/../../.." && pwd)
+# shellcheck disable=SC1091  # path is resolved at runtime
+. "$(dirname -- "$0")/selfcheck-common.sh"
 TARGET="$ROOT/skills/issue/lib/post-ai-metrics.sh"
-FAIL=0
-
-chk() { # chk <label> <got> <want>
-    if [ "$2" = "$3" ]; then
-        echo "ok    $1"
-    else
-        echo "FAIL  $1: got '$2' want '$3'"
-        FAIL=1
-    fi
-}
 
 TMP=$(mktemp -d) || exit 1
 trap 'rm -rf "$TMP"' EXIT
@@ -46,36 +37,46 @@ out=$( GH_DISABLE_AI_METRICS=1 PATH="$TMP/bin:$PATH" \
        bash "$TARGET" origin 1 "$(date +%s)" feat medium 4000 1 2 3 4 5 6 2>&1 )
 chk "GH_DISABLE_AI_METRICS=1: no output, no gh call" "$out" ""
 
-# 2. Happy path: `gh` records its call args to a file so the body/host/repo
-#    can be inspected.
+# 2. Happy path: `gh` records its call args, and copies out the file behind
+#    `-f body=@<file>` (the body goes through a temp file, not an inline
+#    interpolated argument — agy review of PR #4), so both the endpoint and
+#    the rendered body can be inspected. The stub reads the file while the
+#    real script is still alive (its own EXIT trap deletes it only after
+#    this child process — the stub — has already run and returned).
 cat > "$TMP/bin/gh" <<EOF
 #!/bin/sh
 echo "\$@" > "$TMP/gh-call-args"
+for a in "\$@"; do
+    case "\$a" in
+        body=@*) cp "\${a#body=@}" "$TMP/gh-call-body" ;;
+    esac
+done
 EOF
 chmod +x "$TMP/bin/gh"
 START_TS=$(( $(date +%s) - 120 ))  # ~2 min ago
 out=$( PATH="$TMP/bin:$PATH" bash "$TARGET" origin 42 "$START_TS" feat small 4000 5 6 7 8 9 10 2>&1 )
 chk "happy path: no [WARN]" "$out" ""
 CALL_ARGS=$(cat "$TMP/gh-call-args" 2>/dev/null)
+CALL_BODY=$(cat "$TMP/gh-call-body" 2>/dev/null)
 case "$CALL_ARGS" in
-    "api repos/acme/widget/issues/42/comments -X POST -f body="*)
-        chk "happy path: correct endpoint" "match" "match" ;;
+    "api repos/acme/widget/issues/42/comments -X POST -f body=@"*)
+        chk "happy path: correct endpoint, body passed by file" "match" "match" ;;
     *)
-        chk "happy path: correct endpoint" "$CALL_ARGS" "api repos/acme/widget/issues/42/comments -X POST -f body=..." ;;
+        chk "happy path: correct endpoint, body passed by file" "$CALL_ARGS" "api repos/acme/widget/issues/42/comments -X POST -f body=@..." ;;
 esac
-case "$CALL_ARGS" in
+case "$CALL_BODY" in
     *"~4 h"*) chk "feat/small maps to 4h baseline" "match" "match" ;;
-    *) chk "feat/small maps to 4h baseline" "$CALL_ARGS" "*~4 h*" ;;
+    *) chk "feat/small maps to 4h baseline" "$CALL_BODY" "*~4 h*" ;;
 esac
-case "$CALL_ARGS" in
+case "$CALL_BODY" in
     *"~1000"*) chk "token estimate floors at 1000" "match" "match" ;;
-    *) chk "token estimate floors at 1000" "$CALL_ARGS" "*~1000*" ;;
+    *) chk "token estimate floors at 1000" "$CALL_BODY" "*~1000*" ;;
 esac
-case "$CALL_ARGS" in
+case "$CALL_BODY" in
     *"~5 min"*"~6 min"*"~7 min"*"~8 min"*"~9 min"*"~10 min"*)
         chk "per-step minutes threaded through" "match" "match" ;;
     *)
-        chk "per-step minutes threaded through" "$CALL_ARGS" "*5/6/7/8/9/10 min rows*" ;;
+        chk "per-step minutes threaded through" "$CALL_BODY" "*5/6/7/8/9/10 min rows*" ;;
 esac
 
 # 3. gh api failure is soft-fail: one [WARN] line, still exit 0.
