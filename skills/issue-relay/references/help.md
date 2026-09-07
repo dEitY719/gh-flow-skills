@@ -39,33 +39,17 @@
 
 ## What this skill does
 
-1. **Resolve destination + branch** (`references/branch-setup.md`) —
-   resolves `--remote` (hard error, no silent `origin` fallback), detects
-   the destination's default branch via `git ls-remote --symref`, fetches
-   it, and creates (or reuses) a local branch named `issue-<N>-<title-slug>`.
-2. **Delegate implementation** (`references/worker-brief-checklist.md`) —
-   fetches the issue body/comments, resolves any unresolved Open Questions
-   with the user first, and hands a self-contained brief to an opus Worker
-   subagent (Advisor/Worker split from the root `CLAUDE.md`).
-3. **Advisor verification** (`references/verification.md`) — reads the
-   actual diff, discovers and runs the target repo's lint/test commands,
-   and does not proceed on failure.
-4. **Relay** — calls `gh-flow:relay-merge --commits <base>..<head> --target-issue
-   <N> --remote <remote>` verbatim; all patch/gist/apply-guide logic lives
-   there, not here.
-5. **Report** — relays `gh-flow:relay-merge`'s Step 8 output plus a final
-   `[OK]`/`[FAIL]` line for the whole chain.
+Chain: branch (`references/branch-setup.md`) → delegated implementation
+(`references/worker-brief-checklist.md`) → Advisor verification
+(`references/verification.md`) → `gh-flow:relay-merge` → report
+(`references/report-template.md`). `SKILL.md`'s Steps 2-6 are the numbered
+walkthrough; this file only points at it to avoid a second copy that can drift.
 
 ## What this skill will NOT do
 
-- Register the issue — that is `gh-issue:create`'s job, run beforehand.
-- Fall back to `origin` when the requested `--remote` is missing.
-- Delegate implementation while the issue has unresolved Open Questions.
-- Auto-reset a reused branch that has commits not on the destination's
-  default branch — it asks first.
-- Reimplement any part of `gh-flow:relay-merge` (patch generation, the 40KB
-  cutoff, gist upload, apply-guide posting) — it delegates, never
-  duplicates.
+See `references/constraints.md` for the full, current list (never fall back
+to `origin`, never delegate with unresolved Open Questions, never auto-reset
+a reused branch, never duplicate `gh-flow:relay-merge`'s job).
 
 ## Related skills
 
