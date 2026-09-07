@@ -12,24 +12,16 @@
 # shellcheck disable=SC1090
 set -u
 
-ROOT=$(cd -- "$(dirname -- "$0")/../../.." && pwd)
+# shellcheck disable=SC1091  # path is resolved at runtime
+. "$(dirname -- "$0")/selfcheck-common.sh"
 TARGET="$ROOT/skills/issue/lib/target-binding.sh"
-FAIL=0
-
-chk() { # chk <label> <got> <want>
-    if [ "$2" = "$3" ]; then
-        echo "ok    $1"
-    else
-        echo "FAIL  $1: got '$2' want '$3'"
-        FAIL=1
-    fi
-}
 
 TMP=$(mktemp -d) || exit 1
 trap 'rm -rf "$TMP"' EXIT
 git -C "$TMP" init -q
 git -C "$TMP" remote add origin git@github.com:acme/widget.git
 git -C "$TMP" remote add ghes https://github.samsungds.net/acme/widget.git
+git -C "$TMP" remote add other https://gitlab.com/acme/widget.git
 
 # The vendored tier is what a standalone plugin install exercises, so pin
 # DOTFILES_ROOT at a path that cannot exist for every case below.
@@ -70,6 +62,15 @@ chk "unknown remote refused, GH_HOST untouched" "$got" "1|unset"
 # 6. No CLAUDE_PLUGIN_ROOT and no dotfiles checkout: tier 5, fails loud.
 got=$( unset CLAUDE_PLUGIN_ROOT; . "$TARGET" >/dev/null 2>&1; echo "$?" )
 chk "no plugin root, no dotfiles: fails loud" "$got" "1"
+
+# 6b. A remote that resolves (git knows about it) but points at a
+# non-GitHub host must be refused outright, not half-resolved with an
+# empty TARGET_REPO and a guessed-fallback TARGET_HOST — the silent
+# partial-success this function must never produce (codex, PR review of
+# gh-flow-skills#4 BLOCKER).
+got=$( CLAUDE_PLUGIN_ROOT="$ROOT" GH_FLOW_TARGET_REMOTE=other . "$TARGET" >/dev/null 2>&1
+       printf '%s|%s|%s' "$?" "${TARGET_REPO:-unset}" "${GH_HOST:-unset}" )
+chk "non-github remote refused, nothing half-exported" "$got" "1|unset|unset"
 
 # 7. Sourced under dash (POSIX sh, no bash/zsh dot-arg extension) — the shape
 #    every non-bash/zsh harness runs. Uses ghes, not origin, so a regression
