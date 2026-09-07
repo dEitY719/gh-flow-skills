@@ -61,8 +61,15 @@ chmod +x "$TMP/bin/gh"
 mkdir -p "$TMP/work"
 git -C "$TMP/work" init -q
 
+# The vendored tier is what a standalone plugin install exercises, so pin
+# DOTFILES_ROOT at a path that cannot exist and CLAUDE_PLUGIN_ROOT at this
+# checkout for every invocation below — an ambient `$HOME/dotfiles` or
+# `$CLAUDE_PLUGIN_ROOT` on the machine running this self-check must never
+# make it pass by accident (CI has neither).
+export DOTFILES_ROOT=/nonexistent-dotfiles
+
 # --- 2. missing remote: hard error, no fallback -----------------------------
-out=$(cd "$TMP/work" && bash "$TARGET" nosuchremote 1 2>&1 >/dev/null)
+out=$(cd "$TMP/work" && CLAUDE_PLUGIN_ROOT="$ROOT" bash "$TARGET" nosuchremote 1 2>&1 >/dev/null)
 rc=$?
 case "$out" in
     "[gh-flow:issue-relay] remote 'nosuchremote' not found."*) msg_ok=yes ;;
@@ -75,7 +82,7 @@ chk "missing remote: error names the remote, no silent fallback" "$msg_ok" "yes"
 git -C "$TMP/work" remote add origin https://github.com/acme/widget.git
 git -C "$TMP/work" config --add "url.$TMP/bare.git.insteadOf" https://github.com/acme/widget.git
 
-got=$(cd "$TMP/work" && PATH="$TMP/bin:$PATH" bash "$TARGET" origin 42 2>"$TMP/err.log")
+got=$(cd "$TMP/work" && PATH="$TMP/bin:$PATH" CLAUDE_PLUGIN_ROOT="$ROOT" bash "$TARGET" origin 42 2>"$TMP/err.log")
 eval "$got"
 chk "happy path: DEST_REPO from the remote URL" "${DEST_REPO:-}" "acme/widget"
 chk "happy path: DEST_HOST from the remote URL" "${DEST_HOST:-}" "github.com"
@@ -87,7 +94,7 @@ git -C "$TMP/seed" checkout -q -b develop
 git -C "$TMP/seed" commit -q --allow-empty -m develop-work
 git -C "$TMP/seed" push -q "$TMP/bare.git" develop
 
-got=$(cd "$TMP/work" && PATH="$TMP/bin:$PATH" bash "$TARGET" origin 42 --base develop 2>"$TMP/err.log")
+got=$(cd "$TMP/work" && PATH="$TMP/bin:$PATH" CLAUDE_PLUGIN_ROOT="$ROOT" bash "$TARGET" origin 42 --base develop 2>"$TMP/err.log")
 eval "$got"
 chk "--base override: BASE_BRANCH is the given branch" "${BASE_BRANCH:-}" "develop"
 git -C "$TMP/work" show-ref -q refs/remotes/origin/develop
@@ -97,8 +104,7 @@ chk "--base override: that branch was actually fetched" "$?" "0"
 git -C "$TMP/work" remote add ghes https://github.samsungds.net/acme/widget.git
 git -C "$TMP/work" config --add "url.$TMP/bare.git.insteadOf" https://github.samsungds.net/acme/widget.git
 
-got=$(cd "$TMP/work" && PATH="$TMP/bin:$PATH" DOTFILES_ROOT=/nonexistent-dotfiles CLAUDE_PLUGIN_ROOT="$ROOT" \
-      bash "$TARGET" ghes 42 2>"$TMP/err.log")
+got=$(cd "$TMP/work" && PATH="$TMP/bin:$PATH" CLAUDE_PLUGIN_ROOT="$ROOT" bash "$TARGET" ghes 42 2>"$TMP/err.log")
 eval "$got"
 chk "GHE remote: DEST_HOST follows the remote URL" "${DEST_HOST:-}" "github.samsungds.net"
 
