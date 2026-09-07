@@ -19,7 +19,10 @@ comment URL, gist count, SIMPLE PATH vs. relay mode), then this chain summary.
     the sharper-brief re-delegation, or the surfaced relay-merge error>
 
 Stop-on-error causes (Step 1's policy), verbatim as the `- Reason:` line:
-- Step 2: branch-reuse question left unanswered (case 3 in
+- Step 2: `lib/branch-setup.sh` itself failed — missing/unparseable `--remote`,
+  undetectable default branch, unfetchable base branch, or an unfetchable
+  issue title (its own stderr line is the reason, surfaced unmodified); or the
+  branch-reuse question was left unanswered (case 3 in
   `references/branch-setup.md` "Create or reuse")
 - Step 3: unresolved Open Question(s) on the issue — resolve them, then re-run
 - Step 4: Advisor verification failed — re-delegated with a sharper brief per
