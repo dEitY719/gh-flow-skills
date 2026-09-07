@@ -28,6 +28,13 @@ chk "slugify: truncated to 50 chars" "$got" "$(printf 'a%.0s' $(seq 1 50))"
 got=$(_bs_slugify 'idempotent-run')
 got2=$(_bs_slugify 'idempotent-run')
 chk "slugify: same title -> same slug across runs" "$got" "$got2"
+# agy review, PR #20 BLOCKER — claimed an issue title with quotes/backticks/$
+# reaches the consumer's `eval` unescaped. It never does: only this function's
+# output (BRANCH_SETUP_LIB_ONLY=1 lets us call it directly here) is printed
+# for eval, and [^a-z0-9]+ -> '-' strips every shell metacharacter first.
+# shellcheck disable=SC2016  # single-quoted on purpose: must NOT expand
+got=$(_bs_slugify 'hostile "title"; $(rm -rf /tmp/should-never-run) `id`')
+chk "slugify: quotes/\$()/backticks/; never survive into the slug" "$got" "hostile-title-rm-rf-tmp-should-never-run-id"
 
 # --- fixtures for the integration tests below -------------------------------
 TMP=$(mktemp -d) || exit 1
@@ -50,7 +57,15 @@ cat > "$TMP/bin/gh" <<'EOF'
 # branch-setup.sh makes (`gh issue view <N> --repo <repo> --json title -q
 # .title`), and just prints the raw title text `-q .title` would yield.
 if [ "$1" = "issue" ] && [ "$2" = "view" ]; then
-    echo "feat: sample issue title"
+    if [ "$3" = "999" ]; then
+        # Hostile title fixture for test 6 below (agy review, PR #20
+        # BLOCKER): quotes/backticks/$(...) that would run a command or
+        # break eval's quoting if it ever reached the printed BRANCH= line
+        # unescaped. It never does — only the sanitized slug does.
+        printf '%s\n' 'hostile "title"; $(rm -rf /tmp/should-never-run) `id`'
+    else
+        echo "feat: sample issue title"
+    fi
     exit 0
 fi
 echo "unexpected gh call: $*" >&2
@@ -111,5 +126,26 @@ git -C "$TMP/work" config --add "url.$TMP/bare.git.insteadOf" https://github.sam
 
 run ghes 42
 chk "GHE remote: DEST_HOST follows the remote URL" "${DEST_HOST:-}" "github.samsungds.net"
+
+# --- 6. hostile issue title, full pipeline: gh -> TITLE -> slugify -> eval --
+# agy review, PR #20 BLOCKER — same claim as test 1's unit case, but through
+# the real `gh issue view` -> $TITLE -> _bs_slugify -> printf -> eval path an
+# actual run takes, not just a direct function call.
+run origin 999
+chk "hostile title end-to-end: BRANCH carries only the sanitized slug" \
+    "${BRANCH:-}" "issue-999-hostile-title-rm-rf-tmp-should-never-run-id"
+[ -e /tmp/should-never-run ]
+chk "hostile title end-to-end: the embedded command never ran" "$?" "1"
+
+# --- 7. capture-then-eval propagates a failing run's exit status -----------
+# codex review, PR #20 FOLLOW-UP: cover the *documented* invocation contract
+# itself (references/branch-setup.md's `_bs_out=$(...) || exit 1; eval
+# "$_bs_out"`), not just the raw script's own exit code (test 3 above). The
+# bug this guards against: `eval "$(bash ...)" || exit 1` — a failing run
+# prints nothing, so eval "" exits 0 and `||` never fires.
+rc=0
+_bs_out=$(cd "$TMP/work" && CLAUDE_PLUGIN_ROOT="$ROOT" bash "$TARGET" nosuchremote 1 2>/dev/null) || rc=1
+eval "$_bs_out"
+chk "capture-then-eval: a failing run's exit status reaches the caller" "$rc" "1"
 
 exit "$FAIL"
