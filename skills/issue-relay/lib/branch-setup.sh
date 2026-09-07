@@ -64,12 +64,11 @@ if [ "${BRANCH_SETUP_LIB_ONLY:-0}" != "1" ]; then
         esac
     done
 
-    if ! git remote get-url "$REMOTE" >/dev/null 2>&1; then
+    REMOTE_URL=$(git config --get "remote.$REMOTE.url") || {
         printf "[gh-flow:issue-relay] remote '%s' not found. Available remotes:\n" "$REMOTE" >&2
         git remote -v >&2
         exit 1
-    fi
-    REMOTE_URL=$(git config --get "remote.$REMOTE.url")
+    }
 
     # plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
     _bs_sc="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                            # tier 1

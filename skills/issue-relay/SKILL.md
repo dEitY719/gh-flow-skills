@@ -80,10 +80,8 @@ unrelated failures through `--known-failures` (comma-separated
 
 ## Step 6: Report
 
-Follow `references/report-template.md`: relay `gh-flow:relay-merge`'s Step 8 output as-is, then a single
-`[OK]`/`[FAIL]` line summarizing the whole chain (branch created, Worker delegated, Advisor verification result,
-relay result), followed by a `Next:` line naming the concrete follow-up — the apply-guide comment URL (relay
-mode) or the created PR URL (SIMPLE PATH, no relay needed).
+Follow `references/report-template.md` for the exact `[OK]`/`[FAIL]` format —
+relay `gh-flow:relay-merge`'s Step 8 output first, then the chain summary.
 
 ## Constraints
 
