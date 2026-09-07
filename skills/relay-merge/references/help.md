@@ -51,28 +51,9 @@ qualified form whenever the runner reports a test/check name.
 
 ## What the skill does
 
-1. Resolves the commit range from one of two mutually-exclusive input
-   modes — the origin PR (`<origin-PR#>`, via `gh pr view`) **or** a raw
-   `--commits <base>..<head>` range (base excluded, head included; no PR
-   lookup) — plus the `--remote` destination (hard error on a missing
-   remote — never silent fallback to `origin`), and confirms it is reachable.
-2. **Probes push capability** with a real (non-dry-run) throwaway-ref
-   push, deleting the ref immediately on success. If push works, delegates
-   to `gh-pr:create` and stops (relay is a fallback only).
-3. On confirmed block (HTTP 403 / block-page), resolves the base/head SHAs
-   (from the PR or the parsed `--commits` range) and runs a
-   destination-divergence pre-flight — in both input modes.
-4. `git format-patch` per commit; oversized patches whose bulk is a
-   recognized generated artifact are regenerated without that diff (with a
-   recorded regeneration command); an oversized non-artifact commit is
-   pre-split into per-file-group sub-patches; only a single file whose own
-   diff still exceeds the limit stops the skill (no arbitrary truncation).
-5. Uploads each patch via single-file `gh gist create`, one call at a time.
-6. Posts an apply-guide comment (gist table + `git am` steps + regeneration
-   commands + any `--known-failures` entries + background notes) to a new or
-   `--target-issue` destination.
-7. Optionally (with explicit confirmation) closes a duplicate origin issue.
-8. Reports the destination URL, gist count, and any split-patch decisions.
+Resolve range + destination remote → probe push (works → `gh-pr:create`,
+stop) → format-patch → one gist per patch → apply-guide comment → report.
+Step-by-step: `SKILL.md` Steps 1-8, which is the only copy.
 
 ## Constants (tunable)
 
@@ -85,13 +66,9 @@ qualified form whenever the runner reports a test/check name.
 
 ## What this skill will NOT do
 
-- Fall back to `origin` when the requested remote is missing.
-- Push normally and *then* relay — it always probes first.
-- Create a multi-file gist or run gist uploads in parallel.
-- Silently truncate a patch. Recognized generated-artifact diffs are
-  stripped and oversized non-artifact commits are pre-split by file group;
-  only a single file whose own diff exceeds the limit stops the skill.
-- Auto-close an origin-side issue without explicit confirmation.
+The hard constraints — no silent `origin` fallback, no push-then-relay, no
+multi-file/parallel gist, no silent truncation, no auto-close of an origin
+issue — with their rationale: `references/constraints.md`.
 
 ## Related skills
 
