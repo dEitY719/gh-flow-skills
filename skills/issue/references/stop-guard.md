@@ -6,43 +6,11 @@ point here for the *mechanism*.
 
 ## Why this exists
 
-`gh-flow:issue` chains 6 sub-skills (`gh-issue:implement` → `gh-pr:commit` →
-`gh-pr:create` → `gh-verify:review-all` → `gh-resolve:conflict` →
-`gh-resolve:outdated`) plus a final Step 3 report. The post-PR quality
-gate (agy ∥ codex ∥ `/simplify`, with commit+push) and the deferred
-`/gh-pr:reply` scheduling now live *inside* the delegated
-`gh-verify:review-all` (Step 2.4) — they are no longer dispatched inline by
-gh-flow:issue. `gh-verify:review-all` is the 4th entry of the hook's
-`EXPECTED_CHAIN`, and `gh-resolve:outdated` is the 6th. Across multiple
-revisions of this skill (issue dEitY719/dotfiles#333, issue dEitY719/dotfiles#383) the model has repeatedly
-invented a "I'm done now" markdown block between Skill() calls and ended
-its turn early — leaving the user to manually finish the chain.
-
-Because the quality gate and pr-reply scheduling are folded into a single
-`Skill(gh-verify:review-all)` call, Step 2 is a clean six-`Skill()` sequence:
-there is no inline Agent/Bash gate work between the chain skills for the
-hook to reason about. The terminal-marker gating (L1.5 below) blocks
-turn-end until a Step 3 marker appears.
-
-> History (pre-dEitY719/dotfiles#1160): the quality gate used to be dispatched inline as
-> steps 2.3.1 (codex review) ∥ 2.3.2 (`/simplify`) → 2.3.3 (commit+push)
-> via Agent/git tool calls, and pr-reply was scheduled by a separate
-> `session:schedule` step that occupied the 4th `EXPECTED_CHAIN` slot. Both
-> were consolidated into `gh-verify:review-all`.
-
-Two earlier mitigations help but are not sufficient:
-
-- **`--no-next-hint`** (dEitY719/dotfiles#333): suppresses the sub-skill's own trailing
-  `Next: /gh-pr:commit && /gh-pr:create <N>` line so it stops looking like a final
-  answer. Effective for the original failure mode.
-- **Prose rules in `SKILL.md`** that forbid conversational text between
-  Skill() calls. Documented but not enforced — observed bypass rate of
-  ~50% in practice, even with bold/CRITICAL framing.
-
-dEitY719/dotfiles#383 confirmed both are insufficient: the model authors a fresh
-`gh-issue:implement #N complete` block + bullet recap + ai-metrics line
-on its own — none of which `--no-next-hint` controls — and the prose
-rule is silently violated.
+Models have repeatedly treated a sub-skill's own success block as a
+turn-ending answer and stopped `gh-flow:issue` mid-chain (issue dEitY719/dotfiles#333,
+dEitY719/dotfiles#383), even with the two prompt-layer mitigations this hook backstops.
+Full history and the three-guard rule this hook is guard #3 of:
+`references/critical-contract.md`.
 
 The fix: a **Stop hook** that mechanically blocks turn-end while a
 gh-flow:issue chain is mid-flight. The hook does not need the model's
@@ -253,144 +221,36 @@ markers and the Step 3 report must still be produced normally.
 
 ## SubagentStop registration (dEitY719/dotfiles#1434)
 
-### Why
+A subagent's turn-end fires `SubagentStop`, not `Stop`. Without this
+registration, a gh-flow:issue run inside a subagent — the issue-watcher
+unattended dispatch (dEitY719/dotfiles#1389), where nobody is watching the
+session — lost the harness layer entirely: the only one of the three guards
+that does not need the model's cooperation. Just the two prompt-layer
+mitigations remained, exactly the condition under which dEitY719/dotfiles#333 /
+dEitY719/dotfiles#383 / dEitY719/dotfiles#1270 each recurred, leaving a
+silently truncated chain with no error and no warning.
 
-A subagent's turn-end fires `SubagentStop`, not `Stop`. With the guard
-registered on `Stop` only, any gh-flow:issue that ran *inside* a
-subagent lost the third of the three layered guards entirely — the
-harness layer, the only one that does not need the model's cooperation.
-Just the two prompt-layer mitigations remained, i.e. exactly the
-condition under which dEitY719/dotfiles#333 / dEitY719/dotfiles#383 / dEitY719/dotfiles#1270 each recurred. The exposed
-path is the issue-watcher unattended dispatch (dEitY719/dotfiles#1389): nobody is
-watching it, so a silently truncated chain leaves an unreviewed,
-un-rebased PR behind with no error and no warning.
+`Stop` and `SubagentStop` do not carry the same keys — notably,
+`agent_transcript_path` (the subagent's own transcript) exists only on
+`SubagentStop`, while `transcript_path` on that event names the **parent**
+session's transcript. On `SubagentStop` the hook reads **only**
+`agent_transcript_path`; on every other event it prefers
+`agent_transcript_path` and falls back to `transcript_path`. If the chosen
+file does not exist the hook fails open — it does not then try the other
+key. A subagent must never be judged by its parent's flow state (the parent
+could be mid-flow while the subagent does something unrelated, or the
+reverse), so an unreadable transcript is the correct place to fail open.
 
-### Measured payload contract
+Everything else — the four L1 boundary surfaces, the L1.5 terminal-marker
+scan, boundary expiry, and every fail-open rail — applies verbatim once the
+right transcript is selected; confirmed by execution that a block really
+does continue a mid-flow subagent, the same mechanism as the `Stop` path.
 
-`Stop` and `SubagentStop` do **not** carry the same keys:
-
-| key | `Stop` | `SubagentStop` | meaning |
-| --- | --- | --- | --- |
-| `transcript_path` | yes | yes | **the parent session's** transcript |
-| `agent_transcript_path` | no | yes | **the subagent's own** transcript |
-| `agent_id` / `agent_type` | no | yes | which subagent ended |
-| `stop_hook_active` | yes | yes | re-fire flag (loop safety valve) |
-
-Measured on one real `SubagentStop` event:
-
-- `transcript_path` = `<projects>/<session_id>.jsonl` — parent
-- `agent_transcript_path` =
-  `<projects>/<session_id>/subagents/agent-<agent_id>.jsonl` — subagent
-
-So the hazard was never "the key is missing"; it was **the wrong
-transcript**. Registering the guard without a resolution rule would have
-had it parse the *parent* transcript, find no gh-flow:issue boundary
-there (the watcher parent never runs the flow itself), and fail open —
-a silent no-op that looks installed.
-
-### Resolution rule, and why there is no fallback
-
-On `SubagentStop` the hook accepts **only** `agent_transcript_path`; on
-every other event (`Stop`, or a payload naming no event) it prefers
-`agent_transcript_path` and falls back to `transcript_path`. If the
-*chosen* file does not exist the hook fails open; it does **not** then
-try the other key. A subagent must never be judged by its parent's flow
-state — the parent could be mid-flow while the subagent does something
-unrelated (spurious block), or the reverse (missed block). For a
-transcript we cannot read, fail-open is the correct answer.
-
-The event-awareness is a PR dEitY719/dotfiles#1438 (agy) tightening: the preference chain
-used to be unconditional, so a `SubagentStop` with an absent or empty
-`agent_transcript_path` silently walked on to the **parent's**
-transcript — the same cross-session contamination the no-fallback rule
-above exists to prevent. Such an event now fails open instead.
-
-### Everything else carries over unchanged
-
-The subagent transcript uses the same JSONL schema as the parent's, with
-the dispatch prompt as its first `role=user` text entry. All four L1
-boundary surfaces, the L1.5 terminal-marker scan (assistant text plus
-the `Bash` command/result pair), the stale-boundary expiry valve and
-every fail-open rail therefore apply verbatim.
-
-`stop_hook_active` behaves identically too: `False` on the first
-`SubagentStop`, `True` on the event re-fired after a block — so the
-infinite-loop valve holds on this path.
-
-### A block really does continue a subagent (U-4)
-
-Confirmed by execution, not inference: "the hook fires" and "the chain
-actually resumes" are different claims, and closing the issue on the
-first one would leave the path undefended while looking fixed.
-
-Emitting `{"decision":"block","reason":"…"}` on a subagent's first
-`SubagentStop` injected `Stop hook feedback:\n<reason>` into **the
-subagent's own** user channel, and the subagent then performed another
-full turn (thinking -> tool_use -> tool_result -> final text) before
-stopping again. Same mechanism as the `Stop` path.
-
-`Stop hook feedback:` is already one of the `_HARNESS_INJECTION_RE`
-markers, so the guard's own re-injections do not inflate the
-fresh-prompt counter on this path either — the expiry valve keeps
-counting only genuine human prompts.
-
-### How the payload was measured (non-obvious — you will need this again)
-
-Registering a hook in the **running** session's settings does *not*
-work: Claude Code snapshots the hook set at session start, so a
-mid-session registration never fires. The payload was captured from a
-separate headless session instead:
-
-```bash
-cat > /tmp/probe.sh <<'EOF'
-#!/bin/sh
-tee -a /tmp/subagentstop-payload.jsonl >/dev/null
-EOF
-chmod +x /tmp/probe.sh
-# probe-settings.json registers /tmp/probe.sh on SubagentStop
-claude -p --settings /tmp/probe-settings.json --model haiku \
-  --dangerously-skip-permissions "<prompt that dispatches one subagent>"
-```
-
-The probe hook `tee`s stdin to a file. U-4 was measured by having the
-same probe emit one `{"decision":"block"}` and then reading the
-subagent's own transcript for the turns that followed.
-
-### Rollout path (the live settings.json, not just the SSOT)
-
-Adding `SubagentStop` to the tracked `claude/settings.json` is not the
-whole deployment: every mode's live settings.json is a **real file**, so
-something has to carry the new event key over.
-
-- external / multi-account — `_claude_ensure_settings_copy`
-  (`shell-common/tools/integrations/claude.sh`) copies the SSOT over the
-  live file whenever the two differ, on `./setup.sh`.
-- internal — `claude/hooks/session-start-settings-drift.sh` re-assigns
-  the SSOT's whole `.hooks` block into the live file at every
-  SessionStart.
-
-Both propagate a wholly NEW event key, not just changed values; a
-regression test in `tests/bats/skills/session_start_settings_drift_hook.bats`
-pins that (live file with `Stop` but no `SubagentStop` → healed live
-file carries the guard under `.hooks.SubagentStop`).
-
-### Known gap, left open on purpose
-
-`claude/hooks/devx_autopilot_stop_guard.py` and
-`claude/hooks/skill_completion_guard.py` both have the **same structural
-exposure** — `Stop`-only registration plus a `transcript_path`-only
-lookup — and were deliberately **not** registered on `SubagentStop` in
-this change. dEitY719/dotfiles#1434 scopes them out pending the result here. This is a
-documented gap, not an oversight.
-
-### Deployment caveat
-
-The live `~/.claude*/settings.json` is a real file, not a symlink (dEitY719/dotfiles#940
-/ dEitY719/dotfiles#1086), so this new registration does not reach a running install on
-`git pull` alone — it takes effect on the **next** session, never in the
-one that pulled the commit. Which mode heals automatically and which
-only warns is owned by `claude/AGENTS.md` → "Configuration Files"; do
-not restate the re-seed rules here, they have already changed once.
+Mechanism detail, the measured `Stop`/`SubagentStop` payload contract, and
+the settings.json rollout path (tracked SSOT vs. each mode's live file) all
+live with the hook itself in `dEitY719/dotfiles`
+(`claude/hooks/gh_issue_flow_stop_guard.py`) — read there, not here, if you
+are changing the registration rather than just using it.
 
 ## Safety rails
 
@@ -428,73 +288,19 @@ Re-install via `./setup.sh` to restore the default behaviour.
 
 ## Tests
 
-`tests/integration/test_gh_issue_flow_stop_guard.py` covers:
+`tests/integration/test_gh_issue_flow_stop_guard.py` in `dEitY719/dotfiles`
+covers this hook's full detection contract against both `Stop` and
+`SubagentStop` payloads: the four L1 boundary surfaces (and their
+false-positive variants inside a `tool_result`), the L1.5 terminal-marker
+scan including its `Bash` heredoc/`printf` fallback pairing (dEitY719/dotfiles#1270 /
+dEitY719/dotfiles#1274) and every rejected false-positive shape, boundary
+expiry (dEitY719/dotfiles#1270 F-2) with its harness-injection exclusions,
+`SubagentStop` transcript resolution and registration, the async-wait grace
+(dEitY719/dotfiles#1550), and all fail-open rails. A drift test ties the
+report's field names to `references/report-template.md`, so renaming them
+there fails the build instead of silently staling the hook.
 
-- empty stdin / malformed JSON → allow
-- missing transcript_path → allow
-- transcript with no gh-flow:issue boundary → allow
-- mid-flow transcript (e.g. only `gh-issue:implement` invoked) → block
-  with a reason naming the next sub-skill
-- complete transcript (terminal Step 3 marker present) → allow
-- `stop_hook_active == true` → allow regardless of mid-flow state
-- L1 boundary surfaces (dEitY719/dotfiles#608): raw slash, `<command-name>` wrapper,
-  `Base directory for this skill: …/gh-flow:issue`, and the H1 line —
-  positive + false-positive (inside `tool_result`) variants for each
-- L1.5 (dEitY719/dotfiles#608, root cause of 5th regression): a real `/gh-flow:issue`
-  invocation whose user message includes the SKILL prompt body
-  (which literally quotes the Step 3 template) must still **block**
-  the mid-chain stop. A defensive variant covers the case where the
-  model reads `gh_issue_flow_stop_guard.py` itself inside the flow.
-- dEitY719/dotfiles#1270 F-1: a Step 3 report emitted through a `Bash` heredoc/`printf`
-  **with its paired `tool_result`** → allow (string- and list-shaped
-  `tool_result.content` both); a `Bash` command that only greps the
-  template text (no literal issue/step digit) → still block; the same
-  template text arriving via `tool_result`, or a real marker inside an
-  `Edit`/`Write` tool input → still block.
-- dEitY719/dotfiles#1270 / PR dEitY719/dotfiles#1272 (pair matching): command matches but output was
-  redirected to a file (empty `tool_result`) → still block; marker only
-  in a shell comment (unrelated output) → still block; marker in the
-  `tool_result` of a non-matching `cat` command → still block; command
-  under `toolu_A` with a marker-bearing result under `toolu_B` → still
-  block; `Bash` tool_use with no `id` → still block.
-- dEitY719/dotfiles#1274 (full report shape): `grep "gh-flow:issue complete (#1270)"
-  some.log` whose result is just that one echoed line — both halves of
-  the dEitY719/dotfiles#1272 pair match, but no `PR URL:` / `Resume after fix:` field is
-  present → still block. Plus a **drift test** asserting both field
-  strings still occur in `references/report-template.md`, so renaming
-  them there breaks the build instead of silently staling the hook.
-- dEitY719/dotfiles#1270 F-2: 3 fresh unrelated user prompts after an unfinished flow
-  → allow (stale boundary); 2 → still block; skill-expansion,
-  `tool_result`-only and `<system-reminder>`-only messages are not
-  counted; `GH_ISSUE_FLOW_STOP_GUARD_MAX_USER_TURNS=0` disables expiry.
-- dEitY719/dotfiles#1270 / PR dEitY719/dotfiles#1272: `isMeta` entries, `Stop hook feedback:` blocks,
-  `<task-notification>` and `[SYSTEM NOTIFICATION - NOT USER INPUT]`
-  messages are not counted; a message carrying both human text and a
-  `tool_result` **is** counted.
-- dEitY719/dotfiles#1434 (`SubagentStop`): a **registration test** asserts the tracked
-  `claude/settings.json` wires this hook onto `SubagentStop` as well as
-  `Stop` — the one check that would have caught the original gap. Plus
-  transcript resolution (`agent_transcript_path` preferred over
-  `transcript_path`; a missing chosen file fails open instead of
-  falling back), a mid-flow subagent transcript → block, an
-  unrelated subagent stop → allow, and the six existing fail-open rails
-  re-asserted against a `SubagentStop`-shaped payload.
-- dEitY719/dotfiles#1550 (async-wait grace): 1 marker → allow, 2 → allow (at the default
-  limit), 3 → block with the ordinary "gh-flow:issue incomplete:" reason
-  naming the next sub-skill; a marker followed by a real `Skill(gh-pr:commit)`
-  → the streak resets and the normal 2/6 block applies; the marker inside a
-  `tool_result` is ignored (the dEitY719/dotfiles#608 class, applied to this marker); and
-  `GH_ISSUE_FLOW_STOP_GUARD_ASYNC_WAIT_LIMIT=0` blocks on the first marker
-  while `=1` allows exactly one.
-
-Run: `pytest tests/integration/test_gh_issue_flow_stop_guard.py -v`.
-
-The sister hook's half of dEitY719/dotfiles#1550 lives in
-`tests/integration/test_skill_completion_guard.py`: grace reprieves only the
-step its own marker names (a sibling step with no marker still blocks and is
-the only one listed in the reason), colon-form `step=gh-issue:implement/…`
-is accepted, markers never cross skills, a 3rd marker returns the step to
-the blocked list, a real `[step:…] OK` after the marker satisfies the step
-through the ordinary path, the marker inside a `tool_result` is ignored
-(load-bearing here — that hook's step-OK scan *does* read tool_results), and
-`GH_SKILL_GUARD_ASYNC_WAIT_LIMIT` `0` / `1` behave as documented.
+Run from that repo: `pytest tests/integration/test_gh_issue_flow_stop_guard.py -v`.
+The sister hook's tests (`skill_completion_guard.py`, same dEitY719/dotfiles#1550
+async-wait mechanism) live in `tests/integration/test_skill_completion_guard.py`
+there.

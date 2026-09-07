@@ -9,92 +9,45 @@ and deferred pr-reply are folded into Step 2.4 `gh-verify:review-all`, so its
 row already covers that effort — there is no separate gate/schedule row.)
 This step soft-fails — warn on any error but never block the flow.
 
-a. Compute: `ELAPSED=$(( ($(date +%s) - START_TS) / 60 ))`
-   Track per-step timing by recording `STEP_TS=$(date +%s)` at the
-   start of each sub-skill and computing its elapsed at the end:
-   - `IMPL_MIN` — elapsed for Step 2.1 (gh-issue:implement)
-   - `COMMIT_MIN` — elapsed for Step 2.2 (gh-pr:commit)
-   - `PR_MIN` — elapsed for Step 2.3 (gh-pr:create)
-   - `REVIEW_MIN` — elapsed for Step 2.4 (gh-verify:review-all — the quality
-     gate + deferred pr-reply scheduling)
-   - `CONFLICT_MIN` — elapsed for Step 2.5 (gh-resolve:conflict)
-   - `OUTDATED_MIN` — elapsed for Step 2.5.1 (gh-resolve:outdated)
-   Any variable not yet computed defaults to `?` in the template.
-b. Issue type: parse the conventional-commit prefix from the issue title
-   fetched in Step 2.1 (e.g. `feat`, `fix`, `refactor`).
-c. Human time: look up the issue type in `gh-issue:create`'s
-   `references/metrics-baseline.md` (in the same skills directory).
-   For `feat`, infer size from the implementation scope.
-d. Token estimate: character count of (issue body + implementation file
-   reads) ÷ 4, rounded to nearest 500. Minimum 1 000.
-e. Post the aggregate comment on the linked issue (body template below),
-   with `GH_HOST` and the repo slug both explicit — this is the flow's only
-   direct `gh` call, and a bare `gh api` would follow gh CLI's own default
-   repo instead of the `<remote>` the flow was invoked with (dEitY719/dotfiles#1403).
-   Skip the post entirely when `GH_DISABLE_AI_METRICS=1` (issue dEitY719/dotfiles#399);
-   the six sub-skills already honour the same env var, so a disabled
-   run leaves zero ai-metrics artifacts on the issue or PR.
-   **Re-derive `GH_HOST`/`TARGET_REPO` fresh in this same Bash call from the
-   literal `<remote>` value** — do not trust that Step 1's export survived
-   the five `Skill()` calls in between (dEitY719/dotfiles#1498, PR dEitY719/dotfiles#1539 review: a Bash tool
-   call is not guaranteed to inherit an earlier call's exports). Paste
-   `references/target-binding.md`'s block again here with `<remote>`
-   substituted literally, same as Step 1 did.
-f. On failure: print `[WARN] ai-metrics comment failed (<reason>) — continuing.`
-   The block's own tier-5 stop is one such failure — it prints that warning
-   itself and exits non-zero, ending only the pasted block's shell. This step
-   is soft-fail, so the flow continues.
+The arithmetic, the human-time baseline lookup, the token-estimate rounding
+and the `gh api` post are all mechanized in `lib/post-ai-metrics.sh` — its
+own header documents inputs/outputs in full. What stays the executing
+agent's job is the two judgment calls a fixed script cannot make:
+
+a. Track per-step timing by recording `STEP_TS=$(date +%s)` at the start of
+   each sub-skill and computing its elapsed minutes at the end — `IMPL_MIN`
+   (2.1), `COMMIT_MIN` (2.2), `PR_MIN` (2.3), `REVIEW_MIN` (2.4),
+   `CONFLICT_MIN` (2.5), `OUTDATED_MIN` (2.5.1). Pass `?` for any not yet
+   measured.
+b. Parse the conventional-commit prefix from the issue title fetched in
+   Step 2.1 (`feat`, `fix`, `refactor`, `docs`, `chore`, `perf`, `test`;
+   anything else is `misc`).
+c. For `feat` only: infer size (`small`/`medium`/`large`) from the
+   implementation scope — components touched, diff weight, architectural
+   footprint (`gh-issue:create`'s `references/metrics-baseline.md`, same
+   heuristic `gh-issue:create` itself applies). Pass `-` for every other
+   type.
+d. Character count of (issue body + implementation file reads) as
+   `TOKEN_CHARS` — the script divides by 4, rounds to the nearest 500, and
+   floors at 1000.
+
+Then call the script once, from a single Bash call, with the literal
+`<remote>` from Step 1 (never a live `$REMOTE` read — the same reasoning as
+`references/target-binding.md`):
 
 ```bash
-# plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
-_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                                  # tier 1
-if [ ! -f "$_SC/functions/gh_host.sh" ]; then
-    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
-        printf '[WARN] ai-metrics comment failed (no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset — on Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first) — continuing.\n' \
-            "$_SC" >&2
-        return 1 2>/dev/null || exit 1
-    }
-    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
-fi
-unset -f _gh_resolve_host 2>/dev/null || :
-[ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-command -v _gh_resolve_host >/dev/null 2>&1 || {                                     # tier 5
-    printf '[WARN] ai-metrics comment failed (%s did not load a usable shell-common — on Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first) — continuing.\n' \
-        "$_SC" >&2
-    return 1 2>/dev/null || exit 1
-}
-export SHELL_COMMON="$_SC"
-REMOTE_URL=$(git remote get-url "<remote>")
-TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
-TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
-
-if [ "${GH_DISABLE_AI_METRICS:-0}" = "1" ]; then
-    : # ai-metrics comment skipped via GH_DISABLE_AI_METRICS
-else
-    GH_HOST="$TARGET_HOST" gh api "repos/$TARGET_REPO/issues/$ISSUE_NUMBER/comments" \
-      -X POST \
-      -f body="### gh-flow:issue 완료
-
-| 단계 | AI 소요 |
-|------|---------|
-| gh-issue:implement | ~${IMPL_MIN:-?} min |
-| gh-pr:commit | ~${COMMIT_MIN:-?} min |
-| gh-pr:create | ~${PR_MIN:-?} min |
-| gh-verify:review-all (gate + pr-reply) | ~${REVIEW_MIN:-?} min |
-| gh-resolve:conflict | ~${CONFLICT_MIN:-?} min |
-| gh-resolve:outdated | ~${OUTDATED_MIN:-?} min |
-| **합계** | **~$ELAPSED min** |
-
-예상 사람 시간: ~$HUMAN_H h · 토큰: ~$TOKENS
-
----
-<details>
-<summary>AI Metrics · tokens=~$TOKENS · human_h=~$HUMAN_H · ai_min=~$ELAPSED</summary>
-
-<!-- ai-metrics:gh-flow-issue -->
-AI Metrics tokens=~$TOKENS human_h=~$HUMAN_H ai_min=~$ELAPSED
-<!-- /ai-metrics:gh-flow-issue -->
-
-</details>"
-fi
+bash "${CLAUDE_PLUGIN_ROOT:-.}/skills/issue/lib/post-ai-metrics.sh" \
+  "<remote>" "$ISSUE_NUMBER" "$START_TS" \
+  "<issue-type>" "<feat-size-or-->" "$TOKEN_CHARS" \
+  "$IMPL_MIN" "$COMMIT_MIN" "$PR_MIN" "$REVIEW_MIN" "$CONFLICT_MIN" "$OUTDATED_MIN"
 ```
+
+Skips entirely under `GH_DISABLE_AI_METRICS=1` (issue dEitY719/dotfiles#399); the six
+sub-skills already honour the same env var, so a disabled run leaves zero
+ai-metrics artifacts on the issue or PR.
+
+On failure the script itself prints
+`[WARN] ai-metrics comment failed (<reason>) — continuing.` and exits 0 —
+this step is soft-fail, so the flow continues regardless.
+
+Self-check: `lib/post-ai-metrics.selfcheck.sh`.

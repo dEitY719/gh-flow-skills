@@ -1,54 +1,30 @@
 # gh-flow:issue — Binding the GitHub target (dEitY719/dotfiles#1403)
 
-Step 1 resolves the host and repo from the `[remote]`'s URL once and exports
-them, so the composition's own `gh` call cannot drift to another server. It
-also exports `REMOTE` itself (dEitY719/dotfiles#1498), matching the convention `gh-pr:commit` and
-`gh-pr:create` already use.
-
-Set `REMOTE` to the parsed `[remote]` argument from Step 1 **before** running
-this block — e.g. `REMOTE=upstream` when `/gh-flow:issue <N> upstream` was
-invoked, left unset (defaults to `origin`) otherwise. Do not copy the block
-below verbatim without that assignment; `${REMOTE:-origin}` silently reads as
-`origin` when `REMOTE` was never set, which defeats the whole point of
-threading `[remote]` through the chain.
-
-**This export is not load-bearing for the flow's two non-`Skill()` inline
-Bash steps (2.4.1, 2.6)** — PR dEitY719/dotfiles#1539 review (agy + codex) found that a Bash
-tool call is not guaranteed to inherit an earlier call's exports, so a step
-several `Skill()` calls downstream that trusted `$REMOTE` alone could
-silently read the wrong value. Both steps instead re-derive their target
-fresh, in their own Bash call, from the literal `<remote>` value the
-executing agent already knows from parsing it here in Step 1 — see
-`references/merge-train-wake.md` and `references/ai-metrics-step.md`. The
-export below remains useful for anything that stays within Step 1's own
-Bash call, and for consistency with the rest of the skill suite.
+Step 1 resolves the host and repo from the `[remote]`'s URL once, so the
+composition's own `gh` call cannot drift to another server. The mechanism
+lives in one script, `lib/target-binding.sh` — its own header documents the
+usage, exports and inputs in full; this file covers only the *why*.
 
 ```bash
-# plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
-_SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                                  # tier 1
-if [ ! -f "$_SC/functions/gh_host.sh" ]; then
-    [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                            # tier 5
-        printf '[gh-flow:issue] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-            "$_SC" >&2
-        return 1 2>/dev/null || exit 1
-    }
-    _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                                # tier 2
-fi
-unset -f _gh_resolve_host 2>/dev/null || :
-[ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-command -v _gh_resolve_host >/dev/null 2>&1 || {                                     # tier 5
-    printf '[gh-flow:issue] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
-        "$_SC" >&2
-    return 1 2>/dev/null || exit 1
-}
-export SHELL_COMMON="$_SC"
-REMOTE="${REMOTE:-origin}"
-REMOTE_URL=$(git remote get-url "$REMOTE")
-TARGET_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL")
-TARGET_HOST=$(_gh_host_from_url "$REMOTE_URL") || TARGET_HOST=$(_gh_resolve_host)
-export GH_HOST="$TARGET_HOST"
-export REMOTE TARGET_REPO TARGET_HOST
+GH_FLOW_TARGET_REMOTE="<remote>" . "${CLAUDE_PLUGIN_ROOT:-.}/skills/issue/lib/target-binding.sh" || exit 1
 ```
+
+`<remote>` is the literal `[remote]` argument from Step 1 — e.g. `upstream`
+when `/gh-flow:issue <N> upstream` was invoked, `origin` (the script's own
+default) otherwise. Not a positional arg to `.` — that is a bash/zsh
+extension, and dash (POSIX `sh`) silently drops it, defaulting to `origin`
+regardless of what was passed. The env var works identically everywhere.
+
+**Source fresh from every Bash call that needs the target, never trust an
+earlier call's exports to reach it.** PR dEitY719/dotfiles#1539 review (agy + codex)
+found that a Bash tool call is not guaranteed to inherit an earlier call's
+exports, so a step several `Skill()` calls downstream that trusted `$REMOTE`
+alone could silently read the wrong value. Step 1, and internally
+`lib/post-ai-metrics.sh` (Step 2.6), each source `lib/target-binding.sh`
+fresh in their own Bash call from the literal `<remote>` value the executing
+agent already knows from parsing it here in Step 1 — never a live `$REMOTE`
+read. (`lib/merge-train-wake.sh`, Step 2.4.1, needs no host/repo resolution
+at all — it only compares remote URLs, see `references/merge-train-wake.md`.)
 
 ## Why the host is passed explicitly
 

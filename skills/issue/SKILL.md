@@ -27,12 +27,8 @@ worktree 의 feature 브랜치 위.
 ## CRITICAL CONTRACT — read before editing
 
 **Recurring failure mode: early-stop after Step 2.x.** Three layered guards
-prevent it — (1) `--no-next-hint` on Step 2.1, (2) zero conversational text
-between the six `Skill()` calls in Step 2, (3) the harness Stop/SubagentStop
-guard in `dEitY719/dotfiles`, which tracks this skill's `gh-flow:issue`
-markers (dEitY719/dotfiles#1434). **Do not remove any of them.** Only prose is
-forbidden between the calls; the gate is delegated to Step 2.4. History and
-detection contract: `references/critical-contract.md`, `references/stop-guard.md`.
+prevent it; **do not remove any of them.** Full contract, history and
+detection mechanics: `references/critical-contract.md`.
 
 ## Step 1: Parse Args
 
@@ -41,12 +37,12 @@ path — which prints `references/help.md` verbatim and stops, no API calls:
 `references/help.md`. No `mode` arg — implementation is always `direct`.
 Record `START_TS=$(date +%s)` for elapsed-time tracking in Step 2.6.
 
-**Bind the GitHub target once, here (dEitY719/dotfiles#1403)** — resolve `GH_HOST` /
-`TARGET_REPO` / `TARGET_HOST` / `REMOTE` from the `[remote]`'s URL, and thread
-`[remote]` explicitly into 2.1–2.4 (dEitY719/dotfiles#1405). The two inline Bash steps (2.4.1,
-2.6) re-derive their own target from the literal `<remote>` instead of trusting
-that export to reach a later Bash call (dEitY719/dotfiles#1498). Block + rationale:
-`references/target-binding.md`.
+**Bind the GitHub target once, here (dEitY719/dotfiles#1403)** — source
+`lib/target-binding.sh` for `GH_HOST`/`TARGET_REPO`/`TARGET_HOST`/`REMOTE`
+from the `[remote]`'s URL, and thread `[remote]` explicitly into 2.1–2.4
+(dEitY719/dotfiles#1405). Step 2.6's own Bash call re-derives the target fresh from the
+literal `<remote>` instead of trusting this export to reach it (dEitY719/dotfiles#1498).
+Usage + rationale: `references/target-binding.md`.
 
 ## Step 2: Chain the Skills
 

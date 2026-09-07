@@ -3,7 +3,9 @@
 Runs immediately after Step 2.4 (`gh-verify:review-all`) has been dispatched,
 whenever Step 2.3 (`gh-pr:create`) produced a PR — regardless of whether Step 2.4
 itself succeeded, soft-failed, or warned. It sits between Step 2.4 and Step
-2.5 (`gh-resolve:conflict`).
+2.5 (`gh-resolve:conflict`). Mechanism: `lib/merge-train-wake.sh` — its own
+header documents usage, inputs and outputs in full; this file covers the
+*why*.
 
 ## Why this exists
 
@@ -55,12 +57,12 @@ Both alternatives were considered and rejected (issue dEitY719/dotfiles#1482 bod
 ## Guarded to `$HOME/dotfiles`'s own `origin` only (dEitY719/dotfiles#1498, PR dEitY719/dotfiles#1539 review)
 
 `pr_merge_train_cron.sh` (the script `aicron run merge-train` launches) only
-ever operates on `$HOME/dotfiles`'s own `origin` remote — see "Why the
-`$HOME/dotfiles` fallback is intentional" below. Waking it for a PR that
-`gh-flow:issue` pushed somewhere the dispatcher can't see nudges a process
-that will never find that PR: harmless, but pointless. The call is gated on
-whether `<remote>` — the same `[remote]` positional Step 1 resolved
-(`references/target-binding.md`) — points at that **same repo**.
+ever operates on `$HOME/dotfiles`'s own `origin` remote. Waking it for a PR
+that `gh-flow:issue` pushed somewhere the dispatcher can't see nudges a
+process that will never find that PR: harmless, but pointless.
+`lib/merge-train-wake.sh` gates the call on whether `<remote>` — the same
+`[remote]` positional Step 1 resolved (`references/target-binding.md`) —
+points at that **same repo**.
 
 Two failure modes were found and closed together, both from PR dEitY719/dotfiles#1539 review
 (agy + codex, independently, both BLOCKER):
@@ -73,8 +75,8 @@ Two failure modes were found and closed together, both from PR dEitY719/dotfiles
   export doesn't survive to this call, `${REMOTE:-origin}` silently falls
   back to `origin` and fires anyway — the exact failure this guard exists to
   prevent. **The fix: the executing agent substitutes the literal, already-
-  known `<remote>` value into the Bash call it writes for this step — never
-  a live `$REMOTE` read.** The agent parsed `[remote]` itself in Step 1; that
+  known `<remote>` value into the call it makes for this step** — never a
+  live `$REMOTE` read. The agent parsed `[remote]` itself in Step 1; that
   value lives in its own conversational context, not in shell state that can
   reset between tool calls.
 - **Don't compare by remote *name* alone.** Comparing `<remote> = "origin"`
@@ -87,27 +89,21 @@ Two failure modes were found and closed together, both from PR dEitY719/dotfiles
 ## The call
 
 ```bash
-_REMOTE="<remote>"   # <- literal value from Step 1's own arg parsing;
-                      #    the executing agent substitutes it here — never
-                      #    a live `$REMOTE`/`${REMOTE:-origin}` env read.
-_MY_URL=$(git remote get-url "$_REMOTE" 2>/dev/null)
-_DOTFILES_ORIGIN_URL=$(git -C "$HOME/dotfiles" remote get-url origin 2>/dev/null)
-if [ -n "$_MY_URL" ] && [ "$_MY_URL" = "$_DOTFILES_ORIGIN_URL" ]; then
-    _AICRON="${SHELL_COMMON:-${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common}/tools/custom/aicron.sh"
-    if [ -x "$_AICRON" ]; then
-        "$_AICRON" run merge-train >/dev/null 2>&1 &
-    else
-        printf '[WARN] aicron not found at %s — merge-train dispatcher wake skipped.\n' "$_AICRON" >&2
-    fi
-fi
+bash "${CLAUDE_PLUGIN_ROOT:-.}/skills/issue/lib/merge-train-wake.sh" "<remote>" &
 ```
+
+`<remote>` is the literal value from Step 1's own arg parsing — the
+executing agent substitutes it here, never a live `$REMOTE`/`${REMOTE:-origin}`
+env read. Run in the background (harness `run_in_background`, or the
+trailing `&` above when run as a plain script) and proceed to Step 2.5
+immediately — see "Fired in the background, not awaited" below.
 
 In the common single-clone dotfiles setup (the session's own worktree shares
 its remotes with `$HOME/dotfiles`, and `[remote]` defaults to `origin`),
-`$_MY_URL` and `$_DOTFILES_ORIGIN_URL` are the same string, so behavior is
-unchanged from the name-based check. The URL comparison only starts to
-differ — correctly refusing to fire — on a fork clone or a remote pointed at
-a different host/repo than `$HOME/dotfiles`'s own `origin`.
+the script's own URL comparison resolves the same as a name-based check
+would. It only starts to differ — correctly refusing to fire — on a fork
+clone or a remote pointed at a different host/repo than `$HOME/dotfiles`'s
+own `origin`.
 
 No output on the no-match path — silent skip, matching this skill suite's
 convention of staying quiet on an expected, non-error path (e.g.
@@ -115,65 +111,33 @@ convention of staying quiet on an expected, non-error path (e.g.
 as `[SKIP] Step 4.1: merge-train wake  (remote != origin)`
 (`references/report-template.md`).
 
-Called by absolute path (mirrors how cron itself invokes `aicron.sh`), not
-via the `aicron` shell function/alias — the function is guarded by the
-interactive-shell check in `shell-common/functions/aicron.sh` and is not
-reliably available in a skill's non-interactive Bash calls.
+The script invokes `aicron.sh` by absolute path (mirrors how cron itself
+invokes it), not via the `aicron` shell function/alias — the function is
+guarded by the interactive-shell check in `shell-common/functions/aicron.sh`
+and is not reliably available in a skill's non-interactive Bash calls.
 
 **Fired in the background, not awaited.** `pr_merge_train_cron.sh` blocks on
 `herdr agent prompt --wait --timeout 240000` when it actually launches a
 train — up to ~4 minutes, only to confirm the prompt was *accepted*, not that
 the train finished. Step 2.5/2.5.1 (the rebase steps right after this one)
 don't depend on the train's outcome, so awaiting that confirmation would only
-stall the chain for no benefit. The executing agent should launch this call
-without waiting for it (harness `run_in_background`, or the trailing `&`
-above when run as a plain script) and proceed to Step 2.5 immediately.
-One consequence: the dispatcher's own exit code is never observed here —
-see "Soft-fail policy" below.
+stall the chain for no benefit. One consequence: the dispatcher's own exit
+code is never observed here — see "Soft-fail policy" below.
 
 **Why the `$HOME/dotfiles` fallback is intentional, not a portability gap.**
-`gh-flow:issue`'s own precondition is a dedicated feature-branch
-**worktree**, never the checkout at `$HOME/dotfiles` — but crontab always
-calls `$HOME/dotfiles/shell-common/tools/custom/aicron.sh` (see
-`crontab -l`), never a worktree path, because a worktree is torn down after
-its PR merges while the crontab entry is permanent. Waking the *same*
-dispatcher instance cron uses — not a worktree-local copy that may not have
-`aicron`'s installed state/manifest, and would vanish with the worktree —
-is the correct target. The `${SHELL_COMMON:-${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common}`
-chain reaches that target in two tiers, not by falling through past a
-worktree-scoped value:
-
-1. **`SHELL_COMMON` is already canonical (dEitY719/dotfiles#589).** An interactive shell that
-   started this skill session sourced `bash/main.bash` / `zsh/main.zsh`,
-   which calls `_dotfiles_root_canonicalize` (`shell-common/functions/dotfiles_root.sh:110`)
-   at loader entry. That function walks a linked worktree back to the main
-   worktree via `git rev-parse --git-common-dir` and re-exports both
-   `DOTFILES_ROOT` and `SHELL_COMMON` (`dotfiles_root.sh:116`) to the main
-   checkout path — the same path crontab uses. So in the common case
-   `SHELL_COMMON` is picked first by the `:-` chain and is *already* the
-   live checkout; there is no fall-through happening.
-2. **`$HOME/dotfiles` is the last-resort tier**, used only when
-   `SHELL_COMMON`/`DOTFILES_ROOT` are both unset — a non-interactive
-   environment where no loader ran to canonicalize them.
-
-**Caveat on both tiers.** The split above assumes the running shell —
-interactive, or a non-interactive agent/automation session — itself sourced
-`bash/main.bash` / `zsh/main.zsh`, or inherited its environment from a parent
-that did. A shell that instead manually exports `SHELL_COMMON`/`DOTFILES_ROOT`,
-or inherits them from a process that never ran the loader, sits outside that
-guarantee: tier 1 can pick up a stale or non-canonical `SHELL_COMMON` value,
-and tier 2 only fires when both variables are literally unset, not merely
-stale. This degrades safely in practice — Step 2.4.1 is a best-effort
-background wake, never load-bearing for the flow itself — but the two tiers
-above describe the common case, not an invariant.
-
-**Escape hatch interaction.** `DOTFILES_ROOT_NO_CANONICALIZE=1`
-(`_resolve_dotfiles_root_canonical` in `dotfiles_root.sh`) disables tier 1's
-canonicalization for a shell that intentionally wants to test a worktree's
-own dotfiles. If that variable is set in the shell running Step 2.4.1,
-`SHELL_COMMON` stays worktree-scoped and this step wakes the
-**worktree-local** `aicron.sh` instead of the live checkout — the exact
-outcome this section says is undesirable.
+`gh-flow:issue`'s own precondition is a dedicated feature-branch worktree,
+never the checkout at `$HOME/dotfiles` — but crontab always calls
+`$HOME/dotfiles/shell-common/tools/custom/aicron.sh`, never a worktree path,
+because a worktree is torn down after its PR merges while the crontab entry
+is permanent. `SHELL_COMMON` is already canonicalized to the main checkout
+by the shell loader (`_dotfiles_root_canonicalize`,
+`shell-common/functions/dotfiles_root.sh:110`) in the common case; the
+script's `${SHELL_COMMON:-${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common}`
+chain falls to the `$HOME/dotfiles` tier only when neither variable is set.
+Setting `DOTFILES_ROOT_NO_CANONICALIZE=1` (`_resolve_dotfiles_root_canonical`
+in `dotfiles_root.sh`) makes the script wake a worktree-local `aicron.sh`
+instead — the shell that intentionally wants that has opted out of the
+canonicalization this step otherwise relies on.
 
 ## Soft-fail policy (F-2)
 
@@ -194,3 +158,5 @@ Step 3's report shows one row for this step: `[OK]` (dispatcher launched,
 regardless of what it does after that), `[WARN] (aicron.sh missing)` on the
 one synchronous failure path above. It never produces a `stopped at` report
 — see `references/report-template.md`.
+
+Self-check: `lib/merge-train-wake.selfcheck.sh`.
