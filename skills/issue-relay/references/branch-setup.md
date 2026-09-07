@@ -6,8 +6,16 @@ is `lib/branch-setup.sh`; this file covers the *why* plus the one part the
 script deliberately leaves out: the reuse-or-reset conversation with the user.
 
 ```bash
-eval "$(bash "${CLAUDE_PLUGIN_ROOT}/skills/issue-relay/lib/branch-setup.sh" "$REMOTE" "$N" [--base "$BASE"])" || exit 1
+_bs_out=$(bash "${CLAUDE_PLUGIN_ROOT}/skills/issue-relay/lib/branch-setup.sh" "$REMOTE" "$N" [--base "$BASE"]) || exit 1
+eval "$_bs_out"
 ```
+
+Capture the substitution into a variable before `eval` (codex review, PR #20
+BLOCKER) — `eval "$(...)" || exit 1` does not propagate a failed run's exit
+status: a run that errors before printing anything leaves `$(...)` empty,
+`eval ""` exits 0 trivially, and `|| exit 1` never fires, so the caller
+continues with unset/stale `DEST_REPO`/`DEST_HOST`/`BASE_BRANCH`/`BRANCH`.
+Assigning to `_bs_out` first makes its own exit status the one `||` checks.
 
 Prints `DEST_REPO=... DEST_HOST=... BASE_BRANCH=... BRANCH=...` for `eval`.
 Its own header documents inputs/outputs in full (`skill-check` Check 12: this

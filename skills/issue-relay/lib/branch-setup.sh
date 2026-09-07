@@ -9,7 +9,14 @@
 # skills/issue/lib/target-binding.sh's header for the sourced-script version
 # of this same hazard, worked around there with an env var instead):
 #
-#   eval "$(bash "${CLAUDE_PLUGIN_ROOT}/skills/issue-relay/lib/branch-setup.sh" "$REMOTE" "$ISSUE" [--base "$BASE"])" || exit 1
+#   _bs_out=$(bash "${CLAUDE_PLUGIN_ROOT}/skills/issue-relay/lib/branch-setup.sh" "$REMOTE" "$ISSUE" [--base "$BASE"]) || exit 1
+#   eval "$_bs_out"
+#
+# Capture-then-eval, not `eval "$(... )" || exit 1` (codex review, PR #20
+# BLOCKER): eval on the empty string a failed run prints to stdout exits 0,
+# so `|| exit 1` never fires and the caller continues with unset/stale
+# DEST_REPO/DEST_HOST/BASE_BRANCH/BRANCH. Assigning the substitution to a
+# variable first makes its own exit status the one `||` sees.
 #
 # Stops short of creating/reusing the branch — the reuse-or-reset decision
 # stays a conversation with the user (references/branch-setup.md, "Create or
