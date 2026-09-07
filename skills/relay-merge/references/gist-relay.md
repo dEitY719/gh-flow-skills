@@ -4,11 +4,10 @@ Step 5. Uploads each patch file from Step 4 as its own gist.
 
 ## The hard rule: one file, one call, sequential
 
+`lib/relay.sh upload` is that loop — the rule is the code, not a reminder:
+
 ```bash
-for patch in "$tmpdir"/*.patch; do
-    GH_HOST="$DEST_HOST" gh gist create "$patch" --desc "relay: $(basename "$patch")"
-    # capture the returned gist URL for the apply-guide table
-done
+bash "${CLAUDE_PLUGIN_ROOT}/skills/relay-merge/lib/relay.sh" upload "$DEST_HOST" "$tmpdir"
 ```
 
 ## Which host the gists live on: the destination
@@ -33,39 +32,35 @@ this skill relays through. Put the gists where the reader is.
 - **Sequential, never parallel.** Parallel uploads risk rate-limit / abuse
   triggers on the same policy. Run one at a time.
 
-## Capturing the raw URL
+## The output rows
 
-`gh gist create` prints the gist's web URL. The apply-guide needs the
-**raw** URL for `curl … | git am`. Derive it after creation:
+`gh gist create` prints only the gist's web URL, but the apply-guide needs
+the **raw** URL for `curl … | git am`, so `upload` resolves it from the gist
+API (`gh api gists/<id> --jq '.files[].raw_url'`) — pointing at the exact
+file rather than hand-constructing the URL — and prints one TSV row per
+patch, in apply order:
 
-```bash
-GIST_URL=$(GH_HOST="$DEST_HOST" gh gist create "$patch" --desc "...")   # https://gist.github.com/<user>/<id>
-GIST_ID=${GIST_URL##*/}
-RAW_URL=$(GH_HOST="$DEST_HOST" gh api "gists/$GIST_ID" --jq '.files[].raw_url')  # exact file's raw URL
+```
+<order>	<description>	<web-url>	<raw-url>
 ```
 
-Resolve the raw URL from the gist API (`.files[].raw_url`) so it points at
-the exact file, rather than hand-constructing it. Record `(order,
-description, web URL, raw URL)` per patch for the Step 6 table.
+`<description>` is the patch's `Subject:` line (the commit subject), so the
+destination reader knows what each patch does without opening it. `<order>`
+is the patch's `NNNN` slot, or `NNNN-<k>` for a file-group sub-patch. These
+rows are the Step 6 table verbatim.
 
 ## Failure handling
 
+- **Transient/network failure** — `upload` retries that single gist once
+  after a short backoff (same policy as the push probe). Still failing →
+  exit 4.
+- **Any other failure** — exit 4. No automatic retries beyond the one
+  transient-error backoff.
 - **Size-related failure on an individual file** — Step 4's exclusion did
-  not clear the cutoff, or a non-artifact file is itself oversized. Report
-  which file and stop; do not force it through (no-silent-truncation rule,
-  see `references/patch-generation.md`).
-- **Transient/network failure** — retry that single upload once after a
-  short backoff (same policy as the push probe). Still failing → stop.
-- **Any other failure** — report and stop. No automatic retries beyond the
-  one transient-error backoff.
+  not clear the cutoff. Report which file and stop; do not force it through
+  (no-silent-truncation rule, see `references/patch-generation.md`).
 
-On stop, list the gists already created (so the user knows what exists) and
-do not proceed to Step 6 with a partial set — a partial apply-guide would
-be misleading.
-
-## One-line description per patch
-
-While uploading, keep a human-readable one-line summary for each patch
-(from the commit subject) — it becomes the description column in the
-apply-guide table so the destination reader knows what each patch does
-without opening it.
+The rows already printed **are** the list of gists that exist — `upload`
+prints as it goes for exactly this reason. Put them in the Step 8 `[FAIL]`
+block's "gists already created" line and do not proceed to Step 6 with a
+partial set; a partial apply-guide would be misleading.
