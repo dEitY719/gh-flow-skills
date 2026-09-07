@@ -49,10 +49,10 @@ never skip ahead.
 
 ## Step 2: Resolve Destination + Branch
 
-Follow `references/branch-setup.md`. Resolves `--remote` (hard error on a missing remote — never fall back to
-`origin`) and binds `DEST_REPO` + `DEST_HOST` from that one remote URL, detects the destination's default branch
-(or honors `--base`), fetches it, computes the branch name `issue-<N>-<title-slug>`, and either creates a fresh
-branch or handles the "branch already exists" reuse/reset decision (never auto-resets a branch with unique
+Follow `references/branch-setup.md`. Run `lib/branch-setup.sh` (hard error on a missing remote — never fall back
+to `origin`) to bind `DEST_REPO` + `DEST_HOST` from the one remote URL, detect the destination's default branch
+(or honor `--base`), fetch it, and compute the branch name `issue-<N>-<title-slug>`; then either create a fresh
+branch or handle the "branch already exists" reuse/reset decision (never auto-resets a branch with unique
 commits without asking). Destination `gh` calls run as `GH_HOST="$DEST_HOST" gh ... --repo "$DEST_REPO"` — the
 destination is a different host from `origin` by construction, so there is no global `GH_HOST` (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
@@ -80,10 +80,8 @@ unrelated failures through `--known-failures` (comma-separated
 
 ## Step 6: Report
 
-Relay `gh-flow:relay-merge`'s Step 8 output as-is (destination comment URL, gist count, whether SIMPLE PATH or relay
-mode was used), then end with a single `[OK]`/`[FAIL]` line summarizing the whole chain (branch created, Worker
-delegated, Advisor verification result, relay result), followed by a `Next:` line naming the concrete follow-up —
-the apply-guide comment URL (relay mode) or the created PR URL (SIMPLE PATH, no relay needed).
+Follow `references/report-template.md` for the exact `[OK]`/`[FAIL]` format —
+relay `gh-flow:relay-merge`'s Step 8 output first, then the chain summary.
 
 ## Constraints
 

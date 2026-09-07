@@ -1,48 +1,44 @@
 # gh-flow:issue-relay — Destination Remote + Branch Setup
 
-Detailed procedure for Step 2.
+Detailed procedure for Step 2. The deterministic part — remote resolution,
+default-branch detection, and slugifying the issue title into a branch name —
+is `lib/branch-setup.sh`; this file covers the *why* plus the one part the
+script deliberately leaves out: the reuse-or-reset conversation with the user.
 
-## Resolve `--remote`
+```bash
+_bs_out=$(bash "${CLAUDE_PLUGIN_ROOT}/skills/issue-relay/lib/branch-setup.sh" "$REMOTE" "$N" [--base "$BASE"]) || exit 1
+eval "$_bs_out"
+```
 
-Resolve exactly as `gh-flow:relay-merge` does in
+Capture the substitution into a variable before `eval` (codex review, PR #20
+BLOCKER) — `eval "$(...)" || exit 1` does not propagate a failed run's exit
+status: a run that errors before printing anything leaves `$(...)` empty,
+`eval ""` exits 0 trivially, and `|| exit 1` never fires, so the caller
+continues with unset/stale `DEST_REPO`/`DEST_HOST`/`BASE_BRANCH`/`BRANCH`.
+Assigning to `_bs_out` first makes its own exit status the one `||` checks.
+
+Prints `DEST_REPO=... DEST_HOST=... BASE_BRANCH=... BRANCH=...` for `eval`.
+Its own header documents inputs/outputs in full (`skill-check` Check 12: this
+used to be a prose command sequence, including hand-slugified branch-name
+prose that could produce a different name on a second run of the same title —
+now one deterministic script, unit-tested in
+`lib/branch-setup.selfcheck.sh`).
+
+Remote resolution inside the script mirrors `gh-flow:relay-merge`'s
 `skills/relay-merge/references/remote-resolution.md` — same
 default (`upstream`), same hard-error-on-missing-remote rule, same
-never-fall-back-to-`origin` rule. Do not re-derive this logic here; if that
-file's procedure changes, this skill inherits the change by reference.
+never-fall-back-to-`origin` rule. It is issue-relay's own copy rather than a
+shared implementation because `relay-merge` also accepts a raw-URL
+destination with no configured remote, which this skill's `--remote <name>`
+never takes.
 
-That procedure also binds `DEST_REPO` **and** `DEST_HOST` from the one
-destination remote URL. Both are required downstream: Step 3's issue fetch
-runs as `GH_HOST="$DEST_HOST" gh issue view <N> --repo "$DEST_REPO" ...`,
-and `gh-flow:relay-merge` re-resolves the same pair for its own calls. Never
+`DEST_REPO`/`DEST_HOST` are required downstream: Step 3's issue fetch runs as
+`GH_HOST="$DEST_HOST" gh issue view <N> --repo "$DEST_REPO" ...`, and
+`gh-flow:relay-merge` re-resolves the same pair for its own calls. Never
 export a single global `GH_HOST` in this flow — `origin` and the destination
 are deliberately different hosts (dEitY719/dotfiles#1403 / dEitY719/dotfiles#1407).
 
-```
-Error: no 'upstream' remote and no --remote given.
-origin is the internal remote and is never a relay destination.
-Pass --remote <name-or-URL> explicitly.
-```
-
-## Detect the destination default branch
-
-Unless `--base <branch>` was given:
-
-```bash
-DEFAULT_BRANCH=$(git ls-remote --symref "$REMOTE" HEAD \
-  | awk '/^ref:/ {sub("refs/heads/", "", $2); print $2}')
-git fetch "$REMOTE" "$DEFAULT_BRANCH"
-```
-
-If `--base` was given, skip detection and `git fetch "$REMOTE" "$BASE"`
-directly; treat `$BASE` as `$DEFAULT_BRANCH` for the rest of this file.
-
 ## Branch naming: `issue-<N>-<title-slug>`
-
-Slugify the issue title: lowercase, strip punctuation, collapse
-whitespace/special characters to single hyphens. Example: issue dEitY719/dotfiles#1346
-titled "feat(skills): gh-flow:issue-relay 신설 + gh-flow:relay-merge push-probe
-버그 수정" → `issue-1346-feat-skills-gh-flow-issue-relay` (truncate an
-overlong slug; the issue number prefix is what matters for lookup).
 
 **Why issue-number-first, not `wt/<agent>/<N>`:** this session itself runs
 on a worktree branch prefixed `issue-1346` (e.g. `wt/issue-1346/1`), so an
@@ -56,34 +52,34 @@ that will be pushed via relay. Do not conflate the two.
 ## Create or reuse
 
 ```bash
-git checkout -b "issue-<N>-<slug>" "$REMOTE/$DEFAULT_BRANCH"
+git checkout -b "$BRANCH" "$REMOTE/$BASE_BRANCH"
 ```
 
 If a local branch with that exact name already exists, `checkout -b` fails.
 Handle it instead of erroring out:
 
-1. `LOCAL_TIP=$(git rev-parse issue-<N>-<slug>)` and
-   `DEST_TIP=$(git rev-parse "$REMOTE/$DEFAULT_BRANCH")`.
+1. `LOCAL_TIP=$(git rev-parse "$BRANCH")` and
+   `DEST_TIP=$(git rev-parse "$REMOTE/$BASE_BRANCH")`.
 2. **`LOCAL_TIP == DEST_TIP`** — the branch is a clean, unmodified snapshot
-   of the destination default branch. Just `git checkout issue-<N>-<slug>`
+   of the destination default branch. Just `git checkout "$BRANCH"`
    and continue; no confirmation needed.
 3. **`LOCAL_TIP != DEST_TIP`** — check for unique work first:
    ```bash
-   git log "$REMOTE/$DEFAULT_BRANCH..issue-<N>-<slug>" --oneline
+   git log "$REMOTE/$BASE_BRANCH..$BRANCH" --oneline
    ```
    - **Any commits listed** — the branch has work not on the destination.
-     **Never reset automatically.** Tell the user: "Branch `issue-<N>-<slug>`
-     has N unique commit(s) not on `$REMOTE/$DEFAULT_BRANCH`: <list>. Reset
-     to `$REMOTE/$DEFAULT_BRANCH` (discarding them) or keep and continue on
+     **Never reset automatically.** Tell the user: "Branch `$BRANCH`
+     has N unique commit(s) not on `$REMOTE/$BASE_BRANCH`: <list>. Reset
+     to `$REMOTE/$BASE_BRANCH` (discarding them) or keep and continue on
      top of them?" — wait for the answer.
    - **No commits listed** — the branch is just a stale snapshot (destination
      moved forward, or a local no-op commit predates it with no unique diff
-     content). Ask before touching it anyway ("branch `issue-<N>-<slug>`
-     is stale relative to `$REMOTE/$DEFAULT_BRANCH` but has no unique
+     content). Ask before touching it anyway ("branch `$BRANCH`
+     is stale relative to `$REMOTE/$BASE_BRANCH` but has no unique
      commits — reset it?"), then on yes:
      ```bash
-     git checkout issue-<N>-<slug>
-     git reset --hard "$REMOTE/$DEFAULT_BRANCH"
+     git checkout "$BRANCH"
+     git reset --hard "$REMOTE/$BASE_BRANCH"
      ```
 
 Never silently pick a resolution for case 3 — both branches of it require
