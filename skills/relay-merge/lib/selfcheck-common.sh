@@ -15,3 +15,9 @@ chk() { # chk <label> <got> <want>
         FAIL=1
     fi
 }
+
+# chk_grep <label> <pattern> <file> [want-exit-code, default 0]
+chk_grep() {
+    grep -q "$2" "$3"
+    chk "$1" "$?" "${4:-0}"
+}
