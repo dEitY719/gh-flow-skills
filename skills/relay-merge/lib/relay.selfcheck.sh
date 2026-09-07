@@ -72,15 +72,36 @@ git -C "$W" add big1.py big2.py && git -C "$W" commit -q -m 'feat: two big files
 out=$(cd "$W" && RELAY_PATCH_MAX_BYTES=14000 bash "$TARGET" patches "$FROM4..HEAD" "$TMP/o4" 2>"$TMP/err")
 chk "pre-split: exit 0" "$?" "0"
 chk "pre-split: one sub-patch per file group" \
-    "$(printf '%s\n' "$out" | awk -F'\t' '/^PATCH/ {printf "%s ", $2}')" "0001-1 0001-2 "
+    "$(printf '%s\n' "$out" | awk -F'\t' '/^PATCH/ {printf "%s ", $2}')" "0001-01 0001-02 "
 over=$(printf '%s\n' "$out" | awk -F'\t' '/^PATCH/ && $3 > 14000 {print $2}')
 chk "pre-split: every sub-patch is under the cap" "$over" ""
 seq4=$(cd "$TMP/o4" && for p in *.patch; do printf '%s ' "$(printf '%s' "$p" | sed -E 's/^([0-9]+-[0-9]+).*/\1/')"; done)
-chk "pre-split: sub-patches sort in apply order" "$seq4" "0001-1 0001-2 "
+chk "pre-split: sub-patches sort in apply order" "$seq4" "0001-01 0001-02 "
 git -C "$W" checkout -q -b amtest "$FROM4"
 (cd "$W" && git am -q "$TMP"/o4/*.patch >/dev/null 2>&1)
 chk "pre-split: the sub-patches still git-am cleanly, in order" "$?" "0"
 git -C "$W" checkout -q - && git -C "$W" branch -qD amtest
+
+# --- 4b. patches: 10+ sub-patches zero-pad so lexical sort == apply order --
+# Regression for codex review (PR #22): unpadded "0001-10" sorted before
+# "0001-2" lexically, corrupting `git am` order past 9 sub-patches.
+FROM4B=$(git -C "$W" rev-parse HEAD)
+for i in $(seq -w 1 11); do
+    blob 60 >"$W/big$i.py"
+done
+git -C "$W" add "big"*.py && git -C "$W" commit -q -m 'feat: eleven big files'
+
+out=$(cd "$W" && RELAY_PATCH_MAX_BYTES=4200 bash "$TARGET" patches "$FROM4B..HEAD" "$TMP/o4b" 2>"$TMP/err")
+chk "10+ split: exit 0" "$?" "0"
+chk "10+ split: eleven sub-patches, one per file" \
+    "$(printf '%s\n' "$out" | grep -c '^PATCH')" "11"
+glob_order=$(cd "$TMP/o4b" && printf '%s\n' *.patch | sed -E 's/^([0-9]+-[0-9]+).*/\1/' | tr '\n' ' ')
+chk "10+ split: plain glob/lexical sort already matches apply order" \
+    "$glob_order" "0001-01 0001-02 0001-03 0001-04 0001-05 0001-06 0001-07 0001-08 0001-09 0001-10 0001-11 "
+git -C "$W" checkout -q -b amtest4b "$FROM4B"
+(cd "$W" && git am -q "$TMP"/o4b/*.patch >/dev/null 2>&1)
+chk "10+ split: all eleven sub-patches git-am cleanly, in order" "$?" "0"
+git -C "$W" checkout -q - && git -C "$W" branch -qD amtest4b
 
 # --- 5. patches: a single oversized file stops the run, never truncates ----
 FROM5=$(git -C "$W" rev-parse HEAD)
@@ -154,5 +175,29 @@ chk "upload: no multi-file gist call" \
 : >"$GH_CALL_LOG"
 (cd "$W" && PATH="$TMP/bin:$PATH" bash "$TARGET" upload github.com "$TMP/empty-dir" >/dev/null 2>&1)
 chk "upload: an empty patch dir is an error, not a silent success" "$?" "1"
+
+# --- 9. upload: a URL-less "success" from `gh gist create` is not shipped --
+# Regression for codex review (PR #22): `gh gist create` exiting 0 with no
+# URL in its output used to fall through as a false success carrying an
+# empty gist URL, which cmd_upload then fed into a malformed `gh api
+# gists/` call instead of failing loudly.
+mkdir -p "$TMP/o9" "$TMP/bin9"
+cp "$TMP/o1"/0001-*.patch "$TMP/o9/"
+cat >"$TMP/bin9/gh" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$*" >>"$GH_CALL_LOG"
+if [ "$1" = "gist" ] && [ "$2" = "create" ]; then
+    echo "ok, but no url on this line"
+    exit 0
+fi
+echo "unexpected gh call: $*" >&2
+exit 1
+EOF
+chmod +x "$TMP/bin9/gh"
+: >"$GH_CALL_LOG"
+(cd "$W" && PATH="$TMP/bin9:$PATH" bash "$TARGET" upload github.com "$TMP/o9" >/dev/null 2>"$TMP/err")
+chk "upload: a URL-less 'success' is treated as failure, not shipped empty" "$?" "4"
+chk "upload: retries once before giving up on a URL-less response" \
+    "$(grep -c '^gist create ' "$GH_CALL_LOG")" "2"
 
 exit "$FAIL"
