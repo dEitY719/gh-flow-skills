@@ -46,6 +46,7 @@ chk "GH_DISABLE_AI_METRICS=1: no output, no gh call" "$out" ""
 cat > "$TMP/bin/gh" <<EOF
 #!/bin/sh
 echo "\$@" > "$TMP/gh-call-args"
+echo "\$GH_HOST" > "$TMP/gh-call-host"
 for a in "\$@"; do
     case "\$a" in
         body=@*) cp "\${a#body=@}" "$TMP/gh-call-body" ;;
@@ -58,6 +59,11 @@ out=$( PATH="$TMP/bin:$PATH" bash "$TARGET" origin 42 "$START_TS" feat small 400
 chk "happy path: no [WARN]" "$out" ""
 CALL_ARGS=$(cat "$TMP/gh-call-args" 2>/dev/null)
 CALL_BODY=$(cat "$TMP/gh-call-body" 2>/dev/null)
+# codex review of PR #19 FOLLOW-UP: the stub used to record only argv, so a
+# regression dropping the load-bearing `GH_HOST="$TARGET_HOST"` env pin
+# (repos/lib/post-ai-metrics.sh's only defense against a dual-host `gh`
+# misroute, dEitY719/dotfiles#1403) would have passed silently.
+chk "happy path: GH_HOST pinned to the remote's host" "$(cat "$TMP/gh-call-host" 2>/dev/null)" "github.com"
 case "$CALL_ARGS" in
     "api repos/acme/widget/issues/42/comments -X POST -f body=@"*)
         chk "happy path: correct endpoint, body passed by file" "match" "match" ;;
