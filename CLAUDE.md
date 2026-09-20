@@ -76,6 +76,13 @@ a hook contract, not prose.** `gh-flow:issue complete (#<N>)`,
 without the matching hook change re-opens the early-stop regression those hooks
 exist to prevent (dEitY719/dotfiles#333, dEitY719/dotfiles#383, and four later recurrences).
 
+`drain`'s own terminal strings — `gh-flow:drain complete` and `gh-flow:drain
+stopped —` in `skills/drain/references/report-format.md` — belong to the same
+contract, with one difference: no hook matches them yet (#18). They are pinned
+first so the guard in `dEitY719/dotfiles` can be written against them, and
+`skills/drain/references/constraints.md` records that a drain run is meanwhile
+guarded by prose alone.
+
 ## Layout: root manifests, one flat `skills/`
 
 This repo deliberately does **not** use the nested `plugins/<name>/skills/`
