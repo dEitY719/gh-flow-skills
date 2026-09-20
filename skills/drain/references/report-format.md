@@ -1,7 +1,8 @@
 # gh-flow:drain — Report format (F-7)
 
-Plain assistant text. Never a `Bash` heredoc, never `Write` — same rule as the
-sibling skills in this repo.
+Plain assistant text. Never a `Bash` heredoc, never `Write` — a marker on any
+other channel is invisible to the Stop guard, so a correctly-worded report still
+reads as an unfinished run. Same rule as the sibling skills in this repo.
 
 ## Per round
 
@@ -57,28 +58,12 @@ header line. One ending, one `Next:` — there is no second lookup table:
   (`references/promotion.md`). `Next:` `/gh-issue:create` for the named item,
   then re-run the drain.
 
-## The terminal strings are a hook contract, not prose
+## The terminal strings are a hook contract
 
 `gh-flow:drain complete` and `gh-flow:drain stopped —` are the terminal markers
 a `Stop` / `SubagentStop` guard matches to decide that a drain run really
-finished — the same role `gh-flow:issue complete (#<N>)` plays for the sibling
-skill (`../../issue/references/stop-guard.md` is the SSOT for that mechanism).
-The guard's side of the contract, hyphen form included:
-
-```
-gh-flow[-:]drain\s+(?:complete\s*\(|stopped\s+—)
-```
-
-Two consequences for whoever edits the templates above:
-
-- **Both strings stay verbatim.** Rewording either one without the matching
-  hook change re-opens the early-stop failure mode (dEitY719/dotfiles#333,
-  dEitY719/dotfiles#383 for `gh-flow:issue`; issue #18 for this skill).
-- **Plain assistant text only.** A marker printed through `Bash` or `Write` is
-  invisible to the guard, so a correctly-worded report emitted on the wrong
-  channel still reads as an unfinished run.
-
-As of issue #18 no guard in `dEitY719/dotfiles` matches these strings yet — a
-drain run is still guarded by prose alone. The strings are pinned here first so
-the hook can be written against them; `references/constraints.md` carries the
-current state.
+finished — the role `gh-flow:issue complete (#<N>)` plays for the sibling skill
+(`../../issue/references/stop-guard.md` is the SSOT for that mechanism). Keep
+both verbatim: rewording either without the matching hook change re-opens the
+early-stop failure mode (dEitY719/dotfiles#333, dEitY719/dotfiles#383 for
+`gh-flow:issue`; issue #18 for this skill).

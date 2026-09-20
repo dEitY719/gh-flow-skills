@@ -34,12 +34,9 @@
 - **The round table is not a final answer.** It is emitted between rounds and
   the next round starts immediately after it. A run that ends on a round table
   without a final report has stopped early. Unlike `gh-flow:issue` and
-  `gh-flow:autopilot`, drain has **no Stop hook behind it yet** — its terminal
-  markers `gh-flow:drain complete` / `gh-flow:drain stopped —` are pinned as a
-  hook contract in `references/report-format.md`, but no guard in
-  `dEitY719/dotfiles` matches them (issue #18), so this rule is still the only
-  guard against that failure mode. Worse, the guard that *is* installed can end
-  a drain run early: `gh_issue_flow_stop_guard.py` allows the stop once the last
-  inner `gh-flow:issue` has reported, which is before drain's promotion, blocked
-  classification and final report. Inside a single round, keep the chained
-  `Skill()` calls free of conversational text.
+  `gh-flow:autopilot`, drain has **no Stop hook behind it yet** (issue #18), so
+  this rule is the only guard against that failure mode — the installed
+  `gh_issue_flow_stop_guard.py` covers the inner calls only, and its protection
+  lapses the moment the last inner `gh-flow:issue` reports, before drain's
+  promotion, blocked classification and final report. Inside a single round,
+  keep the chained `Skill()` calls free of conversational text.
