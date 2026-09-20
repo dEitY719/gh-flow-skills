@@ -40,14 +40,16 @@ if [ ! -f "$_tb_sc/functions/gh_host.sh" ]; then
     _tb_sc="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                          # tier 2
 fi
 unset -f _gh_resolve_host 2>/dev/null || :
+unalias _gh_resolve_host 2>/dev/null || :
+export SHELL_COMMON="$_tb_sc"                                                     # before the load
 # shellcheck disable=SC1091  # path is resolved at runtime
 [ -f "$_tb_sc/functions/gh_host.sh" ] && . "$_tb_sc/functions/gh_host.sh"
-if ! command -v _gh_resolve_host >/dev/null 2>&1; then                           # tier 5
+if [ "$(command -v _gh_resolve_host 2>/dev/null)" != _gh_resolve_host ]; then     # tier 5
+    unset SHELL_COMMON
     printf '[gh-flow:issue] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
         "$_tb_sc" >&2
     return 1 2>/dev/null || exit 1
 fi
-export SHELL_COMMON="$_tb_sc"
 
 REMOTE="$_tb_remote"
 if ! REMOTE_URL=$(git remote get-url "$REMOTE" 2>/dev/null); then

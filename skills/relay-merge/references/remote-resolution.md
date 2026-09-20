@@ -57,13 +57,15 @@ asymmetric-network setup is `origin` = internal (isolated GHE),
        _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                             # tier 2
    fi
    unset -f _gh_resolve_host 2>/dev/null || :
+   unalias _gh_resolve_host 2>/dev/null || :
+   export SHELL_COMMON="$_SC"                                                        # before the load
    [ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-   command -v _gh_resolve_host >/dev/null 2>&1 || {                                  # tier 5
+   [ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || {          # tier 5
+       unset SHELL_COMMON
        printf '[gh-flow:relay-merge] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
            "$_SC" >&2
        return 1 2>/dev/null || exit 1
    }
-   export SHELL_COMMON="$_SC"
    REMOTE_URL=$(git remote get-url "$REMOTE_NAME") || exit 1   # or "$REMOTE_URL" on the raw-URL path
    DEST_REPO=$(_gh_parse_owner_repo_url "$REMOTE_URL") || exit 1
    DEST_HOST=$(_gh_host_from_url "$REMOTE_URL") || DEST_HOST=$(_gh_resolve_host)
