@@ -88,9 +88,12 @@ if [ "${BRANCH_SETUP_LIB_ONLY:-0}" != "1" ]; then
         _bs_sc="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                          # tier 2
     fi
     unset -f _gh_resolve_host 2>/dev/null || :
+    unalias _gh_resolve_host 2>/dev/null || :
+    export SHELL_COMMON="$_bs_sc"                                                     # before the load
     # shellcheck disable=SC1091  # path is resolved at runtime
     [ -f "$_bs_sc/functions/gh_host.sh" ] && . "$_bs_sc/functions/gh_host.sh"
-    if ! command -v _gh_resolve_host >/dev/null 2>&1; then                            # tier 5
+    if [ "$(command -v _gh_resolve_host 2>/dev/null)" != _gh_resolve_host ]; then     # tier 5
+        unset SHELL_COMMON
         printf '[gh-flow:issue-relay] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_bs_sc" >&2
         exit 1

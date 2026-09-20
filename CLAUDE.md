@@ -164,6 +164,15 @@ should apply here on the next run, which is the whole point.
     hands off to `gh-pr:create` when it does. The patch+gist relay is a
     fallback, never the default. It never truncates an oversized patch silently.
   - Neither relay skill rewrites history on the destination remote.
+- **The shell-common loader is one shape, owned upstream.** All four sites —
+  `autopilot`'s and `relay-merge`'s reference blocks and the two `lib/*.sh` —
+  use the canonical form from
+  [`harness-skills` `references/plugin-root.md`](https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md)
+  verbatim: `unset -f` + `unalias`, `export SHELL_COMMON` **before** the `.`,
+  the equality proof `[ "$(command -v <fn> 2>/dev/null)" = <fn> ]`, and
+  `unset SHELL_COMMON` on the tier-5 arm. Do not adapt it locally — change it
+  upstream and re-roll. `tests/plugin-root-loader.sh` is the guard; each of the
+  three fixes is silent when reverted, which is why it exists (#25).
 - **Host pinning is not optional.** Every skill binds `TARGET_HOST` +
   `TARGET_REPO` from the remote URL before any `gh` call and prefixes each call
   with `GH_HOST=` (dEitY719/dotfiles#1403). Dropping the prefix sends a GHES repo's request to

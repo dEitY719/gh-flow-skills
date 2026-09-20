@@ -13,13 +13,15 @@ origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
         _SC="$CLAUDE_PLUGIN_ROOT/lib/vendor/shell-common"                            # tier 2
     fi
     unset -f _gh_resolve_host 2>/dev/null || :
+    unalias _gh_resolve_host 2>/dev/null || :
+    export SHELL_COMMON="$_SC"                                                       # before the load
     [ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
-    command -v _gh_resolve_host >/dev/null 2>&1 || {                                 # tier 5
+    [ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || {         # tier 5
+        unset SHELL_COMMON
         printf '[gh-flow:autopilot] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
             "$_SC" >&2
         return 1 2>/dev/null || exit 1
     }
-    export SHELL_COMMON="$_SC"
     HOST="$(_gh_resolve_host)"        # internal→github.samsungds.net, 그 외→github.com
 
 - 모든 `gh` 호출은 해석된 host 로 라우팅한다. gh CLI 는 `GH_HOST` 또는 repo 의 remote URL 로
