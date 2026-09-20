@@ -6,8 +6,22 @@ lives in one script, `lib/target-binding.sh` — its own header documents the
 usage, exports and inputs in full; this file covers only the *why*.
 
 ```bash
-GH_FLOW_TARGET_REMOTE="<remote>" . "${CLAUDE_PLUGIN_ROOT:-.}/skills/issue/lib/target-binding.sh" || exit 1
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
+    [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/target-binding.sh" ]; then            # proof
+    GH_FLOW_TARGET_REMOTE="<remote>" \
+        . "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/target-binding.sh" || exit 1
+else                                                                                 # tier 5
+    printf '[gh-flow:issue] cannot locate skills/issue/lib/target-binding.sh under CLAUDE_PLUGIN_ROOT (%s). On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
+    exit 1
+fi
 ```
+
+`${CLAUDE_PLUGIN_ROOT:-.}` would be the retired tier 4
+([harness-skills#22](https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md)):
+with the variable unset it sources this script from the **current working
+directory**, and this skill runs inside the repository under review. Guard the
+variable, then prove the file — there is no tier that guesses (#27).
 
 `<remote>` is the literal `[remote]` argument from Step 1 — e.g. `upstream`
 when `/gh-flow:issue <N> upstream` was invoked, `origin` (the script's own

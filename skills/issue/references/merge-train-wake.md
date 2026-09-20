@@ -89,8 +89,20 @@ Two failure modes were found and closed together, both from PR dEitY719/dotfiles
 ## The call
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT:-.}/skills/issue/lib/merge-train-wake.sh" "<remote>" &
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
+    [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/merge-train-wake.sh" ]; then          # proof
+    bash "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/merge-train-wake.sh" "<remote>" &
+else                                                                                 # tier 5, soft
+    printf '[gh-flow:issue] cannot locate skills/issue/lib/merge-train-wake.sh under CLAUDE_PLUGIN_ROOT (%s) — merge-train wake skipped; the flow is unaffected. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
+fi
 ```
+
+Warn-and-skip, not a stop: the wake is one of the three soft-fail steps
+`references/constraints.md` enumerates (dEitY719/dotfiles#1482), so a broken
+install must not cost the flow. `${CLAUDE_PLUGIN_ROOT:-.}` is banned here for
+the same reason as everywhere else — it is the retired tier 4, and the cwd is
+the repository under review (#27).
 
 `<remote>` is the literal value from Step 1's own arg parsing — the
 executing agent substitutes it here, never a live `$REMOTE`/`${REMOTE:-origin}`

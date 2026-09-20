@@ -173,6 +173,14 @@ should apply here on the next run, which is the whole point.
   `unset SHELL_COMMON` on the tier-5 arm. Do not adapt it locally — change it
   upstream and re-roll. `tests/plugin-root-loader.sh` is the guard; each of the
   three fixes is silent when reverted, which is why it exists (#25).
+- **A skill addressing its OWN bundled scripts is the same convention, and a
+  different carrier.** `$CLAUDE_PLUGIN_ROOT` is guarded before it is spliced
+  into a path, and the file is then proved with `[ -f ]`; a default is never
+  spliced in. `${CLAUDE_PLUGIN_ROOT:-.}` is the retired tier 4
+  (harness-skills#22) and these skills run inside the repository under review,
+  so that default sources a stranger's file. The #35/#36/#37 loader audit
+  looked only at blocks loading a *vendored* helper and missed this carrier
+  entirely (#27) — when you touch one, check the other.
 - **Host pinning is not optional.** Every skill binds `TARGET_HOST` +
   `TARGET_REPO` from the remote URL before any `gh` call and prefixes each call
   with `GH_HOST=` (dEitY719/dotfiles#1403). Dropping the prefix sends a GHES repo's request to
