@@ -36,11 +36,23 @@ Then call the script once, from a single Bash call, with the literal
 `references/target-binding.md`):
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT:-.}/skills/issue/lib/post-ai-metrics.sh" \
-  "<remote>" "$ISSUE_NUMBER" "$START_TS" \
-  "<issue-type>" "<feat-size-or-->" "$TOKEN_CHARS" \
-  "$IMPL_MIN" "$COMMIT_MIN" "$PR_MIN" "$REVIEW_MIN" "$CONFLICT_MIN" "$OUTDATED_MIN"
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
+    [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/post-ai-metrics.sh" ]; then           # proof
+    bash "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/post-ai-metrics.sh" \
+      "<remote>" "$ISSUE_NUMBER" "$START_TS" \
+      "<issue-type>" "<feat-size-or-->" "$TOKEN_CHARS" \
+      "$IMPL_MIN" "$COMMIT_MIN" "$PR_MIN" "$REVIEW_MIN" "$CONFLICT_MIN" "$OUTDATED_MIN"
+else                                                                                 # tier 5, soft
+    printf '[gh-flow:issue] cannot locate skills/issue/lib/post-ai-metrics.sh under CLAUDE_PLUGIN_ROOT (%s) — ai-metrics skipped; the flow is unaffected. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
+fi
 ```
+
+Warn-and-skip, not a stop: the metrics comment is one of the three
+soft-fail steps `references/constraints.md` enumerates, so a broken install
+must not cost the flow. `${CLAUDE_PLUGIN_ROOT:-.}` is banned here for the same
+reason as everywhere else — it is the retired tier 4, and the cwd is the
+repository under review (#27).
 
 Skips entirely under `GH_DISABLE_AI_METRICS=1` (issue dEitY719/dotfiles#399); the six
 sub-skills already honour the same env var, so a disabled run leaves zero

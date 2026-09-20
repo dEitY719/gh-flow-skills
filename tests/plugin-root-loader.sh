@@ -50,6 +50,38 @@ if hits=$(grep -nE 'command -v _[A-Za-z0-9_]+ >/dev/null' "${tracked[@]}"); then
 	fail=1
 fi
 
+# 1b. No tracked file splices a caller-controlled default into a path — the
+#     retired tier 4 (harness-skills#22). This is a DIFFERENT carrier from the
+#     loader blocks above and that is exactly why it was missed: #35/#36/#37
+#     audited blocks that load a VENDORED helper, while a plugin addressing its
+#     OWN scripts by path was never looked at. Two of the four sites here were
+#     `. "<default>/skills/issue/lib/target-binding.sh"`, so with the variable
+#     unset the skill sourced that file out of the CURRENT WORKING DIRECTORY —
+#     and gh-flow skills run inside the repository under review, which the user
+#     may not control (dEitY719/gh-flow-skills#27).
+#
+#     Three spellings of the cwd default, not one: a $PWD-only alternation
+#     passes the dot and command-substitution forms, which name the same
+#     directory, and the dot form is the one that actually shipped here.
+#
+#     The whole tree, not just *.md and *.sh: the defect is a path, so it can
+#     live in a JSON manifest or a JS entry point as easily as in a fence. This
+#     is the gate harness-skills#59 is moving into the shared skill-check.yml;
+#     keeping a copy here means the class cannot come back between runs of it.
+#
+#     This file states the pattern only as a regex, never as a literal, so it
+#     does not match itself and needs no self-exclusion here — the regex text
+#     has a `[` where the pattern needs an identifier character.
+mapfile -t everything < <(git ls-files)
+[ "${#everything[@]}" -gt 0 ] || { printf 'FAIL  no tracked files at all\n'; exit 1; }
+if hits=$(grep -nE '\$\{[A-Za-z_][A-Za-z0-9_]*:?-(\$PWD|\$\(pwd\)|\.)?\}/' "${everything[@]}"); then
+	printf 'FAIL  a caller-controlled default is spliced into a path (retired tier 4):\n'
+	printf '%s\n' "$hits" | sed 's/^/        /'
+	printf '        Guard the variable and prove the file instead; see\n'
+	printf '        harness-skills/references/plugin-root.md, "There is no tier 4".\n'
+	fail=1
+fi
+
 # 2. Every loader block runs its six steps in order. Anchored on `unset -f _`,
 #    which is what starts one, so a new loader site is covered the day it is
 #    added rather than when someone remembers to list it here.
@@ -105,6 +137,6 @@ case "$out" in
 		fail=1 ;;
 esac
 
-[ "$fail" -ne 0 ] || printf 'ok    %s loader site(s): no exit-status proof, six steps in order, and a PATH imposter is refused with nothing exported\n' \
-	"$(grep -lE 'unset -f _' "${tracked[@]}" | wc -l | tr -d ' ')"
+[ "$fail" -ne 0 ] || printf 'ok    %s loader site(s): no exit-status proof, six steps in order, and a PATH imposter is refused with nothing exported; no caller-controlled default spliced into a path across %s tracked file(s)\n' \
+	"$(grep -lE 'unset -f _' "${tracked[@]}" | wc -l | tr -d ' ')" "${#everything[@]}"
 exit "$fail"
