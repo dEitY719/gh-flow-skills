@@ -7,6 +7,8 @@ description: >-
   "사내PC에서 구현해서 upstream으로 릴레이해줘".
 license: MIT
 allowed-tools: Bash, Read, Grep, Agent
+compatibility:
+  network: required
 metadata:
   model_recommendation:
     tier: sonnet
