@@ -1,6 +1,6 @@
 {
   "name": "gh-flow",
   "description": "One-shot issue-to-PR compositions: the ordinary chain, and a relay path for a push-blocked remote",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "contextFileName": "GEMINI.md"
 }
