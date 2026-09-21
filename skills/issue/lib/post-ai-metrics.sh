@@ -90,13 +90,16 @@ TOKENS=$(awk -v c="$TOKEN_CHARS" 'BEGIN {
     printf "%d", r
 }')
 
-# Body goes through a temp file (`-f body=@file`), not an inline
+# Body goes through a temp file (`-F body=@file`), not an inline
 # interpolated `-f body="..."` argument — agy review of PR #4: an inline
 # value composed from several separately-sourced fields is exactly the
 # shape that breaks if any of them ever starts with `@` (gh's own
 # from-file marker) or otherwise collides with `-f`'s value parsing.
 # `@file` sidesteps that class entirely rather than trying to enumerate
 # which characters are currently safe.
+# The flag is capital `-F`: only `-F`/`--field` expands `@file`; lowercase
+# `-f`/`--raw-field` sends the value verbatim, so `-f body="@$_BODY_FILE"`
+# posted the literal path as the comment (gh-flow-skills#30).
 _BODY_FILE=$(mktemp)
 trap 'rm -f "$_BODY_FILE"' EXIT
 cat > "$_BODY_FILE" <<EOF
@@ -127,7 +130,7 @@ EOF
 
 if ! GH_HOST="$TARGET_HOST" gh api "repos/$TARGET_REPO/issues/$ISSUE_NUMBER/comments" \
     -X POST \
-    -f body="@$_BODY_FILE" >/dev/null 2>&1
+    -F body=@"$_BODY_FILE" >/dev/null 2>&1
 then
     printf '[WARN] ai-metrics comment failed (gh api post to issue #%s failed) — continuing.\n' "$ISSUE_NUMBER"
 fi
