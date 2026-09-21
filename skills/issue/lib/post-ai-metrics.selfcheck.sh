@@ -37,20 +37,27 @@ out=$( GH_DISABLE_AI_METRICS=1 PATH="$TMP/bin:$PATH" \
        bash "$TARGET" origin 1 "$(date +%s)" feat medium 4000 1 2 3 4 5 6 2>&1 )
 chk "GH_DISABLE_AI_METRICS=1: no output, no gh call" "$out" ""
 
-# 2. Happy path: `gh` records its call args, and copies out the file behind
-#    `-f body=@<file>` (the body goes through a temp file, not an inline
-#    interpolated argument — agy review of PR #4), so both the endpoint and
-#    the rendered body can be inspected. The stub reads the file while the
-#    real script is still alive (its own EXIT trap deletes it only after
-#    this child process — the stub — has already run and returned).
+# 2. Happy path: `gh` records its call args and the body it would have sent,
+#    so both the endpoint and the rendered body can be inspected. The body
+#    goes through a temp file, not an inline interpolated argument (agy review
+#    of PR #4). The stub models gh's real field semantics: ONLY `-F`/`--field`
+#    expands a leading `@` to the file's contents; `-f`/`--raw-field` sends the
+#    value verbatim, so `-f body=@/tmp/x` posts the literal path (gh-flow-skills#30).
+#    An earlier stub copied the file behind any `body=@*` argument regardless of
+#    the flag, which is why `-f` shipped and passed. The stub reads the file
+#    while the real script is still alive (its own EXIT trap deletes it only
+#    after this child process — the stub — has already run and returned).
 cat > "$TMP/bin/gh" <<EOF
 #!/bin/sh
 echo "\$@" > "$TMP/gh-call-args"
 echo "\$GH_HOST" > "$TMP/gh-call-host"
+prev=
 for a in "\$@"; do
-    case "\$a" in
-        body=@*) cp "\${a#body=@}" "$TMP/gh-call-body" ;;
+    case "\$prev:\$a" in
+        -F:body=@*) cp "\${a#body=@}" "$TMP/gh-call-body" ;;
+        -f:body=*)  printf '%s' "\${a#body=}" > "$TMP/gh-call-body" ;;
     esac
+    prev=\$a
 done
 EOF
 chmod +x "$TMP/bin/gh"
@@ -65,10 +72,14 @@ CALL_BODY=$(cat "$TMP/gh-call-body" 2>/dev/null)
 # misroute, dEitY719/dotfiles#1403) would have passed silently.
 chk "happy path: GH_HOST pinned to the remote's host" "$(cat "$TMP/gh-call-host" 2>/dev/null)" "github.com"
 case "$CALL_ARGS" in
-    "api repos/acme/widget/issues/42/comments -X POST -f body=@"*)
-        chk "happy path: correct endpoint, body passed by file" "match" "match" ;;
+    "api repos/acme/widget/issues/42/comments -X POST -F body=@"*)
+        chk "happy path: correct endpoint, body passed by file (-F)" "match" "match" ;;
     *)
-        chk "happy path: correct endpoint, body passed by file" "$CALL_ARGS" "api repos/acme/widget/issues/42/comments -X POST -f body=@..." ;;
+        chk "happy path: correct endpoint, body passed by file (-F)" "$CALL_ARGS" "api repos/acme/widget/issues/42/comments -X POST -F body=@..." ;;
+esac
+case "$CALL_BODY" in
+    "@"*) chk "posted body is the file's contents, not its path" "$CALL_BODY" "rendered markdown" ;;
+    *) chk "posted body is the file's contents, not its path" "match" "match" ;;
 esac
 case "$CALL_BODY" in
     *"~4 h"*) chk "feat/small maps to 4h baseline" "match" "match" ;;
