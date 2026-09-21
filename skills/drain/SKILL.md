@@ -1,11 +1,10 @@
 ---
 name: drain
 description: >-
-  Drain a repo's open backlog to zero honestly — each issue through
-  gh-flow:issue, every deferred finding promoted to a new issue instead of a
-  ledger line. Use for /gh-flow:drain, "이슈를 다 처리해라", "백로그 0으로",
-  "이연 항목도 이슈로 등록하고 0이 될 때까지", "drain the backlog to zero".
-  Starts from an existing backlog, not a spec (gh-flow:autopilot).
+  Drain a repo's open backlog to zero via gh-flow:issue, promoting deferred
+  findings to new issues. Use for /gh-flow:drain, "이슈를 다 처리해라",
+  "백로그 0으로", "이연 항목도 이슈로 등록하고 0이 될 때까지", "drain the backlog
+  to zero". Not a spec (gh-flow:autopilot).
 license: MIT
 allowed-tools: Bash, Read, Grep, Skill
 metadata:

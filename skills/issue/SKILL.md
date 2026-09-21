@@ -7,6 +7,8 @@ description: >-
   number, not a spec (gh-flow:autopilot).
 license: MIT
 allowed-tools: Bash, Read, Grep, Agent
+compatibility:
+  network: required
 metadata:
   model_recommendation:
     tier: sonnet

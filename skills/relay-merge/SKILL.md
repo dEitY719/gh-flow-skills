@@ -7,6 +7,8 @@ description: >-
   "push 막혀서 gist 로 넘겨줘".
 license: MIT
 allowed-tools: Bash, Read, Write, Grep, Glob
+compatibility:
+  network: required
 metadata:
   model_recommendation:
     tier: opus
@@ -27,8 +29,7 @@ metadata:
 
 ## Help
 
-If arg #1 is `-h`, `--help`, or `help`, read `references/help.md` and
-output its content verbatim, then stop. No API calls.
+If arg #1 is `-h`, `--help`, or `help`, read `references/help.md` and output its content verbatim, then stop. No API calls.
 
 ## Step 1: Preconditions — two mutually-exclusive input modes
 
@@ -78,8 +79,7 @@ NEW destination issue (default) or `--target-issue <N>`; render `--known-failure
 
 ## Step 7: Origin-side Cleanup (optional)
 
-Only with explicit user confirmation, close a duplicate origin-side tracking
-issue with a cross-reference comment. Never auto-close.
+Only with explicit user confirmation, close a duplicate origin-side tracking issue with a cross-reference comment. Never auto-close.
 
 ## Step 8: Report
 
