@@ -65,6 +65,12 @@ printf '%s\n' "$body" |
 # -> "<harness> trusted"  or  "<harness> review"
 ```
 
+**An empty `$body` is an automatic BLOCK, not a review.** Zero bytes is zero
+information, and the review below cannot clear a spec it cannot read — the
+"too little information to judge" arm applies immediately. Fetch failures
+therefore fail closed twice over: `none` keeps them off the trusted path, and
+an empty body keeps them off the PASS path.
+
 The script prints `<harness> <verdict>` and exits 0 for both verdicts; it
 parses, it does not decide the run. Format, trust-set override and parsing
 edge cases are documented in its header, and
@@ -91,6 +97,17 @@ being new (D-5).
 
 Unknown is untrusted in every row (D-2): the review is a read plus a judgment,
 which is cheap, and it only ever stops a run when a real defect is found.
+
+**What this gate is not.** The origin line is a self-declaration written into
+the issue body by the tool that filed it — unsigned, unauthenticated, and
+editable by anyone with write access to the issue. `Harness(claude)` typed by
+hand reads exactly like the real thing. This gate manages the **quality
+variance** between harnesses, which is the problem dEitY719/gh-flow-skills#36
+describes; it is not an authorization boundary and must never be relied on as
+one. Anyone who can edit the issue body can already rewrite the spec the chain
+implements, so a forged origin line buys an attacker nothing they did not
+already have — which is exactly why the checks below are the real protection
+and the trust set is only a way to skip them for issues worth skipping.
 
 ## The review — six blocking checks, nothing else
 
