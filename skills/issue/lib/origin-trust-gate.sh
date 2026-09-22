@@ -47,16 +47,15 @@ _otg_harness=$(
 )
 [ -n "$_otg_harness" ] || _otg_harness=none
 
+# Membership test against a space-separated set: pad both sides so `claude`
+# cannot match inside `claudex`. `-` not `:-`, so GH_TRUSTED_HARNESSES="" is an
+# empty set rather than the default one, and a set separated by anything but
+# spaces matches nothing — fail-closed, the safe direction. The trailing
+# `!= none` is why an override listing `none` still cannot trust an unknown
+# origin.
 _otg_verdict=review
-if [ "$_otg_harness" != none ]; then
-    # Unquoted on purpose — the trust set is space-separated. `-` not `:-`,
-    # so GH_TRUSTED_HARNESSES="" is an empty set rather than the default one.
-    # shellcheck disable=SC2086
-    for _otg_t in ${GH_TRUSTED_HARNESSES-claude codex}; do
-        [ "$_otg_harness" = "$_otg_t" ] || continue
-        _otg_verdict=trusted
-        break
-    done
-fi
+case " ${GH_TRUSTED_HARNESSES-claude codex} " in
+    *" $_otg_harness "*) [ "$_otg_harness" = none ] || _otg_verdict=trusted ;;
+esac
 
 printf '%s %s\n' "$_otg_harness" "$_otg_verdict"
