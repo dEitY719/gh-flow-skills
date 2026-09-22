@@ -32,6 +32,19 @@ AND the former `session:schedule` pr-reply step. Inside `gh-verify:review-all`:
   reviewer slower than 4 minutes may be missed by the automated pass — the
   fallback is a manual `/gh-pr:reply <PR_NUM>` re-run, not a longer default.
 
+  **The deferral is only safe because this chain does not merge.** Step 2.5.1
+  is the last step; the PR is left open, so a reply pass that lands 4 minutes
+  later still lands on an open PR. If you stitch a merge onto the end of this
+  chain — `gh-pr:merge` after Step 2.6, an unattended "implement to merged"
+  run — that window inverts: the merge happens first and the scheduled
+  `/gh-pr:reply` then fires at a PR that is already closed, so reviewer
+  findings are never answered and never acted on. Observed on
+  dEitY719/brokerdesk#174 and #176, where a hand-stitched merge followed this
+  chain and the operator had to run the reply pass inline instead. **Drop the
+  flag whenever a merge will run in the same session** — `gh-verify:review-all`
+  defaults to `inline`, so omitting `--defer-reply` is the whole fix. The
+  4-minute default assumes a human comes back to an open PR later.
+
 ## Ordering is preserved
 
 Because the simplify commit + push runs synchronously **inside**
