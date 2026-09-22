@@ -37,6 +37,11 @@ defect is a risk the human explicitly accepted: proceed, no warning.
 `<N>` is the issue number; `GH_HOST`/`TARGET_HOST`/`TARGET_REPO` are Step 1's
 bindings. Every `gh` call stays host-and-repo pinned (dEitY719/dotfiles#1403).
 
+**`--trust-origin` skips everything below** — do not run the locator and do not
+issue the fetch, or the flag costs a `gh` round-trip per issue over exactly the
+backlog it exists to unblock. Report the `[SKIP]` row and go straight to Step
+2.1.
+
 ```sh
 # Locate the gate: guard the variable, then prove the file. Never splice a
 # default into that path -- the retired tier 4 (dEitY719/harness-skills#22)
@@ -89,9 +94,11 @@ which is cheap, and it only ever stops a run when a real defect is found.
 
 ## The review — six blocking checks, nothing else
 
-Read the issue body against exactly these. This is a search for reasons **not
-to start implementing**, not a code review and not a quality opinion. Anything
-that is merely unclear, stylistic, or a matter of taste is not a block.
+Read the issue body against exactly these — the `$body` already captured in
+Procedure, never a second `gh issue view` for the same bytes. This is a search
+for reasons **not to start implementing**, not a code review and not a quality
+opinion. Anything that is merely unclear, stylistic, or a matter of taste is
+not a block.
 
 1. **Self-contradiction.** Two requirements that cannot both hold, or a
    decision that negates its own requirement.
@@ -109,16 +116,15 @@ that is merely unclear, stylistic, or a matter of taste is not a block.
    split before anything can be implemented as one issue.
 
 **PASS** — none of the six is violated. Proceed to Step 2.1; the report row is
-`[OK] Step 1.5: origin gate (<harness> - reviewed)`.
+owned by `references/report-template.md`.
 
 **BLOCK** — one or more are violated, *or* the body carries too little
 information to judge at all. Stop before Step 2.1. Do not guess a spec into
 existence: a run started on a guess produces a branch, a commit, and a PR to
 unwind (D-2, Error Cases).
 
-The gate judges; it never edits the issue (D-7). Fixing a blocked issue is the
-author's job, by hand or through `gh-issue:issue-create` — an automatic rewrite
-just makes a wrong spec look plausible and replaces the author's intent.
+The gate judges; it never edits the issue — rule and rationale live once, in
+`references/constraints.md` (D-7).
 
 ## On BLOCK
 
