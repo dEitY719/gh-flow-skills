@@ -4,7 +4,7 @@
 - **머지 금지**(사람 몫), 디폴트 브랜치 push 금지, `--force`/`--force-with-lease` 금지,
   `--no-verify` 금지, 테스트/typecheck/lint 실패 상태로 PR 금지.
 - spec 자동 감지 실패 시 추측 금지 — `[spec-path]` 요청 후 정지.
-- 원자 스킬을 재구현하지 않는다 — writing-plans/gh-issue:create/subagent-driven-development/
+- 원자 스킬을 재구현하지 않는다 — writing-plans/gh-issue:issue-create/subagent-driven-development/
   gh-pr:create/simplify/gh-pr:reply 를 그대로 호출.
 - 호스트는 gh_host.sh 로만 해석(하드코딩 금지).
 - 체이닝된 Skill 호출 사이 대화 텍스트 0(early-stop 방지, critical-contract 참조).

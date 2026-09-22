@@ -32,7 +32,7 @@ to run.
 **These are compositions, not implementations.** Each step delegates to the
 atomic skill that owns it — `gh-issue:implement`, `gh-pr:commit`,
 `gh-pr:create`, `gh-verify:review-all`, `gh-resolve:conflict`,
-`gh-resolve:outdated`, `gh-issue:create`. Do not reimplement an atom here. If a
+`gh-resolve:outdated`, `gh-issue:issue-create`. Do not reimplement an atom here. If a
 step needs to change, it changes in the repo that owns it.
 
 **None of them merges a PR.** `autopilot` stops at review on purpose; merging
@@ -135,7 +135,7 @@ should apply here on the next run, which is the whole point.
 - **Invocation form in prose is namespaced.** Body text referring to a skill in
   this repo as a command writes `/gh-flow:issue`.
 - **Cross-repo references keep their own namespace.** `gh-issue:implement`,
-  `gh-issue:create`, `gh-pr:commit`, `gh-pr:create`, `gh-pr:reply`,
+  `gh-issue:issue-create`, `gh-pr:commit`, `gh-pr:create`, `gh-pr:reply`,
   `gh-pr:merge-train`, `gh-verify:review-all`, `gh-resolve:conflict`,
   `gh-resolve:outdated`, `session:restart`, `session:schedule`, and
   `session:worktree-spawn` all live in other repos of this family, each under

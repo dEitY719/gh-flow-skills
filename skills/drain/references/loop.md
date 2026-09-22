@@ -79,7 +79,7 @@ re-listing, so the next round's list reflects what the merges closed.
 | Every listed issue excluded by step 2 | Nothing actionable left. Stop; this is the normal ending of a default (no `--merge`) run, where each issue is open only because its PR awaits a human. |
 | Round count reaches `--max-rounds` (default 5) | Stop and report what is left. |
 | `gh issue list` fails | Stop before the round. |
-| `gh-issue:create` fails while a promotion is pending | Stop the round and say so in the report. |
+| `gh-issue:issue-create` fails while a promotion is pending | Stop the round and say so in the report. |
 
 The no-progress condition is what makes the loop terminate structurally. It
 does not depend on the agent noticing it is going in circles. Note what it is

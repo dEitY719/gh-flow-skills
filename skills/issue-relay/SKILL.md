@@ -24,7 +24,7 @@ metadata:
 목적지 remote 가 push 로 막혀 있을 때, **이미 그 remote 에 등록된 이슈 1건**을 릴레이 PR 까지 한 번에 끌고 간다:
 목적지 remote 해석 + 기본 브랜치에서 분기 → 구현 위임(Advisor/Worker) → Advisor 가 diff 를 읽고 대상 레포의
 lint/test 를 직접 실행 → `gh-flow:relay-merge --commits` 가 패치를 올리고 apply-guide 를 게시. **이슈 등록 자체는 범위
-밖** — 목적지 remote 에 이슈가 없으면 먼저 `gh-issue:create <remote>` 로 만든다. 마지막 단계는
+밖** — 목적지 remote 에 이슈가 없으면 먼저 `gh-issue:issue-create <remote>` 로 만든다. 마지막 단계는
 `Skill(gh-flow:relay-merge, ...)` 호출 **그대로**이며, 패치 생성 · gist 업로드 · apply-guide 게시를 다시 구현하지 않는다.
 
 ## Help
@@ -95,6 +95,6 @@ failed Advisor verification or a failed `gh-flow:relay-merge` call.
 
 ## Related Skills
 
-`gh-flow:relay-merge` (final step — patch+gist relay) · `gh-issue:create` (register the
+`gh-flow:relay-merge` (final step — patch+gist relay) · `gh-issue:issue-create` (register the
 issue on the destination remote first) · `gh-flow:issue` (same shape when the
 destination remote *is* pushable). Flag table: `references/help.md`.

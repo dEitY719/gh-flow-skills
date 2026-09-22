@@ -29,7 +29,7 @@
 
 ## When NOT to use
 
-- The issue is not filed yet — run `gh-issue:create <remote>` first.
+- The issue is not filed yet — run `gh-issue:issue-create <remote>` first.
 - `git push <remote>` actually works from this machine — just use
   `gh-issue:implement` + `gh-pr:commit` + `gh-pr:create` (or `gh-flow:issue`)
   directly; this skill's value is specifically the relay handoff at the end.
@@ -60,4 +60,4 @@ a reused branch, never duplicate `gh-flow:relay-merge`'s job).
   quality gate, no patch/gist relay involved.
 - `gh-issue:implement` — the atomic implementation step this skill's Worker
   delegation is modeled after (same "already on a feature branch" contract).
-- `gh-issue:create` — files the issue this skill assumes already exists.
+- `gh-issue:issue-create` — files the issue this skill assumes already exists.
