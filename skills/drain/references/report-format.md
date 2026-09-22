@@ -55,7 +55,7 @@ header line. One ending, one `Next:` — there is no second lookup table:
 - `gh-flow:drain stopped — issue list failed (<reason>)` — `Next:` the fix for
   that failure (`gh auth status` on `$TARGET_HOST`, usually), then re-run.
 - `gh-flow:drain stopped — promotion failed (<reason>)` — the fatal one
-  (`references/promotion.md`). `Next:` `/gh-issue:create` for the named item,
+  (`references/promotion.md`). `Next:` `/gh-issue:issue-create` for the named item,
   then re-run the drain.
 
 ## The terminal strings are a hook contract

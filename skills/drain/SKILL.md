@@ -23,7 +23,7 @@ metadata:
 만들지 않는 것"이 승리 전략이 된다. 이 스킬은 그 경로를 막으려고 존재한다.
 
 열린 이슈를 번호 오름차순으로 한 건씩 `gh-flow:issue` 에 넘기고, 그 라운드에서 나온
-이연·미해결을 예외 없이 `gh-issue:create` 로 승격한 뒤 목록을 다시 조회한다.
+이연·미해결을 예외 없이 `gh-issue:issue-create` 로 승격한 뒤 목록을 다시 조회한다.
 **전제조건**: `gh-flow:issue` 와 같다 — 전용 worktree 의 feature 브랜치 위.
 
 ## Step 1: Parse Args + Bind Target
@@ -56,7 +56,7 @@ GitHub 에 쓰는 것(승격 이슈 · `blocked` 라벨 · 차단 코멘트): `r
 ## Step 3: Promotion — 이 스킬의 핵심
 
 그 라운드에서 찾았지만 그 라운드에서 고치지 않은 것은 **예외 없이 전부**
-`Skill(gh-issue:create, ...)` 로 이슈화한다. ledger·PR 코멘트·종료 코멘트에만 적고
+`Skill(gh-issue:issue-create, ...)` 로 이슈화한다. ledger·PR 코멘트·종료 코멘트에만 적고
 넘어가는 것은 **금지**다. 대상 목록은 기억이 아니라 아티팩트(미해결 리뷰 스레드,
 diff 의 `TODO`/`ponytail:`, skip/xfail 된 테스트)에서 열거한다 — 목록·제외 기준·
 승격 실패가 왜 치명적인지 전부 `references/promotion.md`.
@@ -87,6 +87,6 @@ diff 의 `TODO`/`ponytail:`, skip/xfail 된 테스트)에서 열거한다 — �
 
 ## Related Skills
 
-위임 대상: `gh-flow:issue` (이슈 1건 체인) · `gh-issue:create` (승격) ·
+위임 대상: `gh-flow:issue` (이슈 1건 체인) · `gh-issue:issue-create` (승격) ·
 `gh-pr:merge-train` (`--merge` 일 때만). 스펙에서 시작하는 사촌:
 `gh-flow:autopilot`.

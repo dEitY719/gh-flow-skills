@@ -24,8 +24,8 @@ b. Parse the conventional-commit prefix from the issue title fetched in
    recognized set and its `misc` fallback.
 c. For `feat` only: infer size (`small`/`medium`/`large`) from the
    implementation scope — components touched, diff weight, architectural
-   footprint (`gh-issue:create`'s `references/metrics-baseline.md`, same
-   heuristic `gh-issue:create` itself applies). Pass `-` for every other
+   footprint (`gh-issue:issue-create`'s `references/metrics-baseline.md`, same
+   heuristic `gh-issue:issue-create` itself applies). Pass `-` for every other
    type.
 d. Character count of (issue body + implementation file reads) as
    `TOKEN_CHARS` — the script divides by 4, rounds to the nearest 500, and

@@ -39,7 +39,7 @@ Step 1 이전에 `START_TS` 를 기록하고 전제조건을 검사한다 — �
 | 단계 | 위임 대상 | 하는 일 | 마커 id |
 |---|---|---|---|
 | 0a | `superpowers:writing-plans` | spec → `docs/superpowers/plans/YYYY-MM-DD-<topic>.md` | `plan` |
-| 0b | `gh-issue:create --no-ask` | host-aware 추적 이슈 생성, `ISSUE_NUM`·URL 확보 | `issue` |
+| 0b | `gh-issue:issue-create --no-ask` | host-aware 추적 이슈 생성, `ISSUE_NUM`·URL 확보 | `issue` |
 | 1 | (인라인 판정) | `auto` 면 계획을 읽어 sdd/inline 판정, `mode=... reason=...` 1줄 로그 | `mode` |
 | 2 | `superpowers:subagent-driven-development` 또는 인라인 TDD | 구현 + 논리 단위 커밋. **Advisor 검증 비생략** — 테스트·typecheck·lint 직접 실행, 실패면 PR 진행 금지 | `implement` |
 | 3 | `gh-pr:create <ISSUE_NUM>` | `Closes #ISSUE_NUM` 보장, PR URL 에서 `PR_NUM` 추출 | `pr` |

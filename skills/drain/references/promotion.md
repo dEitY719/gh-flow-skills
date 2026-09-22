@@ -46,13 +46,13 @@ them had already become a real defect by the time anyone looked.
 
 ## How
 
-`Skill(gh-issue:create, ...)` per item, with enough body that a fresh session
+`Skill(gh-issue:issue-create, ...)` per item, with enough body that a fresh session
 can act on it: what was found, where (file, PR number, review comment link), why
 it was deferred, and what "done" looks like.
 
 ## Failure is fatal
 
-If a promotion is pending and `gh-issue:create` fails, **stop the round and say
+If a promotion is pending and `gh-issue:issue-create` fails, **stop the round and say
 so in the report.** Swallowing a promotion failure reproduces exactly the
 accident this skill exists to prevent — the item disappears while the backlog
 number keeps looking good. Every other error in this skill is recoverable; this

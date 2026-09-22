@@ -3,7 +3,7 @@
 - **Two termination conditions, both required.** Open issues 0 **and** deferred
   items 0. Neither alone ends the run.
 - **Promotion is unconditional** (D-3). Severity, size and "next time" do not
-  exempt an item. A pending promotion whose `gh-issue:create` fails stops the
+  exempt an item. A pending promotion whose `gh-issue:issue-create` fails stops the
   round — that error is the one this skill never swallows.
 - **Never close an issue directly** (NF-3). Closure comes from a PR's
   `Closes #N` or a clean `gh-flow:issue` completion.
@@ -12,7 +12,7 @@
 - **Default run merges nothing.** `--merge` is the one explicit exception and it
   delegates to `gh-pr:merge-train`, which owns its own approval and label gates.
   `gh-pr:merge-emergency` is never called by any path.
-- **Never reimplement an atom** (NF-1). `gh-flow:issue`, `gh-issue:create` and
+- **Never reimplement an atom** (NF-1). `gh-flow:issue`, `gh-issue:issue-create` and
   `gh-pr:merge-train` own their steps — call them, never inline them.
 - **State lives on GitHub** (NF-2). No progress file, no session-local ledger.
   A file-backed run breaks resume from a fresh session, and a file that

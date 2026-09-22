@@ -53,7 +53,7 @@ No API calls.
 - **Step 0a — 계획** — `Skill(superpowers:writing-plans)` — spec →
   `docs/superpowers/plans/YYYY-MM-DD-<topic>.md`. 완료 후
   `printf '[step:gh-flow-autopilot/plan] OK\n'`.
-- **Step 0b — 이슈** — `Skill(gh-issue:create, "--no-ask")` — host-aware(`references/host-resolution.md`)로
+- **Step 0b — 이슈** — `Skill(gh-issue:issue-create, "--no-ask")` — host-aware(`references/host-resolution.md`)로
   추적 이슈 생성, `ISSUE_NUM`·URL 확보. `--no-ask` 는 미결 게이트가 무인 체인을 멈추지 않게
   한다 (dEitY719/dotfiles#1446). 완료 후 `printf '[step:gh-flow-autopilot/issue] OK\n'`.
 - **Step 1 — 모드 선택** (`references/mode-heuristic.md`) — `auto` 면 계획을 읽어 판정,
@@ -83,6 +83,6 @@ No API calls.
 
 ## Related Skills
 
-원자 단계: `gh-issue:create` · `superpowers:writing-plans` ·
+원자 단계: `gh-issue:issue-create` · `superpowers:writing-plans` ·
 `superpowers:subagent-driven-development` · `gh-pr:create` · `simplify` · `gh-pr:reply`.
 사촌: `gh-flow:issue`(spec 이 아니라 이슈 번호에서 시작). 중단 재개: `session:restart`.

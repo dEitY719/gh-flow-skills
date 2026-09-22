@@ -11,7 +11,7 @@ push 로 막힌 목적지 remote 에 **이미 등록된** 이슈 1건을 받아,
 | 상황 | 선택 |
 |---|---|
 | 이슈가 push 차단된 목적지 remote 에 이미 있고, "브랜치 → 구현 → 검증 → 릴레이" 루프를 한 번에 돌리고 싶다 | `gh-flow:issue-relay` — 이 스킬 |
-| 이슈가 아직 등록되지 않았다 | 먼저 `gh-issue:create <remote>` |
+| 이슈가 아직 등록되지 않았다 | 먼저 `gh-issue:issue-create <remote>` |
 | `git push <remote>` 가 실제로 동작한다 | `gh-flow:issue` (또는 원자 스킬들). 이 스킬의 가치는 끝단의 릴레이 인계뿐이다 |
 | 커밋 범위가 이미 준비되어 있고 릴레이만 필요하다 | `gh-flow:relay-merge --commits <base>..<head>` 를 직접 호출 |
 
@@ -47,7 +47,7 @@ Step 1 에서 인자를 파싱하고 `BASE_TS` 를 기록한다. Steps 2~5 는 �
 ## 주의사항 / 제약
 
 - **`origin` 으로 폴백하지 않는다.** 요청한 `--remote` 가 없으면 하드 에러다.
-- **이슈 등록은 범위 밖이다.** 목적지에 이슈가 없으면 `gh-issue:create <remote>` 를 먼저.
+- **이슈 등록은 범위 밖이다.** 목적지에 이슈가 없으면 `gh-issue:issue-create <remote>` 를 먼저.
 - **미결 Open Questions 가 남은 채로 구현을 위임하지 않는다.**
 - **재사용 브랜치를 자동 reset 하지 않는다.** 목적지 기본 브랜치에 없는 고유 커밋이 있으면
   반드시 먼저 묻는다.

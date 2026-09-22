@@ -16,7 +16,7 @@ a shared account or a CI runner that identity's issues are what gets drained.
 
 ## What this skill writes to GitHub
 
-Promoted issues (delegated to `gh-issue:create`), and, on a blocked issue, the
+Promoted issues (delegated to `gh-issue:issue-create`), and, on a blocked issue, the
 mandatory `blocked` label plus one comment — both plain `gh` calls through
 `Bash`. Everything else is written by the sub-skills it delegates to.
 
