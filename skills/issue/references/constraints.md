@@ -3,6 +3,28 @@
 - Never invoke implementation modes other than `direct`.
 - Never retry a failed step. Human decides retry or fix.
 - Never skip a step. All 6 or stop.
+- **The Step 1.5 origin gate judges; it never edits the issue (D-7).** A blocked
+  issue is fixed by its author, by hand or through `gh-issue:issue-create`. An
+  automatic rewrite only makes a wrong spec look plausible and quietly replaces
+  the author's intent with the gate's guess.
+- **The gate is fail-closed (NF-2).** An origin that cannot be read — a failed
+  `gh issue view`, a malformed line, `Harness(none)`, or a pre-#43 issue with no
+  line at all — is UNKNOWN, and unknown is untrusted, never a silent pass to the
+  trusted path. `GH_TRUSTED_HARNESSES` is an allow-list for the same reason: a
+  deny-list would trust every harness nobody has vetted yet (D-5).
+- **BLOCK is exit 2, a broken gate is exit 1 (NF-1, D-6).** 2 is this family's
+  policy refusal, the same code the block-label guard uses; 1 means the check
+  itself could not run. A wrapper that cannot tell those apart retries the one
+  it should respect. BLOCK stops **before** Step 2.1: zero edits, zero commits,
+  zero PRs — the whole point of gating before the chain rather than after it.
+- **The gate runs between Step 1 and Step 2, never inside it (D-1, NF-3).** Its
+  review emits prose, and prose between Step 2's six `Skill()` calls is the
+  early-stop trigger `references/critical-contract.md` documents. Moving this
+  step into Step 2 re-opens that failure mode, however tidy it looks.
+- **Block-comment soft-fail exception (NF-4, D-8).** On BLOCK the gate posts one
+  comment on the issue so an unattended caller (`gh-flow:drain`) leaves the
+  reason on the card rather than only in a terminal nobody reads. A failed post
+  is a single `[WARN]`; it never changes the BLOCK verdict or the exit code.
 - **Quality-gate soft-fail exception.** Step 2.4 (`gh-verify:review-all`)
   is additive polish, not gating: agy/codex absent → that lane skips
   (not a failure); `/simplify` produced no change → no commit; any error

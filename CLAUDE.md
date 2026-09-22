@@ -154,9 +154,10 @@ should apply here on the next run, which is the whole point.
   - No skill here merges a PR. `autopilot` stops at review by design.
   - `issue` stops at the first failing step and prints a resume hint. It never
     retries a step and never skips one. The soft-fail exceptions
-    (`gh-verify:review-all`, the merge-train wake, the metrics comment) are
-    enumerated in `skills/issue/references/constraints.md`; do not add a third
-    kind of exception without updating that file.
+    (`gh-verify:review-all`, the merge-train wake, the metrics comment, the Step
+    1.5 block comment) are enumerated in
+    `skills/issue/references/constraints.md`; do not add another kind of
+    exception without updating that file.
   - **Zero conversational text between the chained `Skill()` calls** of `issue`
     and `autopilot`, and `--no-next-hint` on `issue`'s first call. Both are
     mechanical guards against the early-stop failure mode, not style advice.
