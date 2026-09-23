@@ -57,7 +57,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 
 웨이브 1개는 다섯 단계다. 단계 사이에 사용자 확인을 묻지 않는다(무인 기본).
 
-1. **spawn** — 이슈마다 `Skill(session:worktree-spawn, "--task <slug>")` 1회, 출력된
+1. **spawn** — 이슈마다 fetch 후 `Skill(session:worktree-spawn, "--task <slug> --base <remote>/<base>")` 1회, 출력된
    `Path:` 를 기록하고 조율자는 main 체크아웃에 남는다. 부트스트랩은 `--bootstrap` >
    `.claude/gh-flow-waves.sh` > 없음 순 — 스킬에 하드코딩 금지. 상세: `references/plan.md`.
 2. **dispatch** — 이슈마다 백그라운드 `Agent`(model `opus`) **정확히 1개**, 프롬프트는
