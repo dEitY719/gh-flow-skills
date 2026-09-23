@@ -21,10 +21,8 @@ fi
 ```
 
 `<skill-base-dir>` is explained in `../../issue/references/target-binding.md`.
-The script searches the repo the cwd is in, else every git repo at depth 1-2
-below the cwd, compares each remote URL (ssh and https forms normalised)
-against the URL's host/owner/repo, and never counts a linked worktree (`.git`
-is a file). It does no git write, not even a fetch (NF-2). Its self-check,
+Search order, remote matching and the linked-worktree exclusion are in the
+script's header; it does no git write, not even a fetch (NF-2). Its self-check,
 `lib/locate-checkout.selfcheck.sh`, covers every arm below.
 
 - **Exit 0** prints `MAIN=`, `REMOTE=`, `HOST=`, `REPO=`, `ISSUE=`. Record them
