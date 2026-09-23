@@ -48,6 +48,7 @@ backlog it exists to unblock. Report the `[SKIP]` row and go straight to Step
 # resolves against the current directory, and these skills run inside the
 # repository under review, so a repo shipping its own copy of this script
 # would get that copy executed (dEitY719/gh-flow-skills#27).
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
 if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] ||
     [ ! -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/origin-trust-gate.sh" ]; then
     printf '[gh-flow:issue] cannot locate skills/issue/lib/origin-trust-gate.sh under CLAUDE_PLUGIN_ROOT (%s). On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
