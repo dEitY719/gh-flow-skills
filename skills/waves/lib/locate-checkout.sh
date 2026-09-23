@@ -30,6 +30,7 @@ norm() { # norm <remote-url> -> host/owner/repo (lowercase), or nothing
 match_remote() { # match_remote <repo-dir> -> first matching remote name
     git -C "$1" config --get-regexp '^remote\..*\.url$' 2>/dev/null |
         while read -r key url; do
+            case ${url,,} in *"${WANT#*/}"*) ;; *) continue ;; esac  # skip norm's forks
             [ "$(norm "$url")" = "$WANT" ] && { key=${key#remote.}; printf '%s\n' "${key%.url}"; }
         done | head -n 1
 }
