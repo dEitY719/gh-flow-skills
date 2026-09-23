@@ -27,18 +27,19 @@ metadata:
 워커 1개로 병렬 실행한 뒤, 웨이브가 끝날 때마다 **검증 장벽**(main pull → 앱 재기동 →
 PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 간다. 새 로직은
 **편성 · 병렬 · 장벽** 셋뿐이고 나머지는 원자 스킬 호출이다.
-**전제조건**: 조율자는 저장소의 **main 체크아웃**(기본 브랜치)에서 돈다 — worktree 는 워커 몫.
+**전제조건**: 조율자는 저장소의 **main 체크아웃**(`MAIN`, 기본 브랜치)을 기준으로 돈다 — worktree 는 워커 몫.
 
 **조율자는 `gh-flow:issue` 를 절대 직접 부르지 않는다** — `--help` 조회로도 부르지 않는다
-(NF-1; stop guard 가 그 호출을 체인 시작으로 센다). 도움말이 필요하면
-`../issue/references/help.md` 를 `Read` 한다.
+(NF-1; stop guard 가 그 호출을 체인 시작으로 센다). 도움말은 `../issue/references/help.md` 를 `Read`.
 
 ## Step 1: Parse Args + Bind Target
 
-`/gh-flow:waves [remote] [--from N] [--label L] [--issues 1,2,3] [--track N]
+`/gh-flow:waves [remote|<issue-url>] [--from N] [--label L] [--issues 1,2,3] [--track N]
 [--max-parallel 4] [--run "<cmd>"] [--bootstrap "<cmd>"] [--no-live] [--no-merge]`.
-`-h`/`--help`/`help` 는 `references/help.md` 를 **그대로 출력하고 정지** — API 호출 없음.
-인자 표와 기본값: `references/help.md`.
+`-h`/`--help`/`help` 는 `references/help.md`(인자 표·기본값)를 **그대로 출력하고 정지** — API 호출 없음.
+**이슈 URL**(`https://<host>/<owner>/<repo>/issues/<N>`)이면 cwd 나 하위 2단계에서 main 체크아웃을
+읽기 전용으로 찾아 `MAIN`·`[remote]` 로 쓰고, 조율자의 모든 Bash 호출은 `cd "<MAIN>" &&` 로 시작한다
+(대상 = 열린 이슈 전체, 추적 이슈 기본값 = URL 이슈): `references/locate.md`. 아니면 `MAIN` = cwd, 동작 불변.
 
 **대상 바인딩** — `../issue/references/target-binding.md` 의 **bash 블록만** 그대로 쓴다
 (복사 금지, 같은 모양: `$CLAUDE_PLUGIN_ROOT` 를 가드하고 `[ -f ]` 로 파일을 증명한 뒤

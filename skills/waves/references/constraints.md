@@ -29,8 +29,12 @@
 - **Deferred items become issues.** Workers file them under
   `../../drain/references/promotion.md`'s rules; this skill references that
   file and does not restate it.
+- **The coordinator works against `MAIN`** — the cwd, or with an `<issue-url>`
+  the checkout `references/locate.md` found. Every coordinator Bash call starts
+  `cd "<MAIN>" &&` (or uses `git -C`); locating it is read-only and never
+  clones.
 - **A per-issue failure never aborts the run.** Only a list failure, a missing
-  tracking issue, a failed pull, a failed `--run`, or a wave in which every
+  checkout, a missing tracking issue, a failed pull, a failed `--run`, or a wave in which every
   issue failed ends it.
 - **Bind the target from one remote URL.** Every `gh` call carries
   `GH_HOST="$TARGET_HOST"` and `--repo`/`-R "$TARGET_REPO"`, in the coordinator
