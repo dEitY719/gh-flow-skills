@@ -22,13 +22,14 @@ sibling repos of this family.
 
 `drain` and `waves` sit on top of `issue`. `drain` starts from a backlog
 rather than a single unit of work, and its reason for existing is that "zero
-open issues" is a gameable number — an agent reaches it by not filing issues. `waves` starts from a set of issues whose order matters: it
-runs independent ones in parallel worktrees and verifies each wave live before
-the next — its reason for existing is that a serial drain cannot parallelize
-and a parallel run without a barrier accumulates unverified merges.
+open issues" is a gameable number — an agent reaches it by not filing issues.
+`waves` starts from a set of issues whose order matters: it runs independent
+ones in parallel worktrees and verifies each wave live before the next — its
+reason for existing is that a serial drain cannot parallelize and a parallel
+run without a barrier accumulates unverified merges.
 
-The remaining four split along two axes: how much of the lifecycle they own (`issue`
-starts at an issue, `autopilot` at a spec) and whether the destination remote is
+The remaining four split along two axes: how much of the lifecycle they own
+(`issue` starts at an issue, `autopilot` at a spec) and whether the destination remote is
 reachable (`issue`/`autopilot`) or push-blocked (`issue-relay`/`relay-merge`).
 Merging them would erase exactly the distinction that decides which one is safe
 to run.
@@ -40,8 +41,9 @@ atomic skill that owns it — `gh-issue:implement`, `gh-pr:commit`,
 step needs to change, it changes in the repo that owns it.
 
 **None of them merges a PR.** `autopilot` stops at review on purpose; merging
-stays a human decision. There are two explicit exceptions. The first is `drain --merge`, which
-does not merge anything itself either — it delegates to `gh-pr:merge-train`,
+stays a human decision. There are two explicit exceptions. The first is
+`drain --merge`, which does not merge anything itself either — it delegates to
+`gh-pr:merge-train`,
 whose own approval and label gates still apply. Default `drain` merges nothing.
 The second is `waves`, which merges by default and does not merge anything
 itself either: each of its workers delegates to `gh-pr:merge`, whose approval
@@ -150,8 +152,8 @@ should apply here on the next run, which is the whole point.
 - **Cross-repo references keep their own namespace.** `gh-issue:implement`,
   `gh-issue:issue-create`, `gh-pr:commit`, `gh-pr:create`, `gh-pr:reply`,
   `gh-pr:merge`, `gh-pr:merge-train`, `gh-verify:review-all`, `gh-verify:live`,
-  `gh-resolve:conflict`, `gh-resolve:outdated`, `gh-resolve:ci-fail`, `session:restart`, `session:schedule`, and
-  `session:worktree-spawn` all live in other repos of this family, each under
+  `gh-resolve:conflict`, `gh-resolve:outdated`, `gh-resolve:ci-fail`,
+  `session:restart`, `session:schedule`, and `session:worktree-spawn` all live in other repos of this family, each under
   its own plugin's namespace. Write each exactly as its owning repo does; only
   siblings inside `skills/` take the `gh-flow:` prefix.
 - **Progressive disclosure.** `SKILL.md` stays at or under 100 lines (CI
