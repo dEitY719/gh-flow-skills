@@ -144,7 +144,7 @@
 
       <div class="warn">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <span><strong>체인은 리뷰 앞에서 끝납니다</strong> &mdash; 어느 스킬도 PR 을 스스로 머지하지 않고, 그건 사람의 판단으로 남습니다(<code>drain --merge</code> 만 예외이고, 그마저 <code>gh-pr:merge-train</code> 에 위임합니다). 체인 스킬은 첫 실패 지점에서 즉시 멈추고 재개 힌트를 담은 리포트를 냅니다 &mdash; 실패한 단계를 재시도하거나 건너뛰지 않습니다. 전제조건: 전용 worktree 의 feature 브랜치, 그리고 원자 스킬 플러그인(<code>gh-issue</code> &middot; <code>gh-pr</code> &middot; <code>gh-verify</code> &middot; <code>gh-resolve</code>) 설치.</span>
+        <span><strong>체인은 리뷰 앞에서 끝납니다</strong> &mdash; 어느 스킬도 PR 을 스스로 머지하지 않고, 그건 사람의 판단으로 남습니다(<code>drain --merge</code> 와 <code>waves</code> 만 예외이고, 그마저 각각 <code>gh-pr:merge-train</code> &middot; <code>gh-pr:merge</code> 에 위임해 승인 게이트가 그대로 적용됩니다). 체인 스킬은 첫 실패 지점에서 즉시 멈추고 재개 힌트를 담은 리포트를 냅니다 &mdash; 실패한 단계를 재시도하거나 건너뛰지 않습니다. 전제조건: 전용 worktree 의 feature 브랜치, 그리고 원자 스킬 플러그인(<code>gh-issue</code> &middot; <code>gh-pr</code> &middot; <code>gh-verify</code> &middot; <code>gh-resolve</code>) 설치.</span>
       </div>
     </header>
 

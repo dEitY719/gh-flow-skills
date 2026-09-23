@@ -97,4 +97,4 @@ skip a step, the soft-fail exceptions, simplify-commit-before-rebase, the early-
 ## Related Skills
 
 Chained atoms: `gh-issue:implement` · `gh-pr:commit` · `gh-pr:create` · `gh-verify:review-all` ·
-`gh-resolve:conflict` · `gh-resolve:outdated`. Spec-driven cousin: `gh-flow:autopilot`.
+`gh-resolve:conflict` · `gh-resolve:outdated`. Spec-driven cousin: `gh-flow:autopilot`. Parallel waves of issues: `gh-flow:waves`.
