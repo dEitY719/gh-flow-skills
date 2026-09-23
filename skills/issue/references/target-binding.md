@@ -6,6 +6,7 @@ lives in one script, `lib/target-binding.sh` — its own header documents the
 usage, exports and inputs in full; this file covers only the *why*.
 
 ```bash
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
     [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/target-binding.sh" ]; then            # proof
     GH_FLOW_TARGET_REMOTE="<remote>" \
@@ -22,6 +23,22 @@ fi
 with the variable unset it sources this script from the **current working
 directory**, and this skill runs inside the repository under review. Guard the
 variable, then prove the file — there is no tier that guesses (#27).
+
+**`<skill-base-dir>` is the agent-filled half of tier 2 (#41 F-6).** A skill
+loaded through a plain symlink (`~/.claude*/skills/<name>` -> a checkout's
+`skills/<name>`) runs with `CLAUDE_PLUGIN_ROOT` unset, and every guard above
+stopped. The first line fills the variable the way
+[plugin-root.md](https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md)
+says a harness without it must: from the path the agent read `SKILL.md` at.
+Substitute `<skill-base-dir>` with that literal absolute directory (Claude Code
+prints it as "Base directory for this skill"). `cd -P` resolves the symlink
+before the `../..`, so the result is the real plugin root; a logical `cd`
+would climb the symlink's own parents. A placeholder left unsubstituted, or a
+relative path, is refused by the `/*` arm — a relative path resolves against
+`$PWD`, which is the retired tier 4 again. The `[ -f ]` proof still decides.
+Every block that addresses `$CLAUDE_PLUGIN_ROOT/skills/` in `skills/issue`,
+`skills/drain` and `skills/waves` carries the same line, because Bash calls do
+not share variables; `tests/plugin-root-skill-base.sh` holds them to it.
 
 `<remote>` is the literal `[remote]` argument from Step 1 — e.g. `upstream`
 when `/gh-flow:issue <N> upstream` was invoked, `origin` (the script's own

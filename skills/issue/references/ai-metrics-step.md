@@ -36,6 +36,7 @@ Then call the script once, from a single Bash call, with the literal
 `references/target-binding.md`):
 
 ```bash
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
 if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
     [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/post-ai-metrics.sh" ]; then           # proof
     bash "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/post-ai-metrics.sh" \

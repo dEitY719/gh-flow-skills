@@ -5,10 +5,11 @@
 | # | Name | Default | Description |
 |---|------|---------|-------------|
 | 1 | `[remote]` or `-h`/`--help`/`help` | `origin` | Git remote whose URL binds `TARGET_HOST` + `TARGET_REPO`. Passed to every worker. A missing remote stops the run — no silent `origin` fallback |
+| 1 | `<issue-url>` | none | `https://<host>/<owner>/<repo>/issues/<N>` instead of a remote: locate that repo's main checkout in the cwd or up to two levels below it, bind its matching remote, sweep every open non-`blocked` issue, and default the tracking issue to `<N>`. `references/locate.md` |
 | - | `--from N` | none | Lower bound: open issues numbered below `N` are skipped |
 | - | `--label L` | none | Only issues carrying label `L` |
 | - | `--issues 1,2,3` | none | Exactly these issues. Combines with the filters above as an intersection |
-| - | `--track N` | the single epic in the set | Issue that receives the plan comment and every re-plan comment. With no `--track` and not exactly one epic, the run stops before planning |
+| - | `--track N` | the single epic in the set, else the `<issue-url>` issue | Issue that receives the plan comment and every re-plan comment. With no `--track`, not exactly one epic and no `<issue-url>`, the run stops before planning |
 | - | `--max-parallel K` | `4` | At most `K` workers (and worktrees) per wave. Overflow moves to the next wave |
 | - | `--run "<cmd>"` | none | Barrier's app restart command, run in the main checkout (e.g. `make run`). Absent: the live step is `[SKIP]` |
 | - | `--bootstrap "<cmd>"` | `.claude/gh-flow-waves.sh` if present | Per-worktree setup (symlink `.venv`/`.env`, `bun install`, ...), run inside each new worktree. Never hardcoded in the skill |
@@ -16,13 +17,15 @@
 | - | `--no-merge` | off | Workers stop at a green, synced PR; nothing merges and every live step is `[SKIP]` |
 
 With no `--from` / `--label` / `--issues`, the target set is every open issue in
-the repo that is not labelled `blocked`.
+the repo that is not labelled `blocked` — with or without an `<issue-url>`.
 
 ## Usage
 
 - `/gh-flow:waves --from 178 --run "make run"` — every open issue from #178 up, in waves, self-merged, live-verified after each wave.
 - `/gh-flow:waves upstream --issues 189,190,193 --track 180 --no-merge` — plan and open PRs only, on `upstream`; the plan goes on #180.
 - `/gh-flow:waves --label backend --max-parallel 2 --bootstrap "ln -s ../app/.env .env"` — two workers at a time, with a per-worktree setup command.
+- `/gh-flow:waves https://github.com/acme/app/issues/28` — from a folder of clones: find `app`'s main checkout, sweep its open issues, plan on #28.
+- `/gh-flow:waves https://github.com/acme/app/issues/28 --issues 28,30` — the same, but only #28 and #30.
 - `/gh-flow:waves -h` / `--help` / `help` — print this help.
 
 ## What one wave does

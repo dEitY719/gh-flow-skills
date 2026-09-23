@@ -47,6 +47,9 @@ follows with whatever finished. One ending, one `Next:`:
 
 - `gh-flow:waves stopped — issue list failed (<reason>)` — `Next:` the fix
   (`gh auth status` on `$TARGET_HOST`, usually), then re-run.
+- `gh-flow:waves stopped — checkout not found (<reason>)` — an `<issue-url>`
+  run found no single main checkout (`references/locate.md`). `Next:` the
+  printed `git clone` line, or `cd` into the one checkout meant, then re-run.
 - `gh-flow:waves stopped — no tracking issue` — `Next:` the same command with
   `--track <N>`.
 - `gh-flow:waves stopped — run failed (<reason>)` — `Next:` fix the `--run`

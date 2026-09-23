@@ -59,7 +59,8 @@ how a worker re-implements what an epic PR already shipped.
 ## 5. Record the plan (F-3)
 
 One comment on the tracking issue (`--track N`, else the single epic in the set;
-with neither, stop: `gh-flow:waves stopped — no tracking issue`):
+else the `<issue-url>` issue (`references/locate.md` §3); with none of these,
+stop: `gh-flow:waves stopped — no tracking issue`):
 
 ```
 <!-- gh-flow:waves plan -->
@@ -80,9 +81,21 @@ A fresh session re-invoked with the same command re-derives everything: closed
 issues drop out of step 1, merged predecessors satisfy their edges, and the
 newest `gh-flow:waves plan` comment on the tracking issue shows where the last
 run was. An open issue that already has an open PR from an earlier run — one
-`GH_HOST="$TARGET_HOST" gh pr list --repo "$TARGET_REPO" --state open --json number,headRefName,closingIssuesReferences`
-per plan, matched on `closingIssuesReferences[].number` — is not
-re-implemented: its brief says **existing PR #M** and the worker starts at the
+query per plan, matched on `closes` — is not re-implemented:
+
+```bash
+GH_HOST="$TARGET_HOST" gh api graphql -F owner="${TARGET_REPO%%/*}" -F name="${TARGET_REPO#*/}" \
+  -f query='query($owner:String!,$name:String!){repository(owner:$owner,name:$name){
+    pullRequests(states:OPEN,first:100){pageInfo{hasNextPage}
+      nodes{number headRefName closingIssuesReferences(first:25){nodes{number}}}}}}' \
+  --jq '.data.repository.pullRequests | (.nodes[] | {number, headRefName,
+    closes: [.closingIssuesReferences.nodes[].number]}), (select(.pageInfo.hasNextPage) | "TRUNCATED")'
+```
+
+Not `gh pr list --json closingIssuesReferences`: gh 2.45.0 rejects that field
+(`Unknown JSON field`), so the resume rule broke on it (#41 F-7). A `TRUNCATED`
+line means more than 100 open PRs — say so rather than treat the rest as absent.
+Such an issue's brief says **existing PR #M** and the worker starts at the
 reply step on a worktree checked out on that PR's branch. No state file.
 
 ## 7. Spawn (F-4)
