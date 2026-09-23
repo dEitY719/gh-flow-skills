@@ -9,9 +9,13 @@ stopping rules.
 These are compositions, not implementations. Each step delegates to the skill
 that owns it (`gh-issue:implement`, `gh-pr:commit`, `gh-pr:create`,
 `gh-verify:review-all`, `gh-resolve:conflict`, `gh-resolve:outdated`). Nothing
-here reimplements an atom, and **nothing here merges a PR** — that stays a human
-decision. `drain --merge` is the one explicit exception, and even it only
-delegates to `gh-pr:merge-train`, whose approval and label gates still apply.
+here reimplements an atom, and **nothing here merges a PR by itself** — that
+stays a human decision. There are two explicit exceptions, and neither merges
+anything itself: `drain --merge` delegates to `gh-pr:merge-train`, and `waves`
+(which merges by default) has each worker delegate to `gh-pr:merge` — the
+approval and label gates of both still apply. A `gh-pr:merge` refusal is
+reported `[FAIL] not merged` and the PR is left for a human; `waves --no-merge`
+merges nothing; `gh-pr:merge-emergency` is never called by any path.
 
 ## Skills
 
@@ -22,12 +26,14 @@ delegates to `gh-pr:merge-train`, whose approval and label gates still apply.
 | `issue-relay` | `/gh-flow:issue-relay <N> <remote>` | An issue on a push-blocked remote | Branch, delegate the implementation, verify it, then hand the commits to `relay-merge`. |
 | `relay-merge` | `/gh-flow:relay-merge <PR>` | Commits bound for a push-blocked remote | Probe whether push actually works; only when it is genuinely blocked, relay per-commit patches through a gist with a `git am` apply-guide. |
 | `drain` | `/gh-flow:drain [owner/repo] [remote]` | A repo's open backlog | Run the whole backlog through `issue`, one issue at a time, promoting every deferred item to a new issue. Ends only when open issues and deferred items are both zero. |
+| `waves` | `/gh-flow:waves [remote] [--from N] [--issues 1,2,3] [--run "<cmd>"] [--no-merge]` | A set of issues with dependencies | Plan dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Re-plans every wave. |
 
 Pick by where you are starting and whether the destination accepts a push.
 `issue` refuses to invent a spec; `autopilot` refuses to skip one; neither relay
 skill runs when a plain `git push` works; `drain` starts from a backlog that
 already exists and refuses to finish while anything found along the way is
-sitting in a ledger instead of an issue.
+sitting in a ledger instead of an issue; `waves` takes a set whose order matters
+and refuses to start the next wave until the last one is merged and verified.
 
 ### Visual guides and worked examples (GitHub Pages)
 
@@ -43,10 +49,10 @@ Each page is generated from a Markdown source under
 
 | Need | Why |
 |------|-----|
-| `git` | All five commit, push, or format patches. |
+| `git` | All six commit, push, or format patches. |
 | `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (dEitY719/dotfiles#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
-| A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. |
-| The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve`. These are compositions; the steps they call live in those repos. |
+| A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. `waves` is the inverse: it runs from the main checkout and creates one worktree per issue via `session:worktree-spawn`. |
+| The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve` (and `session` for `waves`). These are compositions; the steps they call live in those repos. |
 
 ## Install
 
@@ -104,6 +110,7 @@ read the one file for the harness you are on.
 | `issue-relay` | full | full, verify by hand | full | full | full | full |
 | `relay-merge` | full | full, confirm in chat | full | full (Antigravity: confirm in chat) | full, confirm in chat | full, confirm in chat |
 | `drain` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
+| `waves` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 
 *manual chain* — without a `Skill` tool, print the ordered list of atomic skills
 the chain would have invoked, run what is plain shell, and stop at the first
@@ -142,7 +149,12 @@ The consequence for anyone editing this repo: the terminal report strings and
 step markers are a **hook contract, not prose**. `gh-flow:issue complete (#<N>)`,
 `gh-flow:issue stopped at step <i>/6`, `[step:gh-flow-autopilot/<id>] OK`,
 `[OK] gh-flow:autopilot`, `[FAIL] gh-flow:autopilot` — change one without the
-matching hook change and the regression comes straight back.
+matching hook change and the regression comes straight back. `drain`'s and
+`waves`'s terminal strings (`gh-flow:drain complete` / `gh-flow:drain stopped —`,
+`gh-flow:waves complete` / `gh-flow:waves stopped —`) are pinned the same way,
+ahead of the guards that will match them. And `waves`'s coordinator never
+invokes `gh-flow:issue` itself, not even for `--help` — the installed guard
+counts that call as a chain start and blocks the coordinator's turn.
 
 Those hooks accept **only** this repo's `gh-flow:*` namespace. The
 pre-migration `gh:issue-flow` / `devx-autopilot` form was dropped in Phase 4 of
@@ -172,7 +184,8 @@ gh-flow-skills/
 │   ├── autopilot/SKILL.md    + references/
 │   ├── issue-relay/SKILL.md  + references/ + evals/
 │   ├── relay-merge/SKILL.md  + references/
-│   └── drain/SKILL.md        + references/ + evals/
+│   ├── drain/SKILL.md        + references/ + evals/
+│   └── waves/SKILL.md        + references/ + evals/
 ├── .claude-plugin/{marketplace,plugin}.json   Claude Code
 ├── .codex-plugin/plugin.json                  Codex
 ├── .kimi-plugin/plugin.json                   Kimi CLI
@@ -224,6 +237,10 @@ invocation time.
 `drain` has no dotfiles ancestor — it was written here (issue #13), after a
 session that reached "zero open issues" while four unresolved items lived only
 in a closing comment.
+
+`waves` has no dotfiles ancestor either — it was written here (issue #39), after
+a session that planned four dependency waves, spawned the worktrees and wrote
+the same worker brief four times by hand.
 
 ## License
 

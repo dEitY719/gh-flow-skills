@@ -1,0 +1,43 @@
+[
+  {
+    "query": "이 이슈 8개 병렬 가능한지 보고 의존성 순서대로 웨이브 나눠서 처리해줘",
+    "should_trigger": true
+  },
+  {
+    "query": "#178 이상 열린 이슈 전부 worktree 나눠서 병렬로 구현하고 머지한 다음 웨이브마다 라이브 검증해",
+    "should_trigger": true
+  },
+  {
+    "query": "run these issues in parallel waves, respecting their dependencies",
+    "should_trigger": true
+  },
+  {
+    "query": "/gh-flow:waves",
+    "should_trigger": true,
+    "note": "slash-literal: update if the skill is renamed"
+  },
+  {
+    "query": "/gh-flow:waves upstream --issues 189,190,193 --no-merge",
+    "should_trigger": true
+  },
+  {
+    "query": "이슈 #16 처음부터 PR까지 자동으로 해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "백로그 다 비워줘. 이연된 것도 전부 이슈로 등록하고",
+    "should_trigger": false
+  },
+  {
+    "query": "이 spec 문서 가지고 계획부터 PR까지 자동으로 진행해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "열린 PR 순차로 정리하고 머지해줘",
+    "should_trigger": false
+  },
+  {
+    "query": "머지된 PR 라이브 검증해줘",
+    "should_trigger": false
+  }
+]

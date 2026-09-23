@@ -1,9 +1,9 @@
 # gh-flow — skill index
 
-Five skills for one job: carrying a GitHub issue all the way to a reviewed pull
+Six skills for one job: carrying a GitHub issue all the way to a reviewed pull
 request in a single run. Each lives in this extension's `skills/` directory.
 They are explicitly invoked, never ambient: load the one that matches your
-starting point by reading its `SKILL.md`, then follow it. Do not load all five.
+starting point by reading its `SKILL.md`, then follow it. Do not load all six.
 
 | Skill | Read | Use when |
 |-------|------|----------|
@@ -12,11 +12,13 @@ starting point by reading its `SKILL.md`, then follow it. Do not load all five.
 | `issue-relay` | `@./skills/issue-relay/SKILL.md` | The issue lives on a destination remote whose `git push` is blocked. Branch, delegate the implementation, verify it, then hand off to `relay-merge`. |
 | `relay-merge` | `@./skills/relay-merge/SKILL.md` | You have commits to move to a push-blocked remote. Probes push first; relays per-commit patches through a gist with a `git am` apply-guide only when push is genuinely blocked. |
 | `drain` | `@./skills/drain/SKILL.md` | You have a whole open backlog, not one issue. Runs each issue through `issue` and promotes every deferred item to a new issue; ends only when open issues and deferred items are both zero. |
+| `waves` | `@./skills/waves/SKILL.md` | You have a set of issues whose order matters. Plans dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Run it from the main checkout. |
 
 Pick by where you are starting and whether the destination accepts a push, not
 by which sounds most thorough. `issue` refuses to invent a spec; `autopilot`
 refuses to skip one. Neither relay skill runs when a plain push works. `drain`
-starts from a backlog that already exists.
+starts from a backlog that already exists; `waves` from a set whose order
+matters.
 
 Each skill's `references/` directory holds the detail it loads on demand.
 `SKILL.md` says which file to read and when — do not read `references/` up
@@ -57,7 +59,7 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
 
 ## Capability gaps on Gemini CLI
 
-- **These five skills are compositions, and Gemini has no skill-invocation
+- **These six skills are compositions, and Gemini has no skill-invocation
   tool.** `issue` and `autopilot` are ordered chains of other skills; without a
   `Skill` equivalent they cannot run as written. Print the ordered list of
   atomic skills the chain would have invoked, run what is plain shell, and stop
@@ -71,8 +73,13 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
 
 ## Safety rules
 
-- **No skill here merges a pull request.** `autopilot` stops at review on
-  purpose; merging is a human decision.
+- **No skill here merges a pull request by itself.** `autopilot` stops at
+  review on purpose; merging is a human decision. `drain --merge` delegates to
+  `gh-pr:merge-train`; `waves` workers delegate to `gh-pr:merge`, whose gates
+  still apply, and report `[FAIL] not merged` on a refusal. `waves --no-merge`
+  merges nothing; `gh-pr:merge-emergency` is never called.
+- `waves`'s coordinator never invokes `issue` itself, not even for `--help` —
+  only its workers do.
 - `issue` stops at the first failing step and prints a resume hint. It never
   retries a step and never skips one. Its three soft-fail exceptions are
   enumerated in `skills/issue/references/constraints.md`.

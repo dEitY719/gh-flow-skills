@@ -18,12 +18,16 @@ sibling repos of this family.
 | `issue-relay` | An issue on a push-blocked remote | Branch, delegate the implementation, verify it, then hand the commits to `relay-merge`. |
 | `relay-merge` | A PR whose `git push` a proxy blocks | Probe whether a normal push actually works; only when it is genuinely blocked, relay per-commit patches through a gist with a `git am` apply-guide. |
 | `drain` | A repo's open backlog | The whole backlog, one issue at a time through `issue`, with every deferred item promoted to a new issue. Ends only when open issues **and** deferred items are both zero. |
+| `waves` | A set of issues with dependencies between them | Plans dependency waves, then per wave runs one worktree + one background worker per issue (`issue` → `gh-pr:merge`), and a serial `gh-verify:live` barrier before re-planning the next wave. |
 
-`drain` sits on top of `issue`: it is the only one that starts from a backlog
+`drain` and `waves` sit on top of `issue`. `drain` starts from a backlog
 rather than a single unit of work, and its reason for existing is that "zero
-open issues" is a gameable number — an agent reaches it by not filing issues.
+open issues" is a gameable number — an agent reaches it by not filing issues. `waves` starts from a set of issues whose order matters: it
+runs independent ones in parallel worktrees and verifies each wave live before
+the next — its reason for existing is that a serial drain cannot parallelize
+and a parallel run without a barrier accumulates unverified merges.
 
-The other four split along two axes: how much of the lifecycle they own (`issue`
+The remaining four split along two axes: how much of the lifecycle they own (`issue`
 starts at an issue, `autopilot` at a spec) and whether the destination remote is
 reachable (`issue`/`autopilot`) or push-blocked (`issue-relay`/`relay-merge`).
 Merging them would erase exactly the distinction that decides which one is safe
@@ -36,10 +40,15 @@ atomic skill that owns it — `gh-issue:implement`, `gh-pr:commit`,
 step needs to change, it changes in the repo that owns it.
 
 **None of them merges a PR.** `autopilot` stops at review on purpose; merging
-stays a human decision. The single explicit exception is `drain --merge`, which
+stays a human decision. There are two explicit exceptions. The first is `drain --merge`, which
 does not merge anything itself either — it delegates to `gh-pr:merge-train`,
-whose own approval and label gates still apply. Default `drain` merges nothing,
-and `gh-pr:merge-emergency` is never called from this repo by any path.
+whose own approval and label gates still apply. Default `drain` merges nothing.
+The second is `waves`, which merges by default and does not merge anything
+itself either: each of its workers delegates to `gh-pr:merge`, whose approval
+and protection gates still apply, and a refusal is reported `[FAIL] not merged`
+with the PR left for a human — there is no raw `gh pr merge` fallback.
+`waves --no-merge` merges nothing. `gh-pr:merge-emergency` is never called from
+this repo by any path.
 
 The skills were extracted from `dEitY719/dotfiles`
 (`claude/skills/{gh-issue-flow,devx-autopilot,gh-issue-relay-flow,gh-relay-merge}`)
@@ -78,7 +87,11 @@ exist to prevent (dEitY719/dotfiles#333, dEitY719/dotfiles#383, and four later r
 
 `drain`'s terminal strings — `gh-flow:drain complete` and `gh-flow:drain
 stopped —` in `skills/drain/references/report-format.md` — are pinned under the
-same contract, ahead of the guard that will match them (#18).
+same contract, ahead of the guard that will match them (#18). So are `waves`'s —
+`gh-flow:waves complete` and `gh-flow:waves stopped —` in
+`skills/waves/references/report-template.md` — and its coordinator never invokes
+`gh-flow:issue` itself, not even for `--help`, because the installed
+`gh_issue_flow_stop_guard.py` counts that call as a chain start (#39).
 
 ## Layout: root manifests, one flat `skills/`
 
@@ -136,14 +149,14 @@ should apply here on the next run, which is the whole point.
   this repo as a command writes `/gh-flow:issue`.
 - **Cross-repo references keep their own namespace.** `gh-issue:implement`,
   `gh-issue:issue-create`, `gh-pr:commit`, `gh-pr:create`, `gh-pr:reply`,
-  `gh-pr:merge-train`, `gh-verify:review-all`, `gh-resolve:conflict`,
-  `gh-resolve:outdated`, `session:restart`, `session:schedule`, and
+  `gh-pr:merge`, `gh-pr:merge-train`, `gh-verify:review-all`, `gh-verify:live`,
+  `gh-resolve:conflict`, `gh-resolve:outdated`, `gh-resolve:ci-fail`, `session:restart`, `session:schedule`, and
   `session:worktree-spawn` all live in other repos of this family, each under
   its own plugin's namespace. Write each exactly as its owning repo does; only
   siblings inside `skills/` take the `gh-flow:` prefix.
 - **Progressive disclosure.** `SKILL.md` stays at or under 100 lines (CI
   enforces it) and names which `references/` file to read and when. Detail lives
-  in `references/`. All five are within a line or two of the limit — when a step
+  in `references/`. All six are within a line or two of the limit — when a step
   grows, move prose out; never delete a safety rule to buy lines.
 - **Description budget.** CI sums every skill description and fails past 5,440
   characters — Codex's context budget — with a per-description cap of 1,024.
@@ -151,7 +164,13 @@ should apply here on the next run, which is the whole point.
   `autopilot` takes a spec, and that one sentence is what keeps them apart.
 - **Honour each skill's safety contract.** These are acceptance criteria, not
   advice:
-  - No skill here merges a PR. `autopilot` stops at review by design.
+  - No skill here merges a PR by itself. `autopilot` stops at review by design.
+    `drain --merge` delegates to `gh-pr:merge-train`; `waves` workers delegate
+    to `gh-pr:merge` and nothing else — no raw `gh pr merge`, no
+    `gh-pr:merge-emergency`.
+  - `waves`: the coordinator never calls `gh-flow:issue` (only workers do), one
+    worker per worktree, merge judged by `mergeCommit.oid` only, live
+    verification serial and only after every merge of the wave.
   - `issue` stops at the first failing step and prints a resume hint. It never
     retries a step and never skips one. The soft-fail exceptions
     (`gh-verify:review-all`, the merge-train wake, the metrics comment, the Step
