@@ -36,7 +36,7 @@ while IFS= read -r f; do
         /^```/ { if (inb) { print start "\t" sp "\t" hc; inb = 0 } else { inb = 1; start = NR; sp = 0; hc = 0 }; next }
         inb && (index($0, "\"$CLAUDE_PLUGIN_ROOT/skills/") || index($0, "\"${CLAUDE_PLUGIN_ROOT}/skills/")) { sp = 1 }
         inb && $0 == canon { hc = 1 }' "$f")
-done < <(git ls-files -- 'skills/*.md')
+done < <(git ls-files -- 'skills/*.md')  # git pathspec: '*' crosses '/', so this is every skills/*/**.md
 [ "$n" -ge 9 ] || { say "FAIL  only $n splicing blocks found — the scan is broken, not the tree"; fail=1; }
 
 # 2. Behaviour. The placeholder is substituted exactly as the agent would.
