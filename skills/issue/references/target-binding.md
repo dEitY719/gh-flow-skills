@@ -36,9 +36,9 @@ before the `../..`, so the result is the real plugin root; a logical `cd`
 would climb the symlink's own parents. A placeholder left unsubstituted, or a
 relative path, is refused by the `/*` arm — a relative path resolves against
 `$PWD`, which is the retired tier 4 again. The `[ -f ]` proof still decides.
-Every block that addresses `$CLAUDE_PLUGIN_ROOT/skills/` in `skills/issue`,
-`skills/drain` and `skills/waves` carries the same line, because Bash calls do
-not share variables; `tests/plugin-root-skill-base.sh` holds them to it.
+Every block under `skills/*/` that addresses `$CLAUDE_PLUGIN_ROOT/skills/` (or
+the braced `${CLAUDE_PLUGIN_ROOT}/skills/`) carries the same line, because Bash
+calls do not share variables; `tests/plugin-root-skill-base.sh` holds them to it.
 
 `<remote>` is the literal `[remote]` argument from Step 1 — e.g. `upstream`
 when `/gh-flow:issue <N> upstream` was invoked, `origin` (the script's own

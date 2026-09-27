@@ -7,7 +7,15 @@ Step 5. Uploads each patch file from Step 4 as its own gist.
 `lib/relay.sh upload` is that loop — the rule is the code, not a reminder:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/relay-merge/lib/relay.sh" upload "$DEST_HOST" "$tmpdir"
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
+    [ -f "$CLAUDE_PLUGIN_ROOT/skills/relay-merge/lib/relay.sh" ]; then               # proof
+    bash "$CLAUDE_PLUGIN_ROOT/skills/relay-merge/lib/relay.sh" upload "$DEST_HOST" "$tmpdir"
+else                                                                                 # tier 5
+    printf '[gh-flow:relay-merge] cannot locate skills/relay-merge/lib/relay.sh under CLAUDE_PLUGIN_ROOT (%s). On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
+    exit 1
+fi
 ```
 
 ## Which host the gists live on: the destination

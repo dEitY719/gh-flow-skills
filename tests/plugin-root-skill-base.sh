@@ -8,8 +8,8 @@
 #
 #   bash tests/plugin-root-skill-base.sh
 #
-# 1. Every fenced block under skills/{issue,drain,waves} that splices
-#    "$CLAUDE_PLUGIN_ROOT/skills/" carries the line, byte-identical.
+# 1. Every fenced block under skills/*/ that splices "$CLAUDE_PLUGIN_ROOT/skills/"
+#    or "${CLAUDE_PLUGIN_ROOT}/skills/" carries the line, byte-identical (#43).
 # 2. The line, executed in every available POSIX-ish shell, resolves a
 #    symlinked base dir to the REAL plugin root (`cd -P`), keeps a preset
 #    value, and refuses a relative path (that would be $PWD, the retired tier 4).
@@ -34,10 +34,10 @@ while IFS= read -r f; do
         fi
     done < <(awk -v canon="$canon" '
         /^```/ { if (inb) { print start "\t" sp "\t" hc; inb = 0 } else { inb = 1; start = NR; sp = 0; hc = 0 }; next }
-        inb && index($0, "\"$CLAUDE_PLUGIN_ROOT/skills/") { sp = 1 }
+        inb && (index($0, "\"$CLAUDE_PLUGIN_ROOT/skills/") || index($0, "\"${CLAUDE_PLUGIN_ROOT}/skills/")) { sp = 1 }
         inb && $0 == canon { hc = 1 }' "$f")
-done < <(git ls-files -- 'skills/issue/*.md' 'skills/drain/*.md' 'skills/waves/*.md')
-[ "$n" -ge 5 ] || { say "FAIL  only $n splicing blocks found — the scan is broken, not the tree"; fail=1; }
+done < <(git ls-files -- 'skills/*.md')
+[ "$n" -ge 9 ] || { say "FAIL  only $n splicing blocks found — the scan is broken, not the tree"; fail=1; }
 
 # 2. Behaviour. The placeholder is substituted exactly as the agent would.
 TMP=$(mktemp -d)

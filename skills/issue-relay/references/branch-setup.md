@@ -6,8 +6,16 @@ is `lib/branch-setup.sh`; this file covers the *why* plus the one part the
 script deliberately leaves out: the reuse-or-reset conversation with the user.
 
 ```bash
-_bs_out=$(bash "${CLAUDE_PLUGIN_ROOT}/skills/issue-relay/lib/branch-setup.sh" "$REMOTE" "$N" [--base "$BASE"]) || exit 1
-eval "$_bs_out"
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] &&                                               # tier 2
+    [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue-relay/lib/branch-setup.sh" ]; then        # proof
+    _bs_out=$(bash "$CLAUDE_PLUGIN_ROOT/skills/issue-relay/lib/branch-setup.sh" "$REMOTE" "$N" [--base "$BASE"]) || exit 1
+    eval "$_bs_out"
+else                                                                                 # tier 5
+    printf '[gh-flow:issue-relay] cannot locate skills/issue-relay/lib/branch-setup.sh under CLAUDE_PLUGIN_ROOT (%s). On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
+    exit 1
+fi
 ```
 
 Capture the substitution into a variable before `eval` (codex review, PR #20
