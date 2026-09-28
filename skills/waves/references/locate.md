@@ -20,7 +20,7 @@ else                                                                            
 fi
 ```
 
-`<skill-base-dir>` is explained in `../../issue/references/target-binding.md`.
+`<skill-base-dir>` is explained in `gh-flow:issue`'s `references/target-binding.md`.
 Search order, remote matching and the linked-worktree exclusion are in the
 script's header; it does no git write, not even a fetch (NF-2). Its self-check,
 `lib/locate-checkout.selfcheck.sh`, covers every arm below.
@@ -39,7 +39,7 @@ Every coordinator Bash call from here on starts with `cd "<MAIN>" &&` (or uses
 barrier's pull and `--run`, and the Bash call right before each
 `Skill(session:worktree-spawn, ...)` — that skill resolves the repo from the
 cwd. The binding is the unchanged block from
-`../../issue/references/target-binding.md` with `<remote>` = the `REMOTE` value.
+`gh-flow:issue`'s `references/target-binding.md` with `<remote>` = the `REMOTE` value.
 Afterwards `TARGET_HOST`/`TARGET_REPO` must equal `HOST`/`REPO`
 (case-insensitive); a mismatch stops with the same `checkout not found` line.
 

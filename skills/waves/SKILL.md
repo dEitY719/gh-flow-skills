@@ -30,7 +30,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 **전제조건**: 조율자는 저장소의 **main 체크아웃**(`MAIN`, 기본 브랜치)을 기준으로 돈다 — worktree 는 워커 몫.
 
 **조율자는 `gh-flow:issue` 를 절대 직접 부르지 않는다** — `--help` 조회로도 부르지 않는다
-(NF-1; stop guard 가 그 호출을 체인 시작으로 센다). 도움말은 `../issue/references/help.md` 를 `Read`.
+(NF-1; stop guard 가 그 호출을 체인 시작으로 센다). 도움말은 `gh-flow:issue` 의 `references/help.md` 를 `Read`.
 
 ## Step 1: Parse Args + Bind Target
 
@@ -41,7 +41,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 읽기 전용으로 찾아 `MAIN`·`[remote]` 로 쓰고, 조율자의 모든 Bash 호출은 `cd "<MAIN>" &&` 로 시작한다
 (대상 = 열린 이슈 전체, 추적 이슈 기본값 = URL 이슈): `references/locate.md`. 아니면 `MAIN` = cwd, 동작 불변.
 
-**대상 바인딩** — `../issue/references/target-binding.md` 의 **bash 블록만** 그대로 쓴다
+**대상 바인딩** — `gh-flow:issue` 의 `references/target-binding.md` 의 **bash 블록만** 그대로 쓴다
 (복사 금지, 같은 모양: `$CLAUDE_PLUGIN_ROOT` 를 가드하고 `[ -f ]` 로 파일을 증명한 뒤
 `skills/issue/lib/target-binding.sh` 를 source — 기본값을 경로에 끼우는 형태 금지).
 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` (또는 `-R`).
@@ -72,7 +72,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
    새 계획 코멘트를 남긴다(pitfall 7). 없으면 다음 웨이브.
 
 한 워커의 실패는 그 이슈만 `[FAIL]` + 이슈 코멘트로 끝나고 웨이브의 나머지는 계속된다.
-실패한 선행을 기다리는 후행 이슈는 미루고 drain 의 `../drain/references/blocked.md`
+실패한 선행을 기다리는 후행 이슈는 미루고 `gh-flow:drain` 의 `references/blocked.md`
 형식으로 사유를 코멘트한다(복사 금지, 참조만).
 
 ## Step 4: Merge Policy

@@ -63,7 +63,7 @@ header line. One ending, one `Next:` — there is no second lookup table:
 `gh-flow:drain complete` and `gh-flow:drain stopped —` are the terminal markers
 a `Stop` / `SubagentStop` guard matches to decide that a drain run really
 finished — the role `gh-flow:issue complete (#<N>)` plays for the sibling skill
-(`../../issue/references/stop-guard.md` is the SSOT for that mechanism). Keep
+(`gh-flow:issue`'s `references/stop-guard.md` is the SSOT for that mechanism). Keep
 both verbatim: rewording either without the matching hook change re-opens the
 early-stop failure mode (dEitY719/dotfiles#333, dEitY719/dotfiles#383 for
 `gh-flow:issue`; issue #18 for this skill).

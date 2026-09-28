@@ -14,7 +14,7 @@ Then drop: numbers below `--from`, numbers outside `--issues`, anything labelled
 `$LIMIT` means the list was truncated — say so, never claim a clean zero.
 
 **A failure here stops the run before the wave starts** (same rule as
-`../../drain/references/loop.md`). Planning over an unknown state is how work
+`gh-flow:drain`'s `references/loop.md`). Planning over an unknown state is how work
 gets redone or lost.
 
 ## 2. Read each candidate

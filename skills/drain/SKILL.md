@@ -34,7 +34,7 @@ API 호출 없음): `references/help.md`.
 
 **대상 바인딩** — 하나의 remote URL 에서 `TARGET_HOST` + `TARGET_REPO` 를 뽑고 모든
 `gh` 호출을 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` 로 실행한다.
-바인딩 블록은 형제 스킬의 SSOT 를 그대로 쓴다 — `../issue/references/target-binding.md`
+바인딩 블록은 형제 스킬의 SSOT 를 그대로 쓴다 — `gh-flow:issue` 의 `references/target-binding.md`
 의 **bash 블록만** 해당하고(복사하지 말 것), 그 파일의 `gh-flow:issue` Step 2.4.1/2.6
 설명은 여기 적용되지 않는다. **없는 remote 는 조용히 `origin` 으로 떨어지지 말고**
 `git remote -v` 를 출력하고 정지한다.

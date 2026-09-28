@@ -20,7 +20,7 @@
 - **Own issues only** (D-4): `--author @me`.
 - **Bind the target from one remote URL.** Every `gh` call carries
   `GH_HOST="$TARGET_HOST"` and `--repo "$TARGET_REPO"`
-  (`../issue/references/target-binding.md`). A missing remote stops the run —
+  (`gh-flow:issue`'s `references/target-binding.md`). A missing remote stops the run —
   falling back to `origin` silently sends the writes to the wrong repo.
 - **The stop conditions live in `references/loop.md`.** Its table is the SSOT;
   do not restate them here. Two of them (`--max-rounds`, closed-0-plus-opened-0)

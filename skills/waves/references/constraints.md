@@ -27,7 +27,7 @@
 - **Re-query every wave** (F-7). The plan moves while it runs (pitfall 7); a
   plan computed once is wrong by wave 2.
 - **Deferred items become issues.** Workers file them under
-  `../../drain/references/promotion.md`'s rules; this skill references that
+  `gh-flow:drain`'s `references/promotion.md` rules; this skill references that
   file and does not restate it.
 - **The coordinator works against `MAIN`** — the cwd, or with an `<issue-url>`
   the checkout `references/locate.md` found. Every coordinator Bash call starts
@@ -38,7 +38,7 @@
   issue failed ends it.
 - **Bind the target from one remote URL.** Every `gh` call carries
   `GH_HOST="$TARGET_HOST"` and `--repo`/`-R "$TARGET_REPO"`, in the coordinator
-  and in every brief (`../../issue/references/target-binding.md`).
+  and in every brief (`gh-flow:issue`'s `references/target-binding.md`).
 - **The wave table is not a final answer.** It is emitted between waves and the
   next one starts immediately. A run that ends on a wave table without a final
   report has stopped early — and no Stop hook guards this skill's own terminal
