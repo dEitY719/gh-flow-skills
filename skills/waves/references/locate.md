@@ -20,7 +20,8 @@ else                                                                            
 fi
 ```
 
-`<skill-base-dir>` is explained in `gh-flow:issue`'s `references/target-binding.md`.
+`<skill-base-dir>` is explained in `gh-flow:issue`'s `references/target-binding.md` (in this
+plugin: `skills/issue/references/target-binding.md` under the plugin root).
 Search order, remote matching and the linked-worktree exclusion are in the
 script's header; it does no git write, not even a fetch (NF-2). Its self-check,
 `lib/locate-checkout.selfcheck.sh`, covers every arm below.
