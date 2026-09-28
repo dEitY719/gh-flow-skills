@@ -45,6 +45,11 @@ blocked, failed, deferred on a failure, excluded as a cycle, or (with
 Name the cause on the header line instead of `complete`; the final table
 follows with whatever finished. One ending, one `Next:`:
 
+- `gh-flow:waves stopped — gh-flow plugin incomplete (<missing path>)` — a
+  sibling file (`gh-flow:issue`'s `references/target-binding.md` or
+  `skills/issue/lib/target-binding.sh`, `gh-flow:drain`'s references) is
+  absent: a single-skill install (#47). `Next:` install the whole `gh-flow`
+  plugin (README "Install"), then re-run.
 - `gh-flow:waves stopped — issue list failed (<reason>)` — `Next:` the fix
   (`gh auth status` on `$TARGET_HOST`, usually), then re-run.
 - `gh-flow:waves stopped — checkout not found (<reason>)` — an `<issue-url>`

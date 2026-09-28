@@ -53,6 +53,7 @@ Each page is generated from a Markdown source under
 | `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (dEitY719/dotfiles#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
 | A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. `waves` is the inverse: it runs from the main checkout and creates one worktree per issue via `session:worktree-spawn`. |
 | The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve` (and `session` for `waves`). These are compositions; the steps they call live in those repos. |
+| The whole `gh-flow` plugin, not one skill directory | `drain` and `waves` read `gh-flow:issue`'s `references/` (and `waves` also `gh-flow:drain`'s) and source `skills/issue/lib/target-binding.sh`. A harness that installs a single skill directory (a Hermes GitHub tap, `npx skills add`) leaves those files missing, so a lone `drain` or `waves` stops at target binding with `gh-flow:<skill> stopped — gh-flow plugin incomplete (<missing path>)`. The shared contracts are not vendored into each skill on purpose: copies drift (#45, #47). |
 
 ## Install
 
