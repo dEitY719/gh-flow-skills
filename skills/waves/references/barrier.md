@@ -21,7 +21,7 @@ Per failed worker: one comment on its issue —
 `[FAIL] gh-flow:waves wave <w> — <step>: <reason>. PR: #<PR> | none.` — and the
 issue is excluded from later waves of this run. Its dependents are deferred:
 one comment each in the three-part form of
-`../../drain/references/blocked.md` ((a) predecessor `#M` failed, (b) `#M`
+`gh-flow:drain`'s `references/blocked.md` ((a) predecessor `#M` failed, (b) `#M`
 merged, (c) re-run `/gh-flow:waves ...`). No `blocked` label for this case — the
 open, unmerged predecessor already re-derives the dependency on resume. A worker
 that reports a real `blocked:` cause (credentials, a user decision, ...) gets the
