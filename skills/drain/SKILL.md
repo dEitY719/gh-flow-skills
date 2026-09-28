@@ -24,7 +24,8 @@ metadata:
 
 열린 이슈를 번호 오름차순으로 한 건씩 `gh-flow:issue` 에 넘기고, 그 라운드에서 나온
 이연·미해결을 예외 없이 `gh-issue:issue-create` 로 승격한 뒤 목록을 다시 조회한다.
-**전제조건**: `gh-flow:issue` 와 같다 — 전용 worktree 의 feature 브랜치 위.
+**전제조건**: `gh-flow:issue` 와 같다 — 전용 worktree 의 feature 브랜치 위. 그리고 **gh-flow 플러그인
+전체 설치** — 스킬 디렉토리 하나만 설치하면 형제 스킬 파일이 없어 동작하지 않는다(#47).
 
 ## Step 1: Parse Args + Bind Target
 
@@ -37,7 +38,8 @@ API 호출 없음): `references/help.md`.
 바인딩 블록은 형제 스킬의 SSOT 를 그대로 쓴다 — `gh-flow:issue` 의 `references/target-binding.md`
 의 **bash 블록만** 해당하고(복사하지 말 것), 그 파일의 `gh-flow:issue` Step 2.4.1/2.6
 설명은 여기 적용되지 않는다. **없는 remote 는 조용히 `origin` 으로 떨어지지 말고**
-`git remote -v` 를 출력하고 정지한다.
+`git remote -v` 를 출력하고 정지한다. `target-binding.md` 를 읽을 수 없거나 블록이 `cannot locate` 로
+멈추면 `gh-flow:drain stopped — gh-flow plugin incomplete (<missing path>)` 로 정지한다.
 
 `[owner/repo]` 는 스위치가 아니라 **가드**다 — remote 슬러그와 다르면 둘 다 출력하고
 정지한다. `--author @me` 로 본인 이슈만 본다(D-4). 두 규칙의 근거와 이 스킬이

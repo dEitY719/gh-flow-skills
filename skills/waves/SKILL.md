@@ -27,7 +27,7 @@ metadata:
 워커 1개로 병렬 실행한 뒤, 웨이브가 끝날 때마다 **검증 장벽**(main pull → 앱 재기동 →
 PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 간다. 새 로직은
 **편성 · 병렬 · 장벽** 셋뿐이고 나머지는 원자 스킬 호출이다.
-**전제조건**: 조율자는 저장소의 **main 체크아웃**(`MAIN`, 기본 브랜치)을 기준으로 돈다 — worktree 는 워커 몫.
+**전제조건**: 조율자는 저장소의 **main 체크아웃**(`MAIN`, 기본 브랜치)을 기준으로 돈다 — worktree 는 워커 몫. **gh-flow 플러그인 전체 설치** 필수(#47).
 
 **조율자는 `gh-flow:issue` 를 절대 직접 부르지 않는다** — `--help` 조회로도 부르지 않는다
 (NF-1; stop guard 가 그 호출을 체인 시작으로 센다). 도움말은 `gh-flow:issue` 의 `references/help.md` 를 `Read`.
@@ -45,7 +45,8 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 (복사 금지, 같은 모양: `$CLAUDE_PLUGIN_ROOT` 를 가드하고 `[ -f ]` 로 파일을 증명한 뒤
 `skills/issue/lib/target-binding.sh` 를 source — 기본값을 경로에 끼우는 형태 금지).
 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` (또는 `-R`).
-없는 remote 는 `origin` 으로 떨어지지 말고 `git remote -v` 를 출력하고 정지한다.
+없는 remote 는 `origin` 으로 떨어지지 말고 `git remote -v` 를 출력하고 정지한다. 형제 스킬 파일
+(`target-binding.md`/`.sh`)이 없으면 `gh-flow:waves stopped — gh-flow plugin incomplete (<missing path>)`.
 
 ## Step 2: Plan
 
@@ -90,8 +91,7 @@ PR 은 사람 판단으로 남는다. `--no-merge` 면 PR 까지만 만들고 �
 
 ## Constraints
 
-`references/constraints.md`: 조율자 NF-1, 워커 1개/worktree, oid 판정, 직렬 live,
-상태는 GitHub 에만, 웨이브 표는 최종 답이 아니다, 이연 항목 승격(drain 참조).
+`references/constraints.md`: 조율자 NF-1, 워커 1개/worktree, oid 판정, 직렬 live, 상태는 GitHub 에만, 웨이브 표는 최종 답이 아니다, 이연 항목 승격(drain 참조), 플러그인 전체 설치.
 
 ## Related Skills
 

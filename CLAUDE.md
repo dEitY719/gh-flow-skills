@@ -28,6 +28,16 @@ ones in parallel worktrees and verifies each wave live before the next — its
 reason for existing is that a serial drain cannot parallelize and a parallel
 run without a barrier accumulates unverified merges.
 
+**`drain` and `waves` need the whole plugin installed** (#47). They read
+`gh-flow:issue`'s `references/` (`waves` also `gh-flow:drain`'s) by name and
+source `$CLAUDE_PLUGIN_ROOT/skills/issue/lib/target-binding.sh`, so a harness
+that installs one skill directory alone (Hermes GitHub tap, `npx skills add`)
+cannot run them. They stop at target binding with `gh-flow:<skill> stopped —
+gh-flow plugin incomplete (<missing path>)` rather than guess. Do not vendor the
+shared contracts into each skill to fix this: copies drift (#45). If a lone
+install ever becomes a requirement, vendor only `lib/target-binding.sh` under
+`lib/vendor/`, behind a drift guard proven red first.
+
 The remaining four split along two axes: how much of the lifecycle they own
 (`issue` starts at an issue, `autopilot` at a spec) and whether the destination remote is
 reachable (`issue`/`autopilot`) or push-blocked (`issue-relay`/`relay-merge`).

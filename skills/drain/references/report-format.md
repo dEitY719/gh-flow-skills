@@ -52,6 +52,11 @@ header line. One ending, one `Next:` — there is no second lookup table:
   after clearing the named blockers.
 - `gh-flow:drain stopped — max rounds (<max>)` — `Next:`
   `/gh-flow:drain <owner/repo> <remote> --max-rounds <n>`.
+- `gh-flow:drain stopped — gh-flow plugin incomplete (<missing path>)` — a
+  sibling file (`gh-flow:issue`'s `references/target-binding.md` or
+  `skills/issue/lib/target-binding.sh`) is absent: a single-skill install
+  (#47). `Next:` install the whole `gh-flow` plugin (README "Install"), then
+  re-run.
 - `gh-flow:drain stopped — issue list failed (<reason>)` — `Next:` the fix for
   that failure (`gh auth status` on `$TARGET_HOST`, usually), then re-run.
 - `gh-flow:drain stopped — promotion failed (<reason>)` — the fatal one
