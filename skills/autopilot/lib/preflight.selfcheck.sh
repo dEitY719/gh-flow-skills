@@ -61,6 +61,8 @@ chk "explicit spec (line)" "$(printf '%s\n' "$out" | tail -n 1)" \
 # 4. Without origin/HEAD the default still resolves via origin/main.
 git remote set-head origin -d
 out=$(git checkout -q main && sh "$T" 2>&1); rc=$?
-chk "no origin/HEAD falls back to origin/main" "$rc" 2
+chk "no origin/HEAD falls back to origin/main (rc)" "$rc" 2
+chk "no origin/HEAD falls back to origin/main (default)" "$(printf '%s\n' "$out" | sed -n 2p)" \
+    "default_branch=main"
 
 exit "$FAIL"
