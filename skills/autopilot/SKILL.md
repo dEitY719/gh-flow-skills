@@ -41,9 +41,20 @@ No API calls.
 
 인자 표: `references/help.md`.
 
-`START_TS=$(date +%s)` 를 즉시 기록(리포트 elapsed 용). Preconditions(실패 시 즉시 정지):
-전용 worktree 의 feature 브랜치(디폴트 브랜치면 정지) · 승인된 spec 존재(자동 감지 실패 시
-`[spec-path]` 요청 후 정지) · 원자 스킬 설치 확인.
+`START_TS=$(date +%s)` 를 즉시 기록(리포트 elapsed 용). Preconditions(실패 시 즉시 정지) — 브랜치·spec
+은 스크립트가 판정한다(exit 2 = 마지막 줄 `[FAIL] ...` 그대로 보고 후 정지, 출력 `spec=` 을 이후 spec 으로 사용):
+
+```bash
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -f "$CLAUDE_PLUGIN_ROOT/skills/autopilot/lib/preflight.sh" ]; then
+    sh "$CLAUDE_PLUGIN_ROOT/skills/autopilot/lib/preflight.sh" "<spec-path, or empty>" "<remote>" || exit $?
+else
+    printf '[FAIL] gh-flow:autopilot cannot locate skills/autopilot/lib/preflight.sh under CLAUDE_PLUGIN_ROOT (%s)\n' "${CLAUDE_PLUGIN_ROOT:-unset}" >&2; exit 1
+fi
+```
+
+**원자 스킬 설치 확인은 모델 판단**(셸은 available skills 를 볼 수 없다) — Related Skills 의 원자
+단계가 현재 세션 skills 목록에 없으면 정지.
 
 ## Steps — 체이닝 사이 대화 텍스트 0 (CRITICAL CONTRACT)
 
