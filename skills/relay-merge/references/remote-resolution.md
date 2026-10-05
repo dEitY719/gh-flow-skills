@@ -73,7 +73,7 @@ asymmetric-network setup is `origin` = internal (isolated GHE),
    ```
 
    - `https://github.com/<owner>/<repo>.git` → `github.com` + `<owner>/<repo>`
-   - `git@github.samsungds.net:<owner>/<repo>.git` → `github.samsungds.net`
+   - `git@<ghes-host>:<owner>/<repo>.git` → `<ghes-host>` (`$DOTFILES_GHES_HOST`)
      + `<owner>/<repo>`
 
    `gh_host.sh` is the host/URL mapping SSOT — never copy a domain list or

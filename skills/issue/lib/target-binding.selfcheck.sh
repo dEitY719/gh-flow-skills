@@ -11,6 +11,9 @@
 # runtime value by construction.
 # shellcheck disable=SC1090
 set -u
+# Fake GHES host (dEitY719/dotfiles#1996): gh_host.sh reads it from the env,
+# never from a literal, so the real internal host stays out of this public repo.
+export DOTFILES_GHES_HOST=ghes.example.invalid
 
 # shellcheck disable=SC1091  # path is resolved at runtime
 . "$(dirname -- "$0")/selfcheck-common.sh"
@@ -20,7 +23,7 @@ TMP=$(mktemp -d) || exit 1
 trap 'rm -rf "$TMP"' EXIT
 git -C "$TMP" init -q
 git -C "$TMP" remote add origin git@github.com:acme/widget.git
-git -C "$TMP" remote add ghes https://github.samsungds.net/acme/widget.git
+git -C "$TMP" remote add ghes https://ghes.example.invalid/acme/widget.git
 git -C "$TMP" remote add other https://gitlab.com/acme/widget.git
 
 # The vendored tier is what a standalone plugin install exercises, so pin
@@ -47,7 +50,7 @@ chk "unset defaults to origin" "$got" "origin"
 #    exactly this one).
 got=$( CLAUDE_PLUGIN_ROOT="$ROOT" GH_FLOW_TARGET_REMOTE=ghes . "$TARGET" >/dev/null 2>&1 &&
        printf '%s|%s' "$TARGET_REPO" "$GH_HOST" )
-chk "GHES remote picks its own host" "$got" "acme/widget|github.samsungds.net"
+chk "GHES remote picks its own host" "$got" "acme/widget|ghes.example.invalid"
 
 # 4. SHELL_COMMON names whichever tree resolved (tier 2, vendored).
 got=$( CLAUDE_PLUGIN_ROOT="$ROOT" . "$TARGET" >/dev/null 2>&1 && printf '%s' "$SHELL_COMMON" )
@@ -78,7 +81,7 @@ chk "non-github remote refused, nothing half-exported" "$got" "1|unset|unset"
 if command -v dash >/dev/null 2>&1; then
     got=$( CLAUDE_PLUGIN_ROOT="$ROOT" DOTFILES_ROOT=/nonexistent-dotfiles GH_FLOW_TARGET_REMOTE=ghes \
            dash -c ". \"$TARGET\" >/dev/null 2>&1 && printf '%s' \"\$GH_HOST\"" )
-    chk "sourced under dash, non-default remote" "$got" "github.samsungds.net"
+    chk "sourced under dash, non-default remote" "$got" "ghes.example.invalid"
 else
     echo "skip  dash not installed"
 fi
