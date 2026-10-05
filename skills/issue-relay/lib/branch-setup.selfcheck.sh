@@ -9,6 +9,9 @@
 # the host/repo parser needs) and a fake `gh` in PATH. No network, no gh
 # auth, no dotfiles checkout. Exits non-zero on the first regressed behaviour.
 set -u
+# Fake GHES host (dEitY719/dotfiles#1996): gh_host.sh reads it from the env,
+# never from a literal, so the real internal host stays out of this public repo.
+export DOTFILES_GHES_HOST=ghes.example.invalid
 
 # shellcheck disable=SC1091  # path is resolved at runtime
 . "$(dirname -- "$0")/selfcheck-common.sh"
@@ -121,11 +124,11 @@ git -C "$TMP/work" show-ref -q refs/remotes/origin/develop
 chk "--base override: that branch was actually fetched" "$?" "0"
 
 # --- 5. GHE remote: host follows the URL, not a hard-coded default ---------
-git -C "$TMP/work" remote add ghes https://github.samsungds.net/acme/widget.git
-git -C "$TMP/work" config --add "url.$TMP/bare.git.insteadOf" https://github.samsungds.net/acme/widget.git
+git -C "$TMP/work" remote add ghes https://ghes.example.invalid/acme/widget.git
+git -C "$TMP/work" config --add "url.$TMP/bare.git.insteadOf" https://ghes.example.invalid/acme/widget.git
 
 run ghes 42
-chk "GHE remote: DEST_HOST follows the remote URL" "${DEST_HOST:-}" "github.samsungds.net"
+chk "GHE remote: DEST_HOST follows the remote URL" "${DEST_HOST:-}" "ghes.example.invalid"
 
 # --- 6. hostile issue title, full pipeline: gh -> TITLE -> slugify -> eval --
 # agy review, PR #20 BLOCKER — same claim as test 1's unit case, but through

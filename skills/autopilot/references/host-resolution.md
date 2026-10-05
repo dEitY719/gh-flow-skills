@@ -22,7 +22,7 @@ origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
             "$_SC" >&2
         return 1 2>/dev/null || exit 1
     }
-    HOST="$(_gh_resolve_host)"        # internal→github.samsungds.net, 그 외→github.com
+    HOST="$(_gh_resolve_host)"        # internal→$DOTFILES_GHES_HOST, 그 외→github.com
 
 - 모든 `gh` 호출은 해석된 host 로 라우팅한다. gh CLI 는 `GH_HOST` 또는 repo 의 remote URL 로
   host 를 판단하므로, 이슈/PR 생성 전 대상 repo 가 그 host 에 있는지 remote 로 확인한다.

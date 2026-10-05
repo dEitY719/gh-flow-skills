@@ -33,7 +33,7 @@ git init -q --bare "$TMP/bare/Widget.git"
 git config --global url."$TMP/bare/".insteadOf git@github.com:Acme/
 git -C "$W/widget" push -q origin HEAD:main 2>/dev/null
 git -C "$W/widget" worktree add -q "$W/widget-wt" -b wt 2>/dev/null
-repo "$W/group/tool" upstream ssh://git@github.samsungds.net:2222/team/tool
+repo "$W/group/tool" upstream ssh://git@ghes.example.invalid:2222/team/tool
 repo "$W/other" origin https://github.com/acme/other.git
 repo "$W/a/b/too-deep" origin https://github.com/acme/deep.git
 URL=https://github.com/acme/widget/issues/28
@@ -48,7 +48,7 @@ REPO=acme/widget
 ISSUE=28"
 
 # 2. Depth 2, ssh:// with port, non-origin remote name, GHES host.
-got=$(bash "$T" "https://github.samsungds.net/team/tool/issues/5/" "$W" | head -2 | tr '\n' ' ')
+got=$(bash "$T" "https://ghes.example.invalid/team/tool/issues/5/" "$W" | head -2 | tr '\n' ' ')
 chk "depth 2 + ssh:// port + upstream" "$got" "MAIN=$W/group/tool REMOTE=upstream "
 
 # 3. URL with query/fragment still parses.
