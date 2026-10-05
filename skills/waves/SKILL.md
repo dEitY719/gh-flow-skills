@@ -1,12 +1,12 @@
 ---
 name: waves
+# Check 16: ~300 chars on purpose — bilingual triggers plus the issue→merge→live-verify pipeline that distinguishes waves from drain
 description: >-
   Run a set of GitHub issues in dependency waves: per wave, one worktree and
   one background worker per issue carry it through gh-flow:issue to
   gh-pr:merge, then a serial gh-verify:live barrier. Use for /gh-flow:waves,
   "이슈들 의존성 웨이브로 병렬 처리", "순서 있는 건 나눠서 병렬로 구현하고 머지",
-  "run these issues in parallel waves". One issue is gh-flow:issue; a serial
-  backlog drain is gh-flow:drain.
+  "run these issues in parallel waves".
 license: MIT
 allowed-tools: Bash, Read, Grep, Skill, Agent
 compatibility:
