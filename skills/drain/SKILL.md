@@ -79,7 +79,8 @@ diff 의 `TODO`/`ponytail:`, skip/xfail 된 테스트)에서 열거한다 — �
 ## Step 6: Report
 
 라운드마다 한 표(닫음 / 새로 엶 / 차단 / 실패), 종료 시 최종 표 + `왜 아직 0이
-아닌가` 항목별 한 줄 + `Next:` 한 줄. 템플릿: `references/report-format.md`.
+아닌가` 항목별 한 줄 + `Next:` 한 줄 + 마지막 줄 판정 토큰(`[OK]`/`[FAIL] gh-flow:drain ...`).
+템플릿: `references/report-format.md`.
 보고는 평문 어시스턴트 텍스트로 낸다 — `Bash` heredoc 이나 `Write` 금지.
 
 ## Constraints
