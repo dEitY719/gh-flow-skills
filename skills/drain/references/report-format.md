@@ -32,6 +32,7 @@ gh-flow:drain complete  (<owner/repo>, <r> rounds)
   #<N> <title> — <one line>
 
 Next: <the single most useful command>
+[OK] gh-flow:drain backlog=<open issues> rounds=<r>
 ```
 
 `왜 아직 0이 아닌가` carries one line per remaining open issue. Every remaining
@@ -64,6 +65,24 @@ header line. One ending, one `Next:` — there is no second lookup table:
 - `gh-flow:drain stopped — promotion failed (<reason>)` — the fatal one
   (`references/promotion.md`). `Next:` `/gh-issue:issue-create` for the named item,
   then re-run the drain.
+
+## Verdict line — the last line, always
+
+The final report ends with exactly one verdict line, after `Next:`, so an
+unattended caller can regex-gate on it (#53). Two levels, like every sibling
+skill — no `[PARTIAL]`: the round tables and `왜 아직 0이 아닌가` already carry
+the blocked-but-progressing detail, and a third band is one more thing a gate
+has to guess about. The token follows the header line one to one:
+
+| Header line | Verdict line |
+|---|---|
+| `gh-flow:drain complete` | `[OK] gh-flow:drain backlog=<open issues> rounds=<r>` |
+| `gh-flow:drain stopped — <reason>` | `[FAIL] gh-flow:drain stopped: <reason> (remaining=<open issues>)` |
+
+`<open issues>` is the final table's `open issues` count — on a default run
+that is the issues still open only because their PR awaits a human merge, so
+`backlog=0` means the honest zero. The verdict line sits **alongside** the
+terminal markers below, never in place of them.
 
 ## The terminal strings are a hook contract
 
