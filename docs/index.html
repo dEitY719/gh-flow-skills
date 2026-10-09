@@ -169,46 +169,21 @@
           <a class="usage" href="skill-output/autopilot-usage.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v12H4z"/><path d="M2 20h20M10 9l4 2-4 2z"/></svg><span>사용 예시</span></a>
         </div>
       </article>
-      <article class="card" data-reveal>
-        <h3>issue-relay</h3>
-        <code class="inv">/gh-flow:issue-relay &lt;이슈번호&gt; --remote &lt;name&gt;</code>
-        <p>push 가 막힌 목적지 remote 에 <strong>이미 등록된</strong> 이슈에서 출발해 브랜치를 따고, 구현을 서브에이전트에 위임한 뒤 Advisor 가 diff 와 테스트를 직접 확인하고, 커밋을 <code>relay-merge</code> 에 넘긴다. 이슈 등록은 하지 않는다.</p>
-        <div class="links">
-          <a href="skill-guides/issue-relay.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><span>설명서</span></a>
-          <a class="usage" href="skill-output/issue-relay-usage.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v12H4z"/><path d="M2 20h20M10 9l4 2-4 2z"/></svg><span>사용 예시</span></a>
-        </div>
-      </article>
-      <article class="card" data-reveal>
-        <h3>relay-merge</h3>
-        <code class="inv">/gh-flow:relay-merge &lt;PR#&gt; | --commits &lt;base&gt;..&lt;head&gt;</code>
-        <p>먼저 버려질 ref 로 <strong>실제 push 를 프로브</strong>해서, 통하면 <code>gh-pr:create</code> 에 위임하고 멈춘다 &mdash; 릴레이는 폴백이지 기본이 아니다. 403 으로 차단이 확인될 때만 커밋별 패치를 gist 로 올리고 <code>git am</code> apply-guide 를 코멘트로 남긴다.</p>
-        <div class="links">
-          <a href="skill-guides/relay-merge.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg><span>설명서</span></a>
-          <a class="usage" href="skill-output/relay-merge-usage.html"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v12H4z"/><path d="M2 20h20M10 9l4 2-4 2z"/></svg><span>사용 예시</span></a>
-        </div>
-      </article>
       </div>
     </section>
 
     <section data-reveal>
-      <h2><span class="num">2</span>고르는 기준 &mdash; 어디서 시작하고, 목적지가 push 를 받는가</h2>
-      <p>이 스킬들은 두 축으로 갈립니다. 하나는 손에 든 것이 이슈 번호인지 spec 인지, 다른 하나는 커밋이 갈 remote 가 평범한 <code>git push</code> 를 받아주는지입니다.</p>
+      <h2><span class="num">2</span>고르는 기준 &mdash; 어디서 시작하는가</h2>
+      <p>이 스킬들은 손에 든 것이 이슈 번호인지 spec 인지로 갈립니다. push 가 막힌 목적지로 넘기던 relay 스킬 두 개는 push 프로브 자체가 정책 위반이라 삭제되었습니다(#55).</p>
       <div class="pair">
         <article class="card">
           <h3>시작점 &mdash; issue / autopilot</h3>
           <p><code>issue</code> 는 이슈가 이미 있고 무엇을 만들지도 이미 적혀 있을 때다 &mdash; spec 을 지어내지 않는다. <code>autopilot</code> 은 spec 에서 시작해 계획과 추적 이슈를 스스로 만들며, spec 을 건너뛰는 것은 거부한다. 둘 다 리뷰 직후에 손을 뗀다.</p>
         </article>
-        <article class="card">
-          <h3>목적지 &mdash; issue-relay / relay-merge</h3>
-          <p><code>issue-relay</code> 는 <code>issue</code> 와 같은 모양이되 마지막 칸이 PR 대신 릴레이 위임이다. <code>relay-merge</code> 는 그 마지막 칸 하나만 떼어낸 것이고, 프로브에서 push 가 통하면 어느 쪽도 릴레이하지 않는다.</p>
-        </article>
       </div>
 
       <p class="label">autopilot 체인</p>
       <div class="flow"><span class="node">spec</span><span class="arrow">&#9472;&#9654;</span> <span class="node">writing-plans</span><span class="arrow">&#9472;&#9654;</span> <span class="node">issue:create</span><span class="arrow">&#9472;&#9654;</span> <span class="node">구현</span><span class="arrow">&#9472;&#9654;</span> <span class="node mid">pr:create</span><span class="arrow">&#9472;&#9654;</span> <span class="node mid">simplify</span><span class="arrow">&#9472;&#9654;</span> <span class="node out">pr:reply</span></div>
-
-      <p class="label">relay 체인</p>
-      <div class="flow"><span class="node">이슈 #N</span><span class="arrow">&#9472;&#9654;</span> <span class="node">브랜치</span><span class="arrow">&#9472;&#9654;</span> <span class="node">Worker 구현</span><span class="arrow">&#9472;&#9654;</span> <span class="node mid">Advisor 검증</span><span class="arrow">&#9472;&#9654;</span> <span class="node mid">push 프로브</span><span class="arrow">&#9472;&#9654;</span> <span class="node out">patch + gist</span></div>
 
       <p>체인 사이의 대화 텍스트가 곧 조기 종료의 원인이 되어 왔습니다 &mdash; 중간 요약 한 줄이 최종 답변처럼 읽혀 체인이 절반에서 끝나는 실패가 반복됐습니다. 그래서 <code>--no-next-hint</code>, <code>Skill()</code> 호출 사이의 텍스트 0, 그리고 하네스 Stop hook 이 세 겹으로 걸려 있고, 단계 마커와 리포트 문자열은 산문이 아니라 그 hook 과의 계약입니다.</p>
     </section>

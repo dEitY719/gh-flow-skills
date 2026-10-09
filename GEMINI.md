@@ -1,22 +1,19 @@
 # gh-flow — skill index
 
-Six skills for one job: carrying a GitHub issue all the way to a reviewed pull
+Four skills for one job: carrying a GitHub issue all the way to a reviewed pull
 request in a single run. Each lives in this extension's `skills/` directory.
 They are explicitly invoked, never ambient: load the one that matches your
-starting point by reading its `SKILL.md`, then follow it. Do not load all six.
+starting point by reading its `SKILL.md`, then follow it. Do not load all four.
 
 | Skill | Read | Use when |
 |-------|------|----------|
 | `issue` | `@./skills/issue/SKILL.md` | You have an issue number and a feature branch. Chains implement, commit, PR, review gate, and rebase-sync, then reports metrics. Stops at the first failing step with a resume hint. |
 | `autopilot` | `@./skills/autopilot/SKILL.md` | You have an approved spec, not an issue. Writes the plan, files the issue, implements, opens the PR, answers review comments — no approval checkpoints. Never merges. |
-| `issue-relay` | `@./skills/issue-relay/SKILL.md` | The issue lives on a destination remote whose `git push` is blocked. Branch, delegate the implementation, verify it, then hand off to `relay-merge`. |
-| `relay-merge` | `@./skills/relay-merge/SKILL.md` | You have commits to move to a push-blocked remote. Probes push first; relays per-commit patches through a gist with a `git am` apply-guide only when push is genuinely blocked. |
 | `drain` | `@./skills/drain/SKILL.md` | You have a whole open backlog, not one issue. Runs each issue through `issue` and promotes every deferred item to a new issue; ends only when open issues and deferred items are both zero. |
 | `waves` | `@./skills/waves/SKILL.md` | You have a set of issues whose order matters. Plans dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Run it from the main checkout. |
 
-Pick by where you are starting and whether the destination accepts a push, not
-by which sounds most thorough. `issue` refuses to invent a spec; `autopilot`
-refuses to skip one. Neither relay skill runs when a plain push works. `drain`
+Pick by where you are starting, not by which sounds most thorough. `issue`
+refuses to invent a spec; `autopilot` refuses to skip one. `drain`
 starts from a backlog that already exists; `waves` from a set whose order
 matters.
 
@@ -59,17 +56,15 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
 
 ## Capability gaps on Gemini CLI
 
-- **These six skills are compositions, and Gemini has no skill-invocation
+- **These four skills are compositions, and Gemini has no skill-invocation
   tool.** `issue` and `autopilot` are ordered chains of other skills; without a
   `Skill` equivalent they cannot run as written. Print the ordered list of
   atomic skills the chain would have invoked, run what is plain shell, and stop
   at the first step that genuinely needs another skill. Do not inline a
   reimplementation of an atom — the atom is what owns its safety rules.
-- `issue-relay` and `autopilot` delegate implementation to a subagent. Use
+- `autopilot` delegates implementation to a subagent. Use
   `invoke_agent`, then verify the result yourself: read the diff and run the
   repo's lint and tests. A worker's completion report is not evidence.
-- On Antigravity, `ask_user` does not exist — ask in the conversation and wait
-  for a real reply before relaying an oversized patch.
 
 ## Safety rules
 
@@ -91,6 +86,3 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
   `[OK] gh-flow:autopilot`, `[step:gh-flow-autopilot/<id>] OK`) are a contract
   with a harness Stop hook, not decoration. Emit them verbatim, as plain
   assistant text — never through a shell heredoc or a file write.
-- `relay-merge` probes whether `git push` works before relaying, and hands off
-  to `gh-pr:create` when it does. The relay is a fallback, never the default. It
-  never truncates an oversized patch silently.

@@ -12,7 +12,7 @@
 | 승인된 spec 이 있고 이슈는 아직 없다 | `gh-flow:autopilot` — 이 스킬 |
 | 이슈 번호가 이미 있다 | `gh-flow:issue` — 한 단계 뒤에서 시작한다 |
 | spec 자체를 아직 쓰지 않았다 (Stage-A) | 이 스킬 범위 밖. brainstorming / spec 작성을 먼저 끝낸다 |
-| 목적지 remote 가 push 차단 | `gh-flow:issue-relay` |
+| 목적지 remote 가 push 차단 | 범위 밖 — 이 플러그인에 해당 스킬이 없다 (#55) |
 
 `issue` 와 `autopilot` 을 가르는 한 문장: **`issue` 는 이슈 번호를 받고, `autopilot` 은
 spec 을 받는다.** `issue` 는 spec 을 지어내지 않고, `autopilot` 은 spec 을 건너뛰지 않는다.

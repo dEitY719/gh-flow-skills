@@ -23,14 +23,11 @@ merges nothing; `gh-pr:merge-emergency` is never called by any path.
 |-------|--------|-------------|--------------|
 | `issue` | `/gh-flow:issue <N> [remote]` | An issue number | Implement, commit, open the PR, run the review gate, rebase-sync, post metrics. Stops dead at the first failing step with a resume hint. |
 | `autopilot` | `/gh-flow:autopilot <spec>` | An approved spec | One step earlier: plan, file the issue, implement, open the PR, answer review comments — no approval checkpoints. Stops at review. |
-| `issue-relay` | `/gh-flow:issue-relay <N> <remote>` | An issue on a push-blocked remote | Branch, delegate the implementation, verify it, then hand the commits to `relay-merge`. |
-| `relay-merge` | `/gh-flow:relay-merge <PR>` | Commits bound for a push-blocked remote | Probe whether push actually works; only when it is genuinely blocked, relay per-commit patches through a gist with a `git am` apply-guide. |
 | `drain` | `/gh-flow:drain [owner/repo] [remote]` | A repo's open backlog | Run the whole backlog through `issue`, one issue at a time, promoting every deferred item to a new issue. Ends only when open issues and deferred items are both zero. |
 | `waves` | `/gh-flow:waves [remote] [--from N] [--issues 1,2,3] [--run "<cmd>"] [--no-merge]` | A set of issues with dependencies | Plan dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Re-plans every wave. |
 
-Pick by where you are starting and whether the destination accepts a push.
-`issue` refuses to invent a spec; `autopilot` refuses to skip one; neither relay
-skill runs when a plain `git push` works; `drain` starts from a backlog that
+Pick by where you are starting.
+`issue` refuses to invent a spec; `autopilot` refuses to skip one; `drain` starts from a backlog that
 already exists and refuses to finish while anything found along the way is
 sitting in a ledger instead of an issue; `waves` takes a set whose order matters
 and refuses to start the next wave until the last one is merged and verified.
@@ -39,8 +36,6 @@ and refuses to start the next wave until the last one is merged and verified.
 
 - `issue` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/issue.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/issue-usage.html) (issue number to reviewed PR)
 - `autopilot` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/autopilot.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/autopilot-usage.html) (approved spec to plan, issue and PR)
-- `issue-relay` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/issue-relay.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/issue-relay-usage.html) (issue on a push-blocked remote to a relayed handoff)
-- `relay-merge` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/relay-merge.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/relay-merge-usage.html) (commit range to gist patches and an apply-guide)
 
 Each page is generated from a Markdown source under
 [`docs/skill-guides/`](docs/skill-guides) and [`docs/skill-output/`](docs/skill-output).
@@ -49,7 +44,7 @@ Each page is generated from a Markdown source under
 
 | Need | Why |
 |------|-----|
-| `git` | All six commit, push, or format patches. |
+| `git` | All four commit and push. |
 | `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (dEitY719/dotfiles#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
 | A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. `waves` is the inverse: it runs from the main checkout and creates one worktree per issue via `session:worktree-spawn`. |
 | The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve` (and `session` for `waves`). These are compositions; the steps they call live in those repos. |
@@ -108,8 +103,6 @@ read the one file for the harness you are on.
 |-------|:-----------:|:-----:|:----:|:--------------------:|:------:|:--------:|
 | `issue` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 | `autopilot` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
-| `issue-relay` | full | full, verify by hand | full | full | full | full |
-| `relay-merge` | full | full, confirm in chat | full | full (Antigravity: confirm in chat) | full, confirm in chat | full, confirm in chat |
 | `drain` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 | `waves` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 
@@ -118,15 +111,6 @@ the chain would have invoked, run what is plain shell, and stop at the first
 step that genuinely needs another skill. Do not inline a reimplementation of an
 atom: the atom is what owns its own safety rules.
 
-*confirm in chat* — `relay-merge` must stop and ask before relaying an oversized
-patch. Kimi (`AskUserQuestion`) and Gemini CLI (`ask_user`) have a structured
-question tool; Codex, Hermes, Antigravity, and OpenCode do not, so ask in the
-conversation and wait for a real reply. An auto-approve session setting is not
-the user's answer.
-
-*verify by hand* — `issue-relay` and `autopilot` delegate implementation to a
-subagent. Read the diff and run the repo's lint and tests yourself; a worker's
-completion report is not evidence.
 
 ## The early-stop contract
 
@@ -183,8 +167,6 @@ gh-flow-skills/
 ├── skills/
 │   ├── issue/SKILL.md        + references/ + evals/
 │   ├── autopilot/SKILL.md    + references/
-│   ├── issue-relay/SKILL.md  + references/ + evals/
-│   ├── relay-merge/SKILL.md  + references/
 │   ├── drain/SKILL.md        + references/ + evals/
 │   └── waves/SKILL.md        + references/ + evals/
 ├── .claude-plugin/{marketplace,plugin}.json   Claude Code
@@ -222,17 +204,18 @@ at all.
 
 The original four skills were extracted from
 [`dEitY719/dotfiles`](https://github.com/dEitY719/dotfiles)
-(`claude/skills/{gh-issue-flow,devx-autopilot,gh-issue-relay-flow,gh-relay-merge}`)
+(`claude/skills/{gh-issue-flow,devx-autopilot}` and two relay skills)
 as a content snapshot at source commit
 `96c90bc8d961d51d9c3286dae730e8b928afdfc8` — no history rewriting. The dotfiles
 originals are gone: `claude/skills/` was deleted there in Phase 4-1 of that
 repo's migration plan (dEitY719/dotfiles#1410 NF-1 / NF-3, tracking issue
-dEitY719/dotfiles#1678).
+dEitY719/dotfiles#1678). The two relay skills were deleted in #55: their push
+probe fired a real `git push`, which is itself the violation on a PC class where
+any push toward github.com is forbidden, and everywhere else they reduced to
+`issue`.
 
 The old prefixes were stripped on the way in: `/gh:issue-flow` became
-`/gh-flow:issue`, `/devx:autopilot` became `/gh-flow:autopilot`,
-`/gh:issue-relay-flow` became `/gh-flow:issue-relay`, and `/gh:relay-merge`
-became `/gh-flow:relay-merge`. The plugin name already supplies the namespace at
+`/gh-flow:issue` and `/devx:autopilot` became `/gh-flow:autopilot`. The plugin name already supplies the namespace at
 invocation time.
 
 `drain` has no dotfiles ancestor — it was written here (issue #13), after a

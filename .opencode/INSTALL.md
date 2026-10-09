@@ -56,14 +56,11 @@ skill names a tool you do not recognise. Short version:
   `"explore"` for read-only exploration)
 - "Invoke a skill" -> OpenCode's native `skill` tool
 
-Two gaps matter here:
+One gap matters here:
 
 - `issue` and `autopilot` delegate implementation to a subagent. Verify the
   result yourself — read the diff and run the repo's lint and tests. A worker's
   completion report is not evidence.
-- OpenCode has no structured question tool. `relay-merge` must stop and ask
-  before relaying an oversized patch: ask in the conversation and wait for a
-  real answer.
 
 ## Safety contracts
 
@@ -73,8 +70,6 @@ Two gaps matter here:
 - Emit zero conversational text between the chained skill calls of `issue` and
   `autopilot`, and emit their terminal report lines verbatim as plain assistant
   text. Both are contracts with a harness Stop hook, not style preferences.
-- `relay-merge` probes push first and relays only when push is genuinely
-  blocked. It never truncates an oversized patch silently.
 
 ## Troubleshooting
 
