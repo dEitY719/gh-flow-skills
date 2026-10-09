@@ -1,6 +1,6 @@
 {
   "name": "gh-flow",
   "description": "One-shot issue-to-PR compositions: the ordinary chain, a spec-driven autopilot, a backlog drain, and dependency waves",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "contextFileName": "GEMINI.md"
 }

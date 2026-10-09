@@ -1,6 +1,6 @@
 {
   "name": "gh-flow-skills",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Skills that chain one GitHub issue to a reviewed PR",
   "type": "module",
   "main": ".opencode/plugins/gh-flow.js",
