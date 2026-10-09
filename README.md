@@ -26,11 +26,11 @@ merges nothing; `gh-pr:merge-emergency` is never called by any path.
 | `drain` | `/gh-flow:drain [owner/repo] [remote]` | A repo's open backlog | Run the whole backlog through `issue`, one issue at a time, promoting every deferred item to a new issue. Ends only when open issues and deferred items are both zero. |
 | `waves` | `/gh-flow:waves [remote] [--from N] [--issues 1,2,3] [--run "<cmd>"] [--no-merge]` | A set of issues with dependencies | Plan dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Re-plans every wave. |
 
-Pick by where you are starting.
-`issue` refuses to invent a spec; `autopilot` refuses to skip one; `drain` starts from a backlog that
-already exists and refuses to finish while anything found along the way is
-sitting in a ledger instead of an issue; `waves` takes a set whose order matters
-and refuses to start the next wave until the last one is merged and verified.
+Pick by where you are starting. `issue` refuses to invent a spec; `autopilot`
+refuses to skip one; `drain` starts from a backlog that already exists and
+refuses to finish while anything found along the way is sitting in a ledger
+instead of an issue; `waves` takes a set whose order matters and refuses to
+start the next wave until the last one is merged and verified.
 
 ### Visual guides and worked examples (GitHub Pages)
 
@@ -110,7 +110,6 @@ read the one file for the harness you are on.
 the chain would have invoked, run what is plain shell, and stop at the first
 step that genuinely needs another skill. Do not inline a reimplementation of an
 atom: the atom is what owns its own safety rules.
-
 
 ## The early-stop contract
 
@@ -215,8 +214,8 @@ any push toward github.com is forbidden, and everywhere else they reduced to
 `issue`.
 
 The old prefixes were stripped on the way in: `/gh:issue-flow` became
-`/gh-flow:issue` and `/devx:autopilot` became `/gh-flow:autopilot`. The plugin name already supplies the namespace at
-invocation time.
+`/gh-flow:issue` and `/devx:autopilot` became `/gh-flow:autopilot`. The plugin
+name already supplies the namespace at invocation time.
 
 `drain` has no dotfiles ancestor — it was written here (issue #13), after a
 session that reached "zero open issues" while four unresolved items lived only

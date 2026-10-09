@@ -62,9 +62,9 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
   atomic skills the chain would have invoked, run what is plain shell, and stop
   at the first step that genuinely needs another skill. Do not inline a
   reimplementation of an atom — the atom is what owns its safety rules.
-- `autopilot` delegates implementation to a subagent. Use
-  `invoke_agent`, then verify the result yourself: read the diff and run the
-  repo's lint and tests. A worker's completion report is not evidence.
+- `autopilot` delegates implementation to a subagent. Use `invoke_agent`, then
+  verify the result yourself: read the diff and run the repo's lint and tests. A
+  worker's completion report is not evidence.
 
 ## Safety rules
 
