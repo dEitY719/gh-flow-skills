@@ -37,7 +37,7 @@ while IFS= read -r f; do
         inb && (index($0, "\"$CLAUDE_PLUGIN_ROOT/skills/") || index($0, "\"${CLAUDE_PLUGIN_ROOT}/skills/")) { sp = 1 }
         inb && $0 == canon { hc = 1 }' "$f")
 done < <(git ls-files -- 'skills/*.md')  # git pathspec: '*' crosses '/', so this is every skills/*/**.md
-[ "$n" -ge 9 ] || { say "FAIL  only $n splicing blocks found — the scan is broken, not the tree"; fail=1; }
+[ "$n" -ge 6 ] || { say "FAIL  only $n splicing blocks found — the scan is broken, not the tree"; fail=1; }
 
 # 2. Behaviour. The placeholder is substituted exactly as the agent would.
 TMP=$(mktemp -d)

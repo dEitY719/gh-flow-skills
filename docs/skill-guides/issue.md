@@ -11,7 +11,7 @@
 |---|---|
 | 목적지 remote 에 이슈가 이미 있고, `git push` 가 정상 동작한다 | `gh-flow:issue` — 이 스킬 |
 | 이슈가 아직 없고 승인된 spec 만 있다 | `gh-flow:autopilot` — 한 단계 앞에서 시작해 이슈까지 만든다 |
-| 목적지 remote 가 프록시로 push 차단되어 있다 | `gh-flow:issue-relay` |
+| 목적지 remote 가 프록시로 push 차단되어 있다 | 범위 밖 — 이 플러그인에 해당 스킬이 없다 (push 프로브가 정책 위반이라 relay 스킬 삭제, #55) |
 | 커밋 전에 변경을 직접 검토하고 싶다 / plan·brainstorming 모드가 필요하다 | 원자 스킬을 따로 호출: `gh-issue:implement` + `gh-pr:commit` + `gh-pr:create` |
 
 이 스킬은 구현을 **direct 모드로만** 돌린다. plan/brainstorming 이 필요하면 이 스킬이 아니라

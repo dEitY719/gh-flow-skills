@@ -2,8 +2,8 @@
 # Drift guard for the shell-common loader convention (#25). SSOT:
 # https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
 #
-# Four sites in this repo paste or ship that loader: autopilot's and
-# relay-merge's reference blocks, and the two lib scripts. Three upstream fixes
+# Two sites in this repo paste or ship that loader: autopilot's reference
+# block and skills/issue/lib/target-binding.sh. Three upstream fixes
 # are easy to lose on the next edit because each looks like a stylistic detail
 # and none of them fails visibly when reverted:
 #

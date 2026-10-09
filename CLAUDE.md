@@ -15,8 +15,6 @@ sibling repos of this family.
 |-------|-------------|------|
 | `issue` | An issue number | The ordinary chain: `gh-issue:implement` → `gh-pr:commit` → `gh-pr:create` → `gh-verify:review-all` → `gh-resolve:conflict` → `gh-resolve:outdated`, then a metrics report. Stops dead at the first failing step with a resume hint. |
 | `autopilot` | An approved spec | One step earlier: writes the plan, files the issue, implements, opens the PR, answers review comments — with no approval checkpoints. Never merges. |
-| `issue-relay` | An issue on a push-blocked remote | Branch, delegate the implementation, verify it, then hand the commits to `relay-merge`. |
-| `relay-merge` | A PR whose `git push` a proxy blocks | Probe whether a normal push actually works; only when it is genuinely blocked, relay per-commit patches through a gist with a `git am` apply-guide. |
 | `drain` | A repo's open backlog | The whole backlog, one issue at a time through `issue`, with every deferred item promoted to a new issue. Ends only when open issues **and** deferred items are both zero. |
 | `waves` | A set of issues with dependencies between them | Plans dependency waves, then per wave runs one worktree + one background worker per issue (`issue` → `gh-pr:merge`), and a serial `gh-verify:live` barrier before re-planning the next wave. |
 
@@ -38,11 +36,16 @@ shared contracts into each skill to fix this: copies drift (#45). If a lone
 install ever becomes a requirement, vendor only `lib/target-binding.sh` under
 `lib/vendor/`, behind a drift guard proven red first.
 
-The remaining four split along two axes: how much of the lifecycle they own
-(`issue` starts at an issue, `autopilot` at a spec) and whether the destination remote is
-reachable (`issue`/`autopilot`) or push-blocked (`issue-relay`/`relay-merge`).
-Merging them would erase exactly the distinction that decides which one is safe
-to run.
+The remaining two split on how much of the lifecycle they own: `issue` starts
+at an issue, `autopilot` at a spec. Merging them would erase exactly the
+distinction that decides which one fits the input.
+
+There is no skill for a push-blocked destination remote. The former relay pair
+was deleted in #55: its first step fired a real `git push` as a capability
+probe, and on a PC class where any push toward github.com is forbidden the
+attempt itself is the violation; everywhere else it reduced to `issue`. Do not
+reintroduce a push probe — a successor must decide its path from recorded
+policy, with "never push" hard-coded as its first step.
 
 **These are compositions, not implementations.** Each step delegates to the
 atomic skill that owns it — `gh-issue:implement`, `gh-pr:commit`,
@@ -63,8 +66,8 @@ with the PR left for a human — there is no raw `gh pr merge` fallback.
 this repo by any path.
 
 The skills were extracted from `dEitY719/dotfiles`
-(`claude/skills/{gh-issue-flow,devx-autopilot,gh-issue-relay-flow,gh-relay-merge}`)
-as a content snapshot at source commit
+(`claude/skills/{gh-issue-flow,devx-autopilot}`, plus two relay skills since
+deleted in #55) as a content snapshot at source commit
 `96c90bc8d961d51d9c3286dae730e8b928afdfc8` — no history rewriting. The dotfiles
 originals are gone: `claude/skills/` was deleted there in Phase 4-1 of that
 repo's migration plan (dEitY719/dotfiles#1410 NF-1 / NF-3, tracking issue
@@ -168,7 +171,7 @@ should apply here on the next run, which is the whole point.
   siblings inside `skills/` take the `gh-flow:` prefix.
 - **Progressive disclosure.** `SKILL.md` stays at or under 100 lines (CI
   enforces it) and names which `references/` file to read and when. Detail lives
-  in `references/`. All six are within a line or two of the limit — when a step
+  in `references/`. All four are within a line or two of the limit — when a step
   grows, move prose out; never delete a safety rule to buy lines.
 - **Description budget.** CI sums every skill description and fails past 5,440
   characters — Codex's context budget — with a per-description cap of 1,024.
@@ -192,12 +195,8 @@ should apply here on the next run, which is the whole point.
   - **Zero conversational text between the chained `Skill()` calls** of `issue`
     and `autopilot`, and `--no-next-hint` on `issue`'s first call. Both are
     mechanical guards against the early-stop failure mode, not style advice.
-  - `relay-merge` probes whether `git push` actually works before relaying, and
-    hands off to `gh-pr:create` when it does. The patch+gist relay is a
-    fallback, never the default. It never truncates an oversized patch silently.
-  - Neither relay skill rewrites history on the destination remote.
-- **The shell-common loader is one shape, owned upstream.** All four sites —
-  `autopilot`'s and `relay-merge`'s reference blocks and the two `lib/*.sh` —
+- **The shell-common loader is one shape, owned upstream.** Both sites —
+  `autopilot`'s reference block and `skills/issue/lib/target-binding.sh` —
   use the canonical form from
   [`harness-skills` `references/plugin-root.md`](https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md)
   verbatim: `unset -f` + `unalias`, `export SHELL_COMMON` **before** the `.`,
