@@ -8,7 +8,7 @@
 | 2 | `[remote]` | `origin` | Git remote whose URL binds `TARGET_HOST` + `TARGET_REPO`. Passed to every worker. A missing remote stops the run — no silent `origin` fallback |
 | - | `--max-depth D` | `3` | Deepest descendant generation processed (root = 0). A child deeper than `D` is not processed and is listed under `Next:` |
 | - | `--max-issues K` | `10` | Most issues processed in one run, root included. The rest of the queue is listed under `Next:` |
-| - | `--no-merge` | off | Workers stop at a green, synced PR; nothing merges and every verify step is `[SKIP] --no-merge` |
+| - | `--no-merge` | off | Workers stop at a green, synced PR; nothing merges, every verify step is `[SKIP] --no-merge`, and only the root runs — its descendants are listed under `Next:` |
 | - | `--no-verify` | off | Skip `gh-verify:merged` after each merge |
 
 ## Usage
@@ -16,7 +16,7 @@
 - `/gh-flow:wave 58` — #58 to a merged, fresh-clone-verified PR, then every issue spawned from it (and from those), up to depth 3 and 10 issues.
 - `/gh-flow:wave https://github.com/acme/lib/issues/58 upstream` — the same, bound to `upstream`.
 - `/gh-flow:wave 58 --max-depth 1 --max-issues 4` — the root and its direct children only, at most four issues.
-- `/gh-flow:wave 58 --no-merge` — PRs only; nothing merges, nothing verifies.
+- `/gh-flow:wave 58 --no-merge` — root PR only; nothing merges, nothing verifies, no descent.
 - `/gh-flow:wave -h` / `--help` / `help` — print this help.
 
 ## What one issue goes through

@@ -60,5 +60,5 @@
   run with `gh-flow:wave stopped — gh-flow plugin incomplete (<missing path>)`.
 - **A per-issue table is not a final answer.** The next issue starts right after
   it. A run that ends without `gh-flow:wave complete` or `gh-flow:wave stopped —`
-  has stopped early — no Stop hook guards these strings yet, so this rule is the
-  only guard.
+  has stopped early — no Stop hook guards these strings yet; `tests/wave-contract.sh`
+  only keeps them pinned, so at run time this rule is the only guard.
