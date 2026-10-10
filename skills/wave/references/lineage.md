@@ -39,11 +39,12 @@ is not a marker. One parent per issue — the first `Spawned-from:` line wins.
 
 ## Querying the children of `#<N>`
 
-After issue `<N>` is done (or, for a root already closed, before anything else):
+After issue `<N>` is done — merged, `pr-only`, or failed — (or, for a root already
+closed, before anything else):
 
 ```
 GH_HOST="$TARGET_HOST" gh issue list --repo "$TARGET_REPO" --state all \
-  --limit 100 --search '"Spawned-from: #<N>" in:body' --json number
+  --limit 1000 --search '"Spawned-from: #<N>" in:body' --json number
 ```
 
 `--state all`, not `open`: a closed child (merged by an earlier run) is never
@@ -58,8 +59,10 @@ GH_HOST="$TARGET_HOST" gh issue view <C> --repo "$TARGET_REPO" --json body,state
 and kept only when its **first** `Spawned-from:` line equals
 `Spawned-from: #<N>` exactly (after stripping a trailing `\r`). An `OPEN` child
 is queued for processing; a `CLOSED` one is queued only to have its own children
-queried, and counts toward neither cap. A result count of 100 means the list was
-truncated — name that parent in `Next:`, never claim the tree is complete.
+queried, and counts toward neither cap. Prose hits ("spawned from 58") are
+dropped here, so the limit is set high enough that they cannot fill it: a result
+count of 1000 means the list was truncated — name that parent in `Next:`, never
+claim the tree is complete.
 
 Search indexing lags issue creation by seconds. View directly, and union with
 the search hits, every number the run already knows is a child of `<N>`: the
@@ -73,15 +76,18 @@ unknown state is how a child gets dropped.
 
 ## Queueing
 
-- Children of `<N>` at depth `d` are at depth `d + 1`. Over `--max-depth`, they
-  go to overflow, not the queue.
+- Children of `<N>` at depth `d` are at depth `d + 1`. Over `--max-depth`, an
+  `OPEN` child goes to overflow, not the queue; a `CLOSED` one is dropped — it
+  is already done and must not appear under `Next:` as work.
 - A number already processed, already queued, or the root is never queued again
   — a child that points back at an ancestor ends there (cycle).
 - Order within one parent: ascending number. Across parents: breadth-first.
 - The `--max-issues` cap is checked when an issue is popped: once the count is
   reached, the rest of the queue moves to overflow.
-- A child of a failed issue is never queued; it gets the deferral comment
-  (`references/constraints.md`).
+- A child of a failed issue (found by the same query) is never queued; each
+  `OPEN` one gets the deferral comment (`references/constraints.md`).
+- Under `--no-merge`, children of a `pr-only` issue are never queued either:
+  the parent's change is not on base yet. Their `OPEN` numbers go to `Next:`.
 
 ## Resume
 

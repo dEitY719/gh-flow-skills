@@ -40,8 +40,8 @@ metadata:
 `/gh-flow:wave <issue-number|issue-url> [remote] [--max-depth 3] [--max-issues 10] [--no-merge] [--no-verify]`.
 `-h`/`--help`/`help` 는 `references/help.md` 를 **그대로 출력하고 정지** — API 호출 없음.
 
-**대상 바인딩** — `gh-flow:issue` 의 `references/target-binding.md` 의 **bash 블록만** 그대로 쓴다
-(복사 금지, SSOT). 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`.
+**대상 바인딩** — `gh-flow:issue` 의 `references/target-binding.md` 의 **bash 블록만** 그대로 쓴다(복사 금지, SSOT:
+`$CLAUDE_PLUGIN_ROOT` 가드 → `[ -f ]` 증명 → `skills/issue/lib/target-binding.sh` source, 기본값을 경로에 끼우는 형태 금지). 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`.
 없는 remote 는 `origin` 으로 떨어지지 말고 `git remote -v` 를 출력하고 정지한다. 이슈 URL 의
 host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 스킬 파일(`target-binding.md`/`.sh`,
 `waves`·`drain` 의 references)이 없으면 `gh-flow:wave stopped — gh-flow plugin incomplete (<missing path>)`.
@@ -54,7 +54,7 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 
 1. **spawn** — `git fetch <remote> <base>` 후 `Skill(session:worktree-spawn, "--task issue-<N> --base <remote>/<base>")`
    1회. `Path:` 를 기록하고 조율자는 main 체크아웃에 남는다(`cd` 를 따라가지 않는다).
-   직전 머지가 반영된 base 에서 시작하려는 것이다. 절차: `gh-flow:waves` 의 `references/plan.md` §7.
+   직전 머지가 반영된 base 에서 시작하려는 것이다. 절차: `gh-flow:waves` 의 `references/plan.md` §7 — 단 wave 에는 `--bootstrap` 이 없어 부트스트랩은 `.claude/gh-flow-waves.sh`(있을 때만) > 없음.
 2. **dispatch** — 백그라운드 `Agent`(model `opus`) **정확히 1개**. 프롬프트는 `gh-flow:waves` 의
    `references/worker-brief.md` 템플릿을 채운 것 — wave 의 채움·차이(계보 마커 지시 포함):
    `references/lineage.md`. 한 worktree 에 워커 둘 금지(NF-2).
@@ -79,7 +79,7 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 **조율자는 머지하지 않는다.** 워커가 `Skill(gh-pr:merge, ...)` 에만 위임하고 그 승인·보호
 게이트가 그대로 적용된다. raw `gh` 머지 명령 대체 경로는 없고 `gh-pr:merge-emergency` 는
 어떤 경로로도 호출하지 않는다. 거절은 `[FAIL] not merged`, PR 은 사람 판단으로 남는다.
-`--no-merge` 면 PR 까지만 만들고 verify 는 `[SKIP]`.
+`--no-merge` 면 PR 까지만 만들고 verify 는 `[SKIP]`, 자손은 처리하지 않고 `Next:` 에 나열한다(부모 변경이 base 에 없다).
 
 ## Step 4: Report
 
