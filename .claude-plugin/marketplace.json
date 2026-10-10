@@ -11,7 +11,7 @@
       "name": "gh-flow",
       "description": "Carry a GitHub issue all the way to a reviewed PR in one run. Five skills: the ordinary path from an issue number; autopilot, from an approved spec; a backlog drain that finishes only when every deferred item has become an issue of its own; dependency waves that run a set of issues in parallel worktrees with a live-verify barrier between waves; and a single-issue wave that merges one issue and then only its marked descendants, verified from a fresh clone.",
       "homepage": "https://github.com/dEitY719/gh-flow-skills",
-      "version": "0.1.18",
+      "version": "0.1.19",
       "source": "./",
       "author": {
         "name": "dEitY719",
