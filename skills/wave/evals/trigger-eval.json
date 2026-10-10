@@ -1,0 +1,54 @@
+[
+  {
+    "query": "이슈 #58 하나만 머지하고 클린 클론에서 검증까지 해줘. 거기서 파생된 후속 이슈도 같이 처리하고",
+    "should_trigger": true
+  },
+  {
+    "query": "carry issue 42 to a merged, verified PR, then do the follow-up issues it spawns",
+    "should_trigger": true
+  },
+  {
+    "query": "/gh-flow:wave",
+    "should_trigger": true,
+    "note": "slash-literal: update if the skill is renamed"
+  },
+  {
+    "query": "/gh-flow:wave 58 upstream --max-depth 2 --max-issues 5",
+    "should_trigger": true
+  },
+  {
+    "query": "이 이슈 머지까지 끝내고, 그 과정에서 나온 Spawned-from 마커 달린 이슈들만 이어서 처리해. 다른 열린 이슈는 건드리지 마",
+    "should_trigger": true,
+    "note": "scope proof: only marked descendants; unmarked open issues stay untouched"
+  },
+  {
+    "query": "이 이슈 8개 의존성 순서대로 웨이브 나눠서 병렬로 처리해줘",
+    "should_trigger": false,
+    "note": "a set of issues in dependency waves -> gh-flow:waves"
+  },
+  {
+    "query": "run these issues in parallel waves and live-verify each wave",
+    "should_trigger": false,
+    "note": "gh-flow:waves"
+  },
+  {
+    "query": "백로그 다 비워줘. 이연된 것도 전부 이슈로 등록하고",
+    "should_trigger": false,
+    "note": "whole backlog -> gh-flow:drain"
+  },
+  {
+    "query": "이슈 #16 처음부터 PR까지 자동으로 해줘",
+    "should_trigger": false,
+    "note": "stops at a reviewed PR, no merge -> gh-flow:issue"
+  },
+  {
+    "query": "레포의 열린 이슈 전부 머지까지 처리해줘",
+    "should_trigger": false,
+    "note": "every open issue, not one issue's descendants -> gh-flow:drain / gh-flow:waves"
+  },
+  {
+    "query": "머지된 PR 61 신선한 클론에서 재검증만 해줘",
+    "should_trigger": false,
+    "note": "verify only -> gh-verify:merged"
+  }
+]
