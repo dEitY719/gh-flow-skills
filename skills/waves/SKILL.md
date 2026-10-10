@@ -6,7 +6,7 @@ description: >-
   one background worker per issue carry it through gh-flow:issue to
   gh-pr:merge, then a serial gh-verify:live barrier. Use for /gh-flow:waves,
   "이슈들 의존성 웨이브로 병렬 처리", "순서 있는 건 나눠서 병렬로 구현하고 머지",
-  "run these issues in parallel waves".
+  "run these issues in parallel waves". A set of issues in dependency waves; one issue + its descendants is gh-flow:wave.
 license: MIT
 allowed-tools: Bash, Read, Grep, Skill, Agent
 compatibility:
@@ -97,4 +97,4 @@ PR 은 사람 판단으로 남는다. `--no-merge` 면 PR 까지만 만들고 �
 
 워커가 부르는 것: `gh-flow:issue` · `gh-pr:reply` · `gh-resolve:{ci-fail,outdated,conflict}` ·
 `gh-pr:merge`. 조율자가 부르는 것: `session:worktree-spawn` · `gh-verify:live` ·
-`gh-issue:issue-create`. 직렬 사촌: `gh-flow:drain`.
+`gh-issue:issue-create`. 직렬 사촌: `gh-flow:drain` · 이슈 1건 + 자손: `gh-flow:wave`.
