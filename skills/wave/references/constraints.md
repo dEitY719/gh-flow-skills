@@ -29,9 +29,13 @@
   and verify, so it branches from the updated base. Parallel runs are
   `gh-flow:waves`'s.
 - **A failed issue stops its subtree, not the run.** Worker failure or merge
-  refusal: `[FAIL]` plus one comment on the issue, a deferral comment on each
-  of its descendants in the three-part form of `gh-flow:drain`'s
-  `references/blocked.md`, and the siblings go on.
+  refusal: `[FAIL]` plus one comment on the issue —
+  `[FAIL] gh-flow:wave #<N> (depth <d>) — <step>: <reason>. PR: #<PR> | none.`
+  (not `barrier.md`'s `gh-flow:waves wave <w>` wording) — a deferral comment
+  on each of its descendants in the three-part form of `gh-flow:drain`'s
+  `references/blocked.md` ((a) parent `#<N>` failed, (b) `#<N>` merged,
+  (c) re-run `/gh-flow:wave <root>`), and the siblings go on. No `blocked`
+  label for this case — the open, unmerged parent re-derives it on resume.
 - **Verify failures become marked issues** (F-5). `gh-verify:merged` failing is
   filed with `gh-issue:issue-create --no-ask` carrying `Spawned-from: #<N>`, and
   queued as a descendant within the caps.
