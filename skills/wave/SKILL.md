@@ -63,7 +63,7 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 4. **verify** — 머지된 PR 마다 `Skill(gh-verify:merged, "<PR>")`. 실패는
    `Skill(gh-issue:issue-create, "--no-ask ...")` 로 이슈화하되 본문에 `Spawned-from: #<N>` 한 줄
    (F-5) — 그 이슈는 자손으로 큐에 들어간다. `--no-verify`/`--no-merge` 면 `[SKIP]`.
-5. **descend** — `Spawned-from: #<N>` 마커를 가진 열린 이슈만 조회해 큐에 넣는다. 조회 명령,
+5. **descend** — `Spawned-from: #<N>` 마커를 가진 이슈만 조회해 큐에 넣는다(닫힌 것은 통과만). 조회 명령,
    정확한 줄 매칭, 순환 처리, 재개 규칙: `references/lineage.md` — 첫 조회 전에 읽는다.
    조회 실패는 정지한다(상태를 모른 채 진행 금지).
 

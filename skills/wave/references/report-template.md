@@ -43,8 +43,10 @@ already closed at start has the row `| #<R> | - | - | - | [SKIP] closed |`.
 `Next: /gh-flow:wave 62 --max-depth 1  (overflow #70 #71; failed #63: merge refused, awaits human)`.
 With neither, it reads `Next: none — tree complete`.
 
-`complete` means the queue is empty: every queued issue merged and verified,
-failed (named, its subtree deferred), or moved to overflow — each named above.
+`complete` means the queue is empty: every queued issue merged and verified
+(or left as a green PR under `--no-merge`), failed (named, its subtree
+deferred), or moved to overflow — each named above. A truncated child query
+(`references/lineage.md`) is named in `Next:` too.
 A root with no work and no children is `complete` with zero issues.
 
 ## Stopped endings
