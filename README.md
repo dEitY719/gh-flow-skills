@@ -34,6 +34,26 @@ instead of an issue; `waves` takes a set whose order matters and refuses to
 start the next wave until the last one is merged and verified; `wave` takes one
 issue and refuses to touch any open issue that does not descend from it.
 
+### `wave` vs `waves`
+
+Same family, opposite shapes: `waves` fans a set of issues out in parallel and gates every wave behind a live barrier; `wave` runs one issue and its own descendants serially and verifies each merge from a fresh clone.
+
+| | `wave` | `waves` |
+|---|---|---|
+| Scope | One issue plus only its descendants — open issues whose body carries `Spawned-from: #<N>`. No other open issue is touched. | A set of issues: the repo's open backlog, or `--issues` / `--label` / `--from`. |
+| Execution | Serial — an internal queue, one issue at a time. | Parallel — per wave, one worktree and one background worker per issue, capped by `--max-parallel`. |
+| What feeds the queue | Lineage only: a `Spawned-from: #<N>` issue filed during the run joins it. | A plan, computed up front from explicit dependency phrases plus file overlap, recorded on a tracking issue and re-queried after every wave. |
+| Verification | Per merge: `gh-verify:merged` — a fresh clone of the merge commit. | Per wave: a barrier — pull main, restart the app (`--run`), then a serial `gh-verify:live` pass over the wave's PRs. |
+| Caps | `--max-depth 3`, `--max-issues 10`; overflow is listed in `Next:`. | `--max-parallel` per wave; an epic whose children have all closed is closed. |
+| One worker fails | That issue reports `[FAIL]`; its descendants are skipped and listed; sibling branches continue. | That issue reports `[FAIL]`; its dependants are deferred with a blocked comment; the rest of the wave continues. |
+
+When to use which:
+
+- **`wave`** — finish one issue *and the follow-ups it spawns*, nothing else. Worked example: refactor issue #42 is implemented and merged; the fresh-clone verification finds a regression, so a `Spawned-from: #42` issue is filed. `wave` pulls that child into the same pipeline automatically and stops when the tree is done — fifty other open issues are irrelevant and untouched. Verification is `merged` because a serial, single-stream run has no running app to check against; proving the merge commit behaves in a clean checkout is the whole claim.
+- **`waves`** — burn down a backlog whose order matters. Worked example: twelve open issues in three layers — schema changes (#10, #11), the API work that depends on them (#20 to #23), the UI work that depends on those (#30 to #35). `waves` plans wave 1 = {#10, #11}, wave 2 = {#20 to #23}, wave 3 = {#30 to #35}; runs each wave's members in parallel worktrees; puts up a live barrier between waves — main pulled, app restarted, every PR verified live — so the next layer starts from a base that is both merged and running; then re-queries the backlog before planning the next wave and closes epics whose children have all landed.
+
+A backlog with no ordering to exploit is `drain`, not either of these.
+
 ### Visual guides and worked examples (GitHub Pages)
 
 - `issue` — [visual guide](https://deity719.github.io/gh-flow-skills/skill-guides/issue.html) · [usage example](https://deity719.github.io/gh-flow-skills/skill-output/issue-usage.html) (issue number to reviewed PR)
