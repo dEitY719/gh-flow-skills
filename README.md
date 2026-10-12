@@ -36,7 +36,9 @@ issue and refuses to touch any open issue that does not descend from it.
 
 ### `wave` vs `waves`
 
-Same family, opposite shapes: `waves` fans a set of issues out in parallel and gates every wave behind a live barrier; `wave` runs one issue and its own descendants serially and verifies each merge from a fresh clone.
+Same family, opposite shapes: `waves` fans a set of issues out in parallel and
+gates every wave behind a live barrier; `wave` runs one issue and its own
+descendants serially and verifies each merge from a fresh clone.
 
 | | `wave` | `waves` |
 |---|---|---|
@@ -49,8 +51,28 @@ Same family, opposite shapes: `waves` fans a set of issues out in parallel and g
 
 When to use which:
 
-- **`wave`** — finish one issue *and the follow-ups it spawns*, nothing else. Worked example: refactor issue #42 is implemented and merged; the fresh-clone verification finds a regression, so a `Spawned-from: #42` issue is filed. `wave` pulls that child into the same pipeline automatically and stops when the tree is done — fifty other open issues are irrelevant and untouched. Verification is `merged` because `wave` takes no `--run` and never starts an app; proving the merge commit behaves in a clean checkout is the whole claim.
-- **`waves`** — burn down a backlog whose order matters. Worked example: epic #9 tracks twelve open issues in three layers — schema changes (#10, #11), the API work that depends on them (#20 to #23), the UI work that depends on those (#30 to #35). `/gh-flow:waves --run "make run" --max-parallel 6` plans wave 1 = {#10, #11}, wave 2 = {#20 to #23}, wave 3 = {#30 to #35} and records the plan on #9. With no epic in the set, pass `--track N`, or the run stops before planning; at the default `--max-parallel 4`, #34 and #35 spill into a fourth wave. Each wave's members run in parallel worktrees. Between waves a live barrier pulls main, restarts the app and verifies every PR live, so the next layer starts from a base that is both merged and running. The run re-queries the target set before planning each next wave, and closes #9 once all its children have landed.
+- **`wave`** — finish one issue *and the follow-ups it spawns*, nothing else.
+  Worked example: refactor issue #42 is implemented and merged; the fresh-clone
+  verification finds a regression, so a `Spawned-from: #42` issue is filed.
+  `wave` pulls that child into the same pipeline automatically and stops when
+  the tree is done — fifty other open issues are irrelevant and untouched.
+  Verification is `merged` because `wave` takes no `--run` and never starts an
+  app; proving the merge commit behaves in a clean checkout is the whole claim.
+- **`waves`** — burn down a backlog whose order matters. Worked example: epic #9
+  tracks twelve issues in three layers — schema changes (#10, #11), the API work
+  that depends on them (#20 to #23), the UI work that depends on those (#30 to
+  #35). `/gh-flow:waves --issues 9,10,11,20,21,22,23,30,31,32,33,34,35 --run
+  "make run" --max-parallel 6` limits the set to that tree (with no `--issues`,
+  `--label` or `--from`, the set is every open issue in the repo). Assuming no
+  two issues of a layer touch the same file — file overlap would push one of
+  them a wave later — it plans wave 1 = {#10, #11}, wave 2 = {#20 to #23}, wave
+  3 = {#30 to #35}, and records the plan on #9, the single epic in the set. At
+  the default `--max-parallel 4`, #34 and #35 would spill into a fourth wave.
+  Each wave's members run in parallel worktrees. Between waves a live barrier
+  pulls main, restarts the app and verifies every PR live, so the next layer
+  starts from a base that is both merged and running. The run re-queries the
+  target set before planning each next wave, and closes #9 once all its
+  children have landed.
 
 A backlog with no ordering to exploit is `drain`, not either of these.
 
