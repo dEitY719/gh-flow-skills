@@ -76,4 +76,20 @@ done
 need "$r/plan.md" 'the first wave included' 'first-wave pull'
 need "$r/report-template.md" 'gh-flow:waves stopped — base not fast-forwardable (<reason>)' 'stopped ending'
 
+# Run plan.md's own marker regex, not a copy, on sample bodies: CRLF, null
+# body, #18 vs #180, trailing text after the number.
+re=$(sed -n 's/.*match("\(.*\)"; "g").*/\1/p' "$r/plan.md")
+if [ -z "$re" ]; then
+    say "FAIL  marker regex not found in $r/plan.md"; fail=1
+elif command -v jq >/dev/null; then
+    got=$(jq -rc --arg re "$re" '[.[] | [(.body // "") | match($re; "g")
+        | .captures[0].string | tonumber]]' <<'JSON'
+[{"body":"x\nFiled-by-run: waves #180\r\ny"},{"body":null},
+ {"body":"Filed-by-run: waves #18"},{"body":"Filed-by-run: waves #180 extra"}]
+JSON
+)
+    [ "$got" = '[[180],[],[18],[]]' ] ||
+        { say "FAIL  marker regex in $r/plan.md: got $got, want [[180],[],[18],[]]"; fail=1; }
+fi
+
 [ "$fail" = 0 ] && say 'OK    waves contract' || exit 1

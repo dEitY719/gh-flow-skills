@@ -38,6 +38,13 @@ dispatched to workers, `--max-waves W` (default `5`) waves started. A wave that
 would pass `N` keeps the lowest numbers that fit; once either cap is reached no
 further wave starts, and every target left is listed under `capped` and in
 `Next:` — not processed, not failed.
+A capped issue is listed only under `capped`, never also under `left open` or
+`deferred` — its dependants too, since no wave starts to block them.
+
+**`<T>` must stay the same across runs.** The marker names the tracking issue,
+not one invocation, so a re-run that picks a different `<T>` (the epic closed,
+a second epic appeared) cannot recognise the earlier follow-ups. Re-run with
+`--track <T>`; the `Next:` command always passes it.
 
 **A failure here stops the run before the wave starts** (same rule as
 `gh-flow:drain`'s `references/loop.md`). Planning over an unknown state is how work

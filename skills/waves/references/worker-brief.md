@@ -88,7 +88,9 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
   Skill(gh-issue:issue-create, "--no-ask ...") with the body line
   Filed-by-run: waves #<T>. Any issue a sub-skill filed in steps 1-5 that lacks
   that line gets it via gh issue edit and is listed under follow-ups: — also
-  before a [FAIL] report from any step, or requery takes it as a target. Add the
+  before a [FAIL] report from any step, or requery takes it as a target. If the
+  issue cannot be filed, the report's first line is exactly waves-worker #<N>:
+  [FAIL] promotion — issue creation failed (<reason>). Add the
   final-report lines fixed-in-place: <commit per finding> | none and
   declined: <finding: reason> | none after follow-ups:.`
 
