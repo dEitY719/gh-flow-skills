@@ -70,9 +70,9 @@ with whatever finished. One ending, one `Next:`:
   `Spawned-from:` line, then re-run on the root.
 - `gh-flow:wave stopped — base not fast-forwardable (<reason>)` — the
   pre-spawn `git pull --ff-only` refused: the main checkout has local changes in
-  the way or its base diverged from `<remote>/<base>`. `Next:` commit or clean
-  the main checkout's local changes, or reconcile the diverged base by hand,
-  then re-run on the root.
+  the way, its base diverged from `<remote>/<base>`, or it is not on `<base>`.
+  `Next:` commit or clean the main checkout's local changes, reconcile the
+  diverged base by hand, or check out `<base>`, then re-run on the root.
 
 ## The terminal strings are a hook contract
 

@@ -52,7 +52,9 @@
   `git pull --ff-only <remote> <base>` in the main checkout, never a bare fetch,
   so a stale local base cannot make a worker re-review earlier merges. Not
   fast-forwardable: `gh-flow:wave stopped — base not fast-forwardable (<reason>)`
-  — local changes in the main checkout are never overwritten.
+  — local changes in the main checkout are never overwritten. The pull moves
+  only the checked-out branch, so first `git symbolic-ref --short HEAD` must
+  print `<base>`; any other branch is the same stop, reason `not on <base>`.
 - **Never reimplement an atom.** Worktrees are `session:worktree-spawn`'s,
   the chain is `gh-flow:issue`'s, merging is `gh-pr:merge`'s, fresh-clone
   verification is `gh-verify:merged`'s, issue filing is `gh-issue:issue-create`'s.
