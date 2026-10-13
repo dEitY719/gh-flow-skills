@@ -22,7 +22,7 @@
   early-stop trigger `references/critical-contract.md` documents. Moving this
   step into Step 2 re-opens that failure mode, however tidy it looks.
 - **Block-comment soft-fail exception (NF-4, D-8).** On BLOCK the gate posts one
-  comment on the issue so an unattended caller (`gh-flow:drain`) leaves the
+  comment on the issue so an unattended caller (`gh-flow:waves`) leaves the
   reason on the card rather than only in a terminal nobody reads. A failed post
   is a single `[WARN]`; it never changes the BLOCK verdict or the exit code.
 - **Quality-gate soft-fail exception.** Step 2.4 (`gh-verify:review-all`)

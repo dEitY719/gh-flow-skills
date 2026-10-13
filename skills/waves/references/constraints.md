@@ -39,7 +39,7 @@
   `gh-flow:wave`'s `references/triage.md` (shared, not copied), and report
   `fixed-in-place:` / `declined:`. A live failure is filed only for a real
   defect; a trivial difference stays in the `gh-verify:live` PR comment report
-  (F-5). Waves does not use `gh-flow:drain`'s every-item rule — that is drain's.
+  (F-5). There is no every-item promotion rule in the plugin since #65.
 - **Run caps** (#64 F-4). `--max-issues N` (default `20`) bounds the issues
   dispatched to workers, `--max-waves W` (default `5`) the waves started, both
   per invocation. A cap reached leaves the rest unprocessed and listed in

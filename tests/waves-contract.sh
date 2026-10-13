@@ -10,12 +10,14 @@
 # 3. Triage, not promote-everything (F-1, F-2): the waves fill of the brief
 #    names gh-flow:wave's shared references/triage.md and carries the
 #    fixed-in-place:/declined: report lines; skills/waves/ never points at
-#    drain's promotion.md; triage.md is the single copy and covers waves.
+#    the deleted promotion.md; triage.md is the single copy and covers waves.
 # 4. This run's follow-ups stay out of requery (F-3): the Filed-by-run marker
 #    is written by workers and the coordinator and dropped by plan.md §1.
 # 5. Run caps (F-4): --max-issues / --max-waves with their defaults.
 # 6. Live failures follow triage (F-5): real defect only.
 # 7. Fresh base before every spawn (F-6): pull --ff-only and its stopped ending.
+# 8. drain is gone (#65): skills/drain/ absent, no live reference to it under
+#    skills/, and blocked.md lives here and is what wave and waves point at.
 set -euo pipefail
 cd -- "$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 fail=0
@@ -43,7 +45,7 @@ for s in 'fixed-in-place:' 'declined:' 'Filed-by-run: waves #<T>'; do
         { say "FAIL  waves fill in $b lacks '$s'"; fail=1; }
 done
 if grep -rnF 'promotion.md' skills/waves/; then
-    say "FAIL  skills/waves/ still points at drain's promotion.md (#64)"; fail=1
+    say "FAIL  skills/waves/ still points at the deleted promotion.md (#64)"; fail=1
 fi
 [ ! -e "$r/triage.md" ] || { say "FAIL  $r/triage.md is a second copy of $t"; fail=1; }
 for s in 'gh-flow:wave / gh-flow:waves' 'Filed-by-run: waves #<T>' 'gh-verify:live'; do
@@ -91,5 +93,15 @@ JSON
     [ "$got" = '[[180],[],[18],[]]' ] ||
         { say "FAIL  marker regex in $r/plan.md: got $got, want [[180],[],[18],[]]"; fail=1; }
 fi
+
+[ ! -e skills/drain ] || { say 'FAIL  skills/drain/ still exists (#65)'; fail=1; }
+if grep -rnE 'gh-flow:drain|skills/drain' skills/; then
+    say 'FAIL  skills/ still points at the deleted gh-flow:drain (#65)'; fail=1
+fi
+[ -f "$r/blocked.md" ] || { say "FAIL  $r/blocked.md missing (#65)"; fail=1; }
+for f in skills/waves/SKILL.md "$r/barrier.md" skills/wave/SKILL.md skills/wave/references/constraints.md; do
+    need "$f" 'references/blocked.md' 'blocked form'
+done
+need "$r/plan.md" 'A failure here stops the run before the wave starts' 'list-query stop'
 
 [ "$fail" = 0 ] && say 'OK    waves contract' || exit 1

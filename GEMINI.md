@@ -1,22 +1,20 @@
 # gh-flow — skill index
 
-Five skills for one job: carrying a GitHub issue all the way to a reviewed pull
+Four skills for one job: carrying a GitHub issue all the way to a reviewed pull
 request in a single run. Each lives in this extension's `skills/` directory.
 They are explicitly invoked, never ambient: load the one that matches your
-starting point by reading its `SKILL.md`, then follow it. Do not load all five.
+starting point by reading its `SKILL.md`, then follow it. Do not load all four.
 
 | Skill | Read | Use when |
 |-------|------|----------|
 | `issue` | `@./skills/issue/SKILL.md` | You have an issue number and a feature branch. Chains implement, commit, PR, review gate, and rebase-sync, then reports metrics. Stops at the first failing step with a resume hint. |
 | `autopilot` | `@./skills/autopilot/SKILL.md` | You have an approved spec, not an issue. Writes the plan, files the issue, implements, opens the PR, answers review comments — no approval checkpoints. Never merges. |
-| `drain` | `@./skills/drain/SKILL.md` | You have a whole open backlog, not one issue. Runs each issue through `issue` and promotes every deferred item to a new issue; ends only when open issues and deferred items are both zero. |
-| `waves` | `@./skills/waves/SKILL.md` | You have a set of issues whose order matters. Plans dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Run it from the main checkout. |
+| `waves` | `@./skills/waves/SKILL.md` | You have a set of issues whose order matters, or a whole open backlog (the default target). Plans dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Run it from the main checkout. |
 | `wave` | `@./skills/wave/SKILL.md` | You have one issue and want it merged and fresh-clone-verified, plus only the follow-ups it spawns. Runs it through `issue`, `gh-pr:merge` and `gh-verify:merged`, then only open issues marked `Spawned-from: #<N>`, one at a time, depth- and count-capped. Run it from the main checkout. |
 
 Pick by where you are starting, not by which sounds most thorough. `issue`
-refuses to invent a spec; `autopilot` refuses to skip one. `drain`
-starts from a backlog that already exists; `waves` from a set whose order
-matters; `wave` from one issue and its descendants only.
+refuses to invent a spec; `autopilot` refuses to skip one. `waves`
+starts from a set whose order matters, or the whole open backlog; `wave` from one issue and its descendants only.
 
 Each skill's `references/` directory holds the detail it loads on demand.
 `SKILL.md` says which file to read and when — do not read `references/` up
@@ -57,7 +55,7 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
 
 ## Capability gaps on Gemini CLI
 
-- **These five skills are compositions, and Gemini has no skill-invocation
+- **These four skills are compositions, and Gemini has no skill-invocation
   tool.** `issue` and `autopilot` are ordered chains of other skills; without a
   `Skill` equivalent they cannot run as written. Print the ordered list of
   atomic skills the chain would have invoked, run what is plain shell, and stop
@@ -70,8 +68,7 @@ On Antigravity read `antigravity-tools.md` in that same directory instead —
 ## Safety rules
 
 - **No skill here merges a pull request by itself.** `autopilot` stops at
-  review on purpose; merging is a human decision. `drain --merge` delegates to
-  `gh-pr:merge-train`; `waves` and `wave` workers delegate to `gh-pr:merge`,
+  review on purpose; merging is a human decision. `waves` and `wave` workers delegate to `gh-pr:merge`,
   whose gates still apply, and report `[FAIL] not merged` on a refusal.
   `waves --no-merge` and `wave --no-merge` merge nothing; `gh-pr:merge-emergency` is never called.
 - `waves`'s and `wave`'s coordinators never invoke `issue` themselves, not

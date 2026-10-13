@@ -1,7 +1,10 @@
-# gh-flow:drain — Blocked classification (F-4)
+# gh-flow:waves / gh-flow:wave — Blocked classification
+
+Moved here from the former `drain` skill (removed in #65); `gh-flow:waves`
+and `gh-flow:wave` both link to this file and keep no copy.
 
 An issue that cannot be finished right now is **not closed and not retried**.
-It is marked `blocked`, excluded from the following rounds, and gets one comment
+It is marked `blocked`, excluded from the rest of the run, and gets one comment
 carrying everything a later session needs.
 
 ## What counts as blocked
@@ -14,16 +17,12 @@ carrying everything a later session needs.
 | Waiting on someone | An unanswered upstream question, a pending third-party fix |
 | Upstream issue open | The parent or the `Depends on #M` issue is not done |
 
-Three failed `gh-flow:issue` attempts on the same issue **within one run** also
-converts it to `blocked` (F-5), with the failure reason as the cause. The count
-is not persisted across sessions (`references/constraints.md`).
-
 ## The comment
 
 Three parts, always all three:
 
 ```
-[blocked] gh-flow:drain — round <r>
+[blocked] gh-flow:<waves|wave> — <wave w | depth d>
 
 (a) 왜 막혔는지: <cause, one or two lines, concrete>
 (b) 무엇이 있으면 풀리는지: <the specific thing — a credential, an answer,
@@ -37,13 +36,13 @@ Three parts, always all three:
 should be checkable — "`#42` is closed", "`gh auth status` lists the host",
 "the user replied on this issue" — not "when it seems ready".
 
-**The label is mandatory, and it is the only thing the round loop can see.**
-Step 2's exclusion reads the list query's `labels` projection, so a block
-recorded only as a comment is invisible and the issue is retried every round:
+**The label is mandatory for a real block, and it is what a re-run can see.**
+The plan's list query reads the `labels` projection, so a block recorded only
+as a comment is invisible and the issue is retried on the next run:
 
 ```
 GH_HOST="$TARGET_HOST" gh label create blocked --repo "$TARGET_REPO" \
-  --color b60205 --description "gh-flow:drain — cannot proceed; see the newest comment" 2>/dev/null || true
+  --color b60205 --description "gh-flow — cannot proceed; see the newest comment" 2>/dev/null || true
 GH_HOST="$TARGET_HOST" gh issue edit "$N" --repo "$TARGET_REPO" --add-label blocked
 ```
 
@@ -52,10 +51,15 @@ inventing a second taxonomy — but there must be exactly one label, and it must
 be applied. If the label write fails, report that issue as failed; do not leave
 it unlabelled in the queue.
 
+A dependant deferred only because its predecessor or parent failed in this run
+takes the three-part comment **without** the label: the open, unmerged
+predecessor already re-derives the dependency on resume (`barrier.md`,
+`gh-flow:wave`'s `references/constraints.md`).
+
 ## Not blocked
 
-- A PR is open and waiting for a human merge. That is `awaiting-merge` in the
-  report, a normal default-run outcome, not a block (D-1).
+- A PR is open and waiting for a human merge (`--no-merge`, or a
+  `gh-pr:merge` refusal). That is a normal outcome in the report, not a block.
 - The work is merely hard, long, or unpleasant.
-- A dependency that is itself in this round's queue — that just defers the issue
-  to a later round.
+- A dependency that is itself in this run's plan — that just puts the issue in
+  a later wave.

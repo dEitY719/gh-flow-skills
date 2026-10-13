@@ -27,7 +27,7 @@ output cannot land inside that zone.
 
 `--trust-origin` skips this whole step — no fetch, no parse, no review — and
 Step 2 starts as it did before the gate existed. It exists so an unattended
-caller (`gh-flow:drain` over a backlog of pre-#43 issues, every one of them
+caller (a `gh-flow:waves` worker over a backlog of pre-#43 issues, every one of them
 unknown-origin) can be unblocked by a human in one flag rather than issue by
 issue (F-8). A `--trust-origin` run whose issue really does have a blocking
 defect is a risk the human explicitly accepted: proceed, no warning.

@@ -57,8 +57,7 @@ with whatever finished. One ending, one `Next:`:
 
 - `gh-flow:wave stopped — gh-flow plugin incomplete (<missing path>)` — a
   sibling file (`gh-flow:issue`'s `references/target-binding.md` or
-  `skills/issue/lib/target-binding.sh`, a `gh-flow:waves` / `gh-flow:drain`
-  reference) cannot be read (#47). `CLAUDE_PLUGIN_ROOT` unset: export it to the
+  `skills/issue/lib/target-binding.sh`, a `gh-flow:waves` reference) cannot be read (#47). `CLAUDE_PLUGIN_ROOT` unset: export it to the
   plugin dir, then re-run. Set, and the file still absent: install the whole
   `gh-flow` plugin (README "Install"), then re-run.
 - `gh-flow:wave stopped — target mismatch (<url> vs <remote>)` — `Next:` the
@@ -81,4 +80,4 @@ with whatever finished. One ending, one `Next:`:
 role `gh-flow:issue complete (#<N>)` plays for the sibling skill
 (`gh-flow:issue`'s `references/stop-guard.md` is the SSOT for that mechanism).
 Keep both verbatim. No guard matches them yet; they are pinned ahead of it, the
-same way `gh-flow:waves`'s and `gh-flow:drain`'s are.
+same way `gh-flow:waves`'s are.

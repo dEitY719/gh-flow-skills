@@ -46,9 +46,10 @@ not one invocation, so a re-run that picks a different `<T>` (the epic closed,
 a second epic appeared) cannot recognise the earlier follow-ups. Re-run with
 `--track <T>`; the `Next:` command always passes it.
 
-**A failure here stops the run before the wave starts** (same rule as
-`gh-flow:drain`'s `references/loop.md`). Planning over an unknown state is how work
-gets redone or lost.
+**A failure here stops the run before the wave starts** — a failed or
+partial list query never falls through to an empty or stale target set, and
+no wave is planned from it. Planning over an unknown state is how work gets
+redone or lost.
 
 ## 2. Read each candidate
 

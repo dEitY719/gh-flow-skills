@@ -3,12 +3,12 @@
 What the worker does with each finding of its own run, and what the coordinator
 does with a `gh-verify:merged` (wave) or `gh-verify:live` (waves) finding. This
 file is the whole rule for both skills — the single copy; `gh-flow:waves` links
-here and keeps none of its own. Neither defers to `gh-flow:drain`.
+here and keeps none of its own.
 
-## Why wave differs from drain
+## Why not promote everything
 
-`gh-flow:drain` exists to reach zero deferred items, so it files every
-acknowledged finding at any severity. Wave carries one root issue, and every
+The former `drain` skill (removed in #65) filed every acknowledged finding at
+any severity to reach zero deferred items. Wave carries one root issue, and every
 issue a worker files with `Spawned-from:` becomes a node it must process next.
 Filing every reviewer remark grew one root into 17 descendants, most of them
 nits or out-of-scope remarks (#62). Wave therefore fixes or declines what it
