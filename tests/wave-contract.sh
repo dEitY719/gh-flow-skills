@@ -40,8 +40,9 @@ else
     say "FAIL  $t missing"; fail=1
 fi
 
+b=skills/waves/references/worker-brief.md
 for s in 'fixed-in-place:' 'declined:'; do
-    grep -qF -- "$s" skills/waves/references/worker-brief.md ||
+    grep -qF -- "$s" "$b" ||
         { say "FAIL  report line '$s' missing from the wave brief"; fail=1; }
 done
 
@@ -49,7 +50,6 @@ if grep -rnF 'promotion.md' skills/wave/; then
     say "FAIL  skills/wave/ still points at drain's promotion.md (#62)"; fail=1
 fi
 
-b=skills/waves/references/worker-brief.md
 grep -qxF -- '6. <PROMOTION_RULE>' "$b" || { say "FAIL  '6. <PROMOTION_RULE>' missing from $b"; fail=1; }
 # The waves fill, as whole lines: the pre-#62 step 6, byte for byte.
 for s in '6. File every deferred item (unfixed review finding, TODO/FIXME/ponytail:,' \
