@@ -46,11 +46,10 @@
   `Next:`.
 - **Fresh base before every spawn** (#64 F-6). The coordinator runs
   `git pull --ff-only "$REMOTE" <base>` in `MAIN` before each wave's spawn —
-  the first wave included, and with `--no-merge` the only pull — never a bare
-  fetch, so a stale local base cannot make a worker re-review earlier merges.
-  First `git symbolic-ref --short HEAD` must print `<base>`. Not on `<base>` or
-  not fast-forwardable: `gh-flow:waves stopped — base not fast-forwardable (<reason>)`
-  — local changes in `MAIN` are never overwritten.
+  the first wave included — never a bare fetch. Not on `<base>` or not
+  fast-forwardable: `gh-flow:waves stopped — base not fast-forwardable (<reason>)`
+  — local changes in `MAIN` are never overwritten. Why and how:
+  `references/plan.md` §7.
 - **The coordinator works against `MAIN`** — the cwd, or with an `<issue-url>`
   the checkout `references/locate.md` found. Every coordinator Bash call starts
   `cd "<MAIN>" &&` (or uses `git -C`); locating it is read-only and never

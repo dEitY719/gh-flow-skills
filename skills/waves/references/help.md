@@ -37,17 +37,19 @@ under `filed this run` and in `Next:` (`references/plan.md` §1).
 ## What one wave does
 
 `git pull --ff-only` the base → spawn worktrees → dispatch one background
-worker per issue → collect completion notifications → barrier (pull, `--run`, serial `gh-verify:live`) → re-query and
-re-plan. Plan rules: `references/plan.md`. Worker brief:
-`references/worker-brief.md`. Barrier: `references/barrier.md`.
+worker per issue → collect completion notifications → barrier (pull, `--run`,
+serial `gh-verify:live`) → re-query and re-plan. Plan rules:
+`references/plan.md`. Worker brief: `references/worker-brief.md`. Barrier:
+`references/barrier.md`.
 
 ## What this skill writes to GitHub
 
 The plan table (a comment on the tracking issue, a new one per re-plan), a
 `[FAIL]` comment on an issue whose worker failed, a deferral comment on an issue
 whose predecessor failed, issues filed for real-defect live failures (via
-`gh-issue:issue-create`, each with `Filed-by-run: waves #<T>`), and closing comments on finished epics. PRs, replies
-and merges are written by the workers' own sub-skills.
+`gh-issue:issue-create`, each with `Filed-by-run: waves #<T>`), and closing
+comments on finished epics. PRs, replies and merges are written by the workers'
+own sub-skills.
 
 ## What this skill will NOT do
 
