@@ -60,7 +60,7 @@ follows with whatever finished. One ending, one `Next:`:
 
 - `gh-flow:waves stopped — gh-flow plugin incomplete (<missing path>)` — a
   sibling file (`gh-flow:issue`'s `references/target-binding.md` or
-  `skills/issue/lib/target-binding.sh`, `gh-flow:drain`'s references,
+  `skills/issue/lib/target-binding.sh`,
   `gh-flow:wave`'s `references/triage.md`) cannot be read (#47).
   `Next:` depends on why. `CLAUDE_PLUGIN_ROOT` unset (a harness that does
   not export it, a symlinked skill): export it to the plugin dir, then
@@ -91,5 +91,4 @@ follows with whatever finished. One ending, one `Next:`:
 a `Stop` / `SubagentStop` guard matches to decide a waves run really finished —
 the role `gh-flow:issue complete (#<N>)` plays for the sibling skill
 (`gh-flow:issue`'s `references/stop-guard.md` is the SSOT for that mechanism). Keep
-both verbatim. No guard matches them yet; they are pinned ahead of it, the same
-way `gh-flow:drain`'s are.
+both verbatim. No guard matches them yet; they are pinned ahead of it.

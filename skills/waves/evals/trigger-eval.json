@@ -25,8 +25,14 @@
     "should_trigger": false
   },
   {
-    "query": "백로그 다 비워줘. 이연된 것도 전부 이슈로 등록하고",
-    "should_trigger": false
+    "query": "이슈를 다 처리해라. 백로그 0으로",
+    "should_trigger": true,
+    "note": "whole backlog -> gh-flow:waves (drain absorbed, #65)"
+  },
+  {
+    "query": "drain the backlog to zero",
+    "should_trigger": true,
+    "note": "whole backlog -> gh-flow:waves (drain absorbed, #65)"
   },
   {
     "query": "이 spec 문서 가지고 계획부터 PR까지 자동으로 진행해줘",

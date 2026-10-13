@@ -10,7 +10,7 @@
 #    in a line that forbids it.
 # 4. Triage, not promote-everything (#62): triage.md names its three branches,
 #    the wave fill of the brief carries the fixed-in-place:/declined: report
-#    lines and skills/wave/ never points at drain's promotion.md. The waves
+#    lines and skills/wave/ never points at the deleted promotion.md. The waves
 #    fill of the shared brief is pinned by tests/waves-contract.sh (#64).
 # 5. Fresh base before each spawn (#62): pull --ff-only and its stopped ending.
 set -euo pipefail
@@ -47,7 +47,7 @@ for s in 'fixed-in-place:' 'declined:'; do
 done
 
 if grep -rnF 'promotion.md' skills/wave/; then
-    say "FAIL  skills/wave/ still points at drain's promotion.md (#62)"; fail=1
+    say "FAIL  skills/wave/ still points at the deleted promotion.md (#62)"; fail=1
 fi
 
 grep -qxF -- '6. <PROMOTION_RULE>' "$b" || { say "FAIL  '6. <PROMOTION_RULE>' missing from $b"; fail=1; }

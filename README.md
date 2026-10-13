@@ -10,9 +10,8 @@ These are compositions, not implementations. Each step delegates to the skill
 that owns it (`gh-issue:implement`, `gh-pr:commit`, `gh-pr:create`,
 `gh-verify:review-all`, `gh-resolve:conflict`, `gh-resolve:outdated`). Nothing
 here reimplements an atom, and **nothing here merges a PR by itself** — that
-stays a human decision. There are three explicit exceptions, and none merges
-anything itself: `drain --merge` delegates to `gh-pr:merge-train`, and `waves`
-and `wave` (which merge by default) have each worker delegate to `gh-pr:merge` —
+stays a human decision. There are two explicit exceptions, and neither merges
+anything itself: `waves` and `wave` (which merge by default) have each worker delegate to `gh-pr:merge` —
 the approval and label gates still apply. A `gh-pr:merge` refusal is
 reported `[FAIL] not merged` and the PR is left for a human; `waves --no-merge`
 and `wave --no-merge` merge nothing; `gh-pr:merge-emergency` is never called by any path.
@@ -23,14 +22,12 @@ and `wave --no-merge` merge nothing; `gh-pr:merge-emergency` is never called by 
 |-------|--------|-------------|--------------|
 | `issue` | `/gh-flow:issue <N> [remote]` | An issue number | Implement, commit, open the PR, run the review gate, rebase-sync, post metrics. Stops dead at the first failing step with a resume hint. |
 | `autopilot` | `/gh-flow:autopilot <spec>` | An approved spec | One step earlier: plan, file the issue, implement, open the PR, answer review comments — no approval checkpoints. Stops at review. |
-| `drain` | `/gh-flow:drain [owner/repo] [remote]` | A repo's open backlog | Run the whole backlog through `issue`, one issue at a time, promoting every deferred item to a new issue. Ends only when open issues and deferred items are both zero. |
-| `waves` | `/gh-flow:waves [remote] [--from N] [--issues 1,2,3] [--run "<cmd>"] [--no-merge]` | A set of issues with dependencies | Plan dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Re-plans every wave. |
+| `waves` | `/gh-flow:waves [remote] [--from N] [--issues 1,2,3] [--run "<cmd>"] [--no-merge]` | A set of issues with dependencies, or the whole open backlog (default) | Plan dependency waves; per wave, one worktree and one background worker per issue carry it through `issue` to `gh-pr:merge`, then a serial `gh-verify:live` barrier. Re-plans every wave. |
 | `wave` | `/gh-flow:wave <N> [remote] [--max-depth 3] [--max-issues 10] [--no-merge] [--no-verify]` | One issue and the follow-ups it spawns | Carry one issue through `issue`, `gh-pr:merge` and a fresh-clone `gh-verify:merged`, then only its descendants (open issues marked `Spawned-from: #<N>`), one at a time, depth- and count-capped. |
 
 Pick by where you are starting. `issue` refuses to invent a spec; `autopilot`
-refuses to skip one; `drain` starts from a backlog that already exists and
-refuses to finish while anything found along the way is sitting in a ledger
-instead of an issue; `waves` takes a set whose order matters and refuses to
+refuses to skip one; `waves` takes a set whose order matters (by default the
+whole open backlog) and refuses to
 start the next wave until the last one is merged and verified; `wave` takes one
 issue and refuses to touch any open issue that does not descend from it.
 
@@ -74,7 +71,8 @@ When to use which:
   target set before planning each next wave, and closes #9 once all its
   children have landed.
 
-A backlog with no ordering to exploit is `drain`, not either of these.
+A backlog with no ordering to exploit is still `waves`: every issue lands in
+the first wave, and `--max-parallel 1 --no-merge` runs it serially without merging.
 
 ### Visual guides and worked examples (GitHub Pages)
 
@@ -88,11 +86,11 @@ Each page is generated from a Markdown source under
 
 | Need | Why |
 |------|-----|
-| `git` | All five commit and push. |
+| `git` | All four commit and push. |
 | `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (dEitY719/dotfiles#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
 | A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. `waves` and `wave` are the inverse: they run from the main checkout and create one worktree per issue via `session:worktree-spawn`. |
 | The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve` (and `session` for `waves` and `wave`). These are compositions; the steps they call live in those repos. |
-| The whole `gh-flow` plugin, not one skill directory | `drain`, `waves` and `wave` read `gh-flow:issue`'s `references/` (`waves` also `gh-flow:drain`'s and `gh-flow:wave`'s; `wave` also `gh-flow:waves`'s and `gh-flow:drain`'s) and source `skills/issue/lib/target-binding.sh`. A harness that installs a single skill directory (a Hermes GitHub tap, `npx skills add`) leaves those files missing, so a lone `drain`, `waves` or `wave` stops at target binding with `gh-flow:<skill> stopped — gh-flow plugin incomplete (<missing path>)`. The shared contracts are not vendored into each skill on purpose: copies drift (#45, #47). |
+| The whole `gh-flow` plugin, not one skill directory | `waves` and `wave` read `gh-flow:issue`'s `references/` (`waves` also `gh-flow:wave`'s; `wave` also `gh-flow:waves`'s) and source `skills/issue/lib/target-binding.sh`. A harness that installs a single skill directory (a Hermes GitHub tap, `npx skills add`) leaves those files missing, so a lone `waves` or `wave` stops at target binding with `gh-flow:<skill> stopped — gh-flow plugin incomplete (<missing path>)`. The shared contracts are not vendored into each skill on purpose: copies drift (#45, #47). |
 
 ## Install
 
@@ -147,7 +145,6 @@ read the one file for the harness you are on.
 |-------|:-----------:|:-----:|:----:|:--------------------:|:------:|:--------:|
 | `issue` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 | `autopilot` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
-| `drain` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 | `waves` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 | `wave` | full | manual chain | manual chain | manual chain | manual chain | manual chain |
 
@@ -178,9 +175,8 @@ The consequence for anyone editing this repo: the terminal report strings and
 step markers are a **hook contract, not prose**. `gh-flow:issue complete (#<N>)`,
 `gh-flow:issue stopped at step <i>/6`, `[step:gh-flow-autopilot/<id>] OK`,
 `[OK] gh-flow:autopilot`, `[FAIL] gh-flow:autopilot` — change one without the
-matching hook change and the regression comes straight back. `drain`'s,
-`waves`'s and `wave`'s terminal strings (`gh-flow:drain complete` / `gh-flow:drain stopped —`,
-`gh-flow:waves complete` / `gh-flow:waves stopped —`, `gh-flow:wave complete` /
+matching hook change and the regression comes straight back. `waves`'s and
+`wave`'s terminal strings (`gh-flow:waves complete` / `gh-flow:waves stopped —`, `gh-flow:wave complete` /
 `gh-flow:wave stopped —`) are pinned the same way, ahead of the guards that will
 match them. And neither `waves`'s nor `wave`'s coordinator ever
 invokes `gh-flow:issue` itself, not even for `--help` — the installed guard
@@ -212,7 +208,6 @@ gh-flow-skills/
 ├── skills/
 │   ├── issue/SKILL.md        + references/ + evals/
 │   ├── autopilot/SKILL.md    + references/
-│   ├── drain/SKILL.md        + references/ + evals/
 │   ├── waves/SKILL.md        + references/ + evals/
 │   └── wave/SKILL.md         + references/ + evals/
 ├── .claude-plugin/{marketplace,plugin}.json   Claude Code
@@ -264,11 +259,9 @@ The old prefixes were stripped on the way in: `/gh:issue-flow` became
 `/gh-flow:issue` and `/devx:autopilot` became `/gh-flow:autopilot`. The plugin
 name already supplies the namespace at invocation time.
 
-`drain` has no dotfiles ancestor — it was written here (issue #13), after a
-session that reached "zero open issues" while four unresolved items lived only
-in a closing comment.
+`drain` (written here in #13) was folded into `waves` and deleted in #65.
 
-`waves` has no dotfiles ancestor either — it was written here (issue #39), after
+`waves` has no dotfiles ancestor — it was written here (issue #39), after
 a session that planned four dependency waves, spawned the worktrees and wrote
 the same worker brief four times by hand.
 

@@ -32,7 +32,7 @@
   refusal: `[FAIL]` plus one comment on the issue —
   `[FAIL] gh-flow:wave #<N> (depth <d>) — <step>: <reason>. PR: #<PR> | none.`
   (not `barrier.md`'s `gh-flow:waves wave <w>` wording) — a deferral comment
-  on each of its descendants in the three-part form of `gh-flow:drain`'s
+  on each of its descendants in the three-part form of `gh-flow:waves`'s
   `references/blocked.md` ((a) parent `#<N>` failed, (b) `#<N>` merged,
   (c) re-run `/gh-flow:wave <root>`), and the siblings go on. No `blocked`
   label for this case — the open, unmerged parent re-derives it on resume.
@@ -46,8 +46,8 @@
   filed vanishes from the tree (`references/triage.md`).
 - **Triage, not promote-everything** (#62). Workers fix in place, decline with a
   reason, or file a child issue only for a large real defect, under
-  `references/triage.md`, and report `fixed-in-place:` / `declined:`. Wave does
-  not use `gh-flow:drain`'s every-item rule — that one is drain's.
+  `references/triage.md`, and report `fixed-in-place:` / `declined:`. There is
+  no every-item promotion rule anywhere in the plugin since #65.
 - **Fresh base before each spawn** (#62). The coordinator runs
   `git pull --ff-only <remote> <base>` in the main checkout, never a bare fetch,
   so a stale local base cannot make a worker re-review earlier merges. Not

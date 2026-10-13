@@ -1,12 +1,13 @@
 ---
 name: waves
-# Check 16: ~300 chars on purpose — bilingual triggers plus the issue→merge→live-verify pipeline that distinguishes waves from drain
+# Check 16: ~400 chars on purpose — bilingual triggers (incl. the whole-backlog ones absorbed from drain, #65) plus the issue→merge→live-verify pipeline
 description: >-
   Run a set of GitHub issues in dependency waves: per wave, one worktree and
   one background worker per issue carry it through gh-flow:issue to
-  gh-pr:merge, then a serial gh-verify:live barrier. Use for /gh-flow:waves,
-  "이슈들 의존성 웨이브로 병렬 처리", "순서 있는 건 나눠서 병렬로 구현하고 머지",
-  "run these issues in parallel waves". A set of issues in dependency waves; one issue + its descendants is gh-flow:wave.
+  gh-pr:merge, then a serial gh-verify:live barrier. Default target is every
+  open issue. Use for /gh-flow:waves, "이슈들 의존성 웨이브로 병렬 처리",
+  "이슈를 다 처리해라", "백로그 0으로", "run these issues in parallel waves",
+  "drain the backlog". A set of issues in dependency waves; one issue + its descendants is gh-flow:wave.
 license: MIT
 allowed-tools: Bash, Read, Grep, Skill, Agent
 compatibility:
@@ -73,8 +74,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
    새 이슈나 바뀐 의존성이 있으면 Step 2 로 재계획하고 새 계획 코멘트(pitfall 7). `--max-issues`/`--max-waves` 에 닿으면 남은 대상은 `Next:`.
 
 한 워커의 실패는 그 이슈만 `[FAIL]` + 이슈 코멘트로 끝나고 웨이브의 나머지는 계속된다.
-실패한 선행을 기다리는 후행 이슈는 미루고 `gh-flow:drain` 의 `references/blocked.md`
-형식으로 사유를 코멘트한다(복사 금지, 참조만).
+실패한 선행을 기다리는 후행 이슈는 미루고 `references/blocked.md` 형식으로 사유를 코멘트한다(복사 금지, 참조만).
 
 ## Step 4: Merge Policy
 
@@ -97,4 +97,4 @@ PR 은 사람 판단으로 남는다. `--no-merge` 면 PR 까지만 만들고 �
 
 워커가 부르는 것: `gh-flow:issue` · `gh-pr:reply` · `gh-resolve:{ci-fail,outdated,conflict}` ·
 `gh-pr:merge`. 조율자가 부르는 것: `session:worktree-spawn` · `gh-verify:live` ·
-`gh-issue:issue-create`. 직렬 사촌: `gh-flow:drain` · 이슈 1건 + 자손: `gh-flow:wave`.
+`gh-issue:issue-create`. 이슈 1건 + 자손: `gh-flow:wave`. 직렬 백로그는 `--max-parallel 1 --no-merge`.

@@ -44,7 +44,7 @@ metadata:
 `$CLAUDE_PLUGIN_ROOT` 가드 → `[ -f ]` 증명 → `skills/issue/lib/target-binding.sh` source, 기본값을 경로에 끼우는 형태 금지). 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`.
 없는 remote 는 `origin` 으로 떨어지지 말고 `git remote -v` 를 출력하고 정지한다. 이슈 URL 의
 host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 스킬 파일(`target-binding.md`/`.sh`,
-`waves`·`drain` 의 references)이 없으면 `gh-flow:wave stopped — gh-flow plugin incomplete (<missing path>)`.
+`waves` 의 references)이 없으면 `gh-flow:wave stopped — gh-flow plugin incomplete (<missing path>)`.
 
 ## Step 2: Queue Loop (BFS, 직렬)
 
@@ -71,7 +71,7 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 처리하지 않고 overflow 로 모아 최종 `Next:` 에 번호로 나열한다(F-7).
 
 **실패 전파** — 워커 실패나 `gh-pr:merge` 거절은 그 이슈만 `[FAIL]` + 이슈 코멘트로 끝난다.
-그 이슈의 자손은 처리하지 않고 `gh-flow:drain` 의 `references/blocked.md` 3단 형식으로 사유를
+그 이슈의 자손은 처리하지 않고 `gh-flow:waves` 의 `references/blocked.md` 3단 형식으로 사유를
 코멘트한다(참조만). 형제 자손은 계속 처리한다.
 
 ## Step 3: Merge Policy
@@ -96,4 +96,4 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 
 워커가 부르는 것: `gh-flow:issue` · `gh-pr:reply` · `gh-resolve:{ci-fail,outdated,conflict}` ·
 `gh-pr:merge`. 조율자가 부르는 것: `session:worktree-spawn` · `gh-verify:merged` ·
-`gh-issue:issue-create`. 이슈 집합 · 병렬 · live 장벽: `gh-flow:waves`. 백로그 전체: `gh-flow:drain`.
+`gh-issue:issue-create`. 이슈 집합 · 백로그 전체 · 병렬 · live 장벽: `gh-flow:waves`.
