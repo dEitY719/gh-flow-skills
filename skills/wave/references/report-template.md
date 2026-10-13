@@ -9,6 +9,7 @@ reads as an unfinished run. Same rule as the sibling skills in this repo.
 ```
 gh-flow:wave #<N> (depth <d>, <i>/<max-issues>, <owner/repo> on <remote>)
   PR #<P>  [OK] merged <oid7>   verify [OK]
+  triage   fixed-in-place <a>   declined <b>   child issues <c>
   queued   #<C> #<D>   overflow #<E> (depth > <max-depth>)
 ```
 
@@ -67,6 +68,11 @@ with whatever finished. One ending, one `Next:`:
 - `gh-flow:wave stopped — promotion failed (<reason>)` — a marker issue could
   not be filed. `Next:` `/gh-issue:issue-create` for the named item with its
   `Spawned-from:` line, then re-run on the root.
+- `gh-flow:wave stopped — base not fast-forwardable (<reason>)` — the
+  pre-spawn `git pull --ff-only` refused: the main checkout has local changes in
+  the way or its base diverged from `<remote>/<base>`. `Next:` commit or clean
+  the main checkout's local changes, or reconcile the diverged base by hand,
+  then re-run on the root.
 
 ## The terminal strings are a hook contract
 
