@@ -35,8 +35,10 @@ before its merge step — a fix made after the merge cannot land in this PR:
   `Skill(gh-issue:issue-create, "--no-ask ...")` with the body line
   `Spawned-from: #<N>`, `<N>` being this issue (`references/lineage.md`).
 
-"Trivial and out of scope" is never a child issue: a remark about code an
-earlier PR merged is that PR's matter, not this one's.
+"Trivial and out of scope" is never a child issue: a trivial remark about code
+an earlier PR merged is that PR's matter, not this one's. A real defect is
+different whatever its scope: wave is the only run that will see it, so it
+takes (b) or a child issue even when it sits in earlier-merged code.
 
 ## Small or large
 
@@ -46,7 +48,8 @@ An approximate aid, not a hard gate. A fix is **small** when it
   touched,
 - needs no new helper, no new test harness or shim and no new doc or
   reference file, and
-- adds roughly 50 diff lines or fewer.
+- adds roughly 50 non-test diff lines or fewer. Test lines do not count:
+  never drop a test to keep a fix small.
 
 Exceeding any one makes it **large**.
 
@@ -78,7 +81,9 @@ A child issue that cannot be filed vanishes from the tree: nothing else records
 it, and the descendant query cannot find what was never created. So a failed
 `gh-issue:issue-create` is never skipped:
 
-- in a worker, the report is `[FAIL] <step> — issue creation failed (<reason>)`,
-  naming the item;
-- in the coordinator — its own creation failing, or such a worker report — the
+- in a worker, the report's first line is exactly
+  `wave-worker #<N>: [FAIL] promotion — issue creation failed (<reason>)`,
+  naming the item — the step word `promotion` is what the coordinator matches;
+- in the coordinator — its own creation failing, or a worker report whose
+  failed step is `promotion` (never handled as an ordinary step failure) — the
   run stops: `gh-flow:wave stopped — promotion failed (<reason>)`.

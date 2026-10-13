@@ -52,7 +52,7 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 이슈 1건마다 아래 다섯 단계, 단계 사이에 사용자 확인을 묻지 않는다(무인 기본).
 루트가 이미 닫혀 있으면 1~4 를 건너뛰고 5 만 한다 — 자손이 없으면 `complete`.
 
-1. **spawn** — main 체크아웃에서 `git pull --ff-only <remote> <base>` 후 `Skill(session:worktree-spawn, "--task issue-<N> --base <remote>/<base>")`
+1. **spawn** — main 체크아웃에서 `git symbolic-ref --short HEAD` 가 `<base>` 인지 확인(아니면 아래 정지, 사유 `not on <base>`), `git pull --ff-only <remote> <base>` 후 `Skill(session:worktree-spawn, "--task issue-<N> --base <remote>/<base>")`
    1회. 비-ff 면 `gh-flow:wave stopped — base not fast-forwardable (<reason>)`(로컬 변경 보호). `Path:` 를 기록하고 조율자는 main 체크아웃에 남는다(`cd` 를 따라가지 않는다).
    직전 머지가 반영된 base 에서 시작하고, 리뷰가 stale 로컬 base 로 앞선 PR 을 재리뷰하지 않게 하려는 것이다. 절차: `gh-flow:waves` 의 `references/plan.md` §7 — 단 그 `git fetch` 대신 위 pull, wave 에는 `--bootstrap` 이 없어 부트스트랩은 `.claude/gh-flow-waves.sh`(있을 때만) > 없음.
 2. **dispatch** — 백그라운드 `Agent`(model `opus`) **정확히 1개**. 프롬프트는 `gh-flow:waves` 의
