@@ -58,6 +58,14 @@ for s in '6. File every deferred item (unfixed review finding, TODO/FIXME/ponyta
     grep -qxF -- "$s" "$b" || { say "FAIL  waves fill line '$s' missing from $b"; fail=1; }
 done
 
+grep -qF -- "by gh-flow:wave's references/triage.md" "$b" ||
+    { say "FAIL  the wave fill in $b does not name gh-flow:wave's references/triage.md"; fail=1; }
+
+for f in skills/wave/SKILL.md skills/wave/references/constraints.md; do
+    grep -qF -- 'git symbolic-ref --short HEAD' "$f" ||
+        { say "FAIL  the not-on-<base> check (symbolic-ref) missing from $f"; fail=1; }
+done
+
 grep -qF -- 'pull --ff-only' skills/wave/SKILL.md ||
     { say "FAIL  'pull --ff-only' missing from skills/wave/SKILL.md"; fail=1; }
 grep -qF -- 'gh-flow:wave stopped — base not fast-forwardable' skills/wave/references/report-template.md ||

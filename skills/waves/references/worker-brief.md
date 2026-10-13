@@ -26,8 +26,9 @@ remote <remote>). Wave <w>. Carry this one issue to a merged PR, then report.
 - Merge only through `Skill(gh-pr:merge, ...)`. No raw gh merge command, no
   gh-pr:merge-emergency, no admin flag. If gh-pr:merge refuses, stop there and
   report `[FAIL] not merged` with its reason; leave the PR open for a human.
-- Review diffs are taken against `<remote>/<base>`, never the local base
-  branch — it may be stale and would re-review PRs already merged.
+- Judge whether a review finding is in this PR's scope against
+  `git diff <remote>/<base>...HEAD`, never the local base branch — it may be
+  stale and make PRs already merged look like this PR's work.
 - Never put `rm` inside `sh -c`, `eval`, `$(...)` or `xargs ... sh -c`. Run it
   as a standalone one-line command, only on a literal path or on a variable
   assigned from `mktemp` in that same command.
@@ -77,7 +78,8 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
 
 `<PROMOTION_RULE>` is one of:
 
-- `gh-flow:waves` — the pre-#62 step 6, byte for byte, so the line reads:
+- `gh-flow:waves` — the pre-#62 step 6, byte for byte. The slot takes the text
+  after `6. `; the filled step reads:
 
 ```
 6. File every deferred item (unfixed review finding, TODO/FIXME/ponytail:,
@@ -85,7 +87,8 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
    by the rules of gh-flow:drain's references/promotion.md.
 ```
 
-- `gh-flow:wave` — `Triage every review finding, TODO/FIXME/ponytail:, skipped
+- `gh-flow:wave` — the slot takes this text (no `6. ` prefix), so the filled
+  step reads `6. Triage ...`: `Triage every review finding, TODO/FIXME/ponytail:, skipped
   test and "follow-up" by gh-flow:wave's references/triage.md during step 2,
   before step 5 merges — a fix made after the merge cannot land in this PR: fix
   it in this PR, decline it with a reason in the gh-pr:reply reply, or — only
