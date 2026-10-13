@@ -16,8 +16,8 @@
 # 5. Run caps (F-4): --max-issues / --max-waves with their defaults.
 # 6. Live failures follow triage (F-5): real defect only.
 # 7. Fresh base before every spawn (F-6): pull --ff-only and its stopped ending.
-# 8. drain is gone (#65): skills/drain/ absent, no live reference to it under
-#    skills/, and blocked.md lives here and is what wave and waves point at.
+# 8. drain is gone (#65): skills/drain/ absent, no live reference to it in
+#    skills/, docs or a manifest, and blocked.md lives here and is what wave and waves point at.
 set -euo pipefail
 cd -- "$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 fail=0
@@ -95,8 +95,9 @@ JSON
 fi
 
 [ ! -e skills/drain ] || { say 'FAIL  skills/drain/ still exists (#65)'; fail=1; }
-if grep -rnE 'gh-flow:drain|skills/drain' skills/; then
-    say 'FAIL  skills/ still points at the deleted gh-flow:drain (#65)'; fail=1
+if grep -rnE 'gh-flow:drain|skills/drain' skills/ docs/ GEMINI.md gemini-extension.json \
+    .claude-plugin/ .codex-plugin/ .kimi-plugin/ .hermes-plugin/ .opencode/ .agents/; then
+    say 'FAIL  skills/, docs or a manifest still points at the deleted gh-flow:drain (#65)'; fail=1
 fi
 [ -f "$r/blocked.md" ] || { say "FAIL  $r/blocked.md missing (#65)"; fail=1; }
 for f in skills/waves/SKILL.md "$r/barrier.md" skills/wave/SKILL.md skills/wave/references/constraints.md; do

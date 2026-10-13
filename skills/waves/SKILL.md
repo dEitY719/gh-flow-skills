@@ -5,7 +5,7 @@ description: >-
   Run a set of GitHub issues in dependency waves: per wave, one worktree and
   one background worker per issue carry it through gh-flow:issue to
   gh-pr:merge, then a serial gh-verify:live barrier. Default target is every
-  open issue. Use for /gh-flow:waves, "이슈들 의존성 웨이브로 병렬 처리",
+  open issue (planned on --track or an issue URL). Use for /gh-flow:waves, "이슈들 의존성 웨이브로 병렬 처리",
   "이슈를 다 처리해라", "백로그 0으로", "run these issues in parallel waves",
   "drain the backlog". A set of issues in dependency waves; one issue + its descendants is gh-flow:wave.
 license: MIT
@@ -35,7 +35,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 
 ## Step 1: Parse Args + Bind Target
 
-`/gh-flow:waves [remote|<issue-url>] [--from N] [--label L] [--issues 1,2,3] [--track N]
+`/gh-flow:waves [remote|<issue-url>] [--from N] [--label L] [--author A] [--issues 1,2,3] [--track N]
 [--max-parallel 4] [--max-issues 20] [--max-waves 5] [--run "<cmd>"] [--bootstrap "<cmd>"] [--no-live] [--no-merge]`.
 `-h`/`--help`/`help` 는 `references/help.md`(인자 표·기본값)를 **그대로 출력하고 정지** — API 호출 없음.
 **이슈 URL**(`https://<host>/<owner>/<repo>/issues/<N>`)이면 cwd 나 하위 2단계에서 main 체크아웃을

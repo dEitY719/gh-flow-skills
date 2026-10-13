@@ -8,6 +8,7 @@
 | 1 | `<issue-url>` | none | `https://<host>/<owner>/<repo>/issues/<N>` instead of a remote: locate that repo's main checkout in the cwd or up to two levels below it, bind its matching remote, sweep every open non-`blocked` issue, and default the tracking issue to `<N>`. `references/locate.md` |
 | - | `--from N` | none | Lower bound: open issues numbered below `N` are skipped |
 | - | `--label L` | none | Only issues carrying label `L` |
+| - | `--author A` | none | Only issues opened by `A` (`@me` for yourself), passed to `gh issue list --author`. Use it on a shared repo: without it every open issue is implemented and, by default, merged |
 | - | `--issues 1,2,3` | none | Exactly these issues. Combines with the filters above as an intersection |
 | - | `--track N` | the single epic in the set, else the `<issue-url>` issue | Issue that receives the plan comment and every re-plan comment. With no `--track`, not exactly one epic and no `<issue-url>`, the run stops before planning |
 | - | `--max-parallel K` | `4` | At most `K` workers (and worktrees) per wave. Overflow moves to the next wave |
@@ -18,7 +19,7 @@
 | - | `--no-live` | off | Skip `gh-verify:live` at every barrier (the pull still runs) |
 | - | `--no-merge` | off | Workers stop at a green, synced PR; nothing merges and every live step is `[SKIP]` |
 
-With no `--from` / `--label` / `--issues`, the target set is every open issue in
+With no `--from` / `--label` / `--author` / `--issues`, the target set is every open issue in
 the repo that is not labelled `blocked` — with or without an `<issue-url>`.
 Either way, issues this run filed (body line `Filed-by-run: waves #<T>`, `<T>`
 the tracking issue) are left out unless `--issues` names them; they are listed
