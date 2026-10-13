@@ -97,4 +97,4 @@ PR 은 사람 판단으로 남는다. `--no-merge` 면 PR 까지만 만들고 �
 
 워커가 부르는 것: `gh-flow:issue` · `gh-pr:reply` · `gh-resolve:{ci-fail,outdated,conflict}` ·
 `gh-pr:merge`. 조율자가 부르는 것: `session:worktree-spawn` · `gh-verify:live` ·
-`gh-issue:issue-create`. 이슈 1건 + 자손: `gh-flow:wave`. 직렬 백로그는 `--max-parallel 1 --no-merge`.
+`gh-issue:issue-create`. 이슈 1건 + 자손: `gh-flow:wave`. 직렬 백로그는 `--track <T> --max-parallel 1 --max-waves 20 --no-merge`.

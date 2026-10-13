@@ -72,7 +72,11 @@ When to use which:
   children have landed.
 
 A backlog with no ordering to exploit is still `waves`: every issue lands in
-the first wave, and `--max-parallel 1 --no-merge` runs it serially without merging.
+the first wave (split by `--max-parallel`). `--track <T> --max-parallel 1
+--max-waves 20 --no-merge` runs it serially without merging — `--track` because
+a plain backlog has no single epic to plan on, `--max-waves` because each
+one-issue wave counts against its default of `5`. Unlike the former `drain`,
+`waves` merges by default and does not filter by author.
 
 ### Visual guides and worked examples (GitHub Pages)
 
