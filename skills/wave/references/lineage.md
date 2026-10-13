@@ -21,21 +21,23 @@ is not a marker. One parent per issue — the first `Spawned-from:` line wins.
     the issue's depth instead of a wave number.
   - **Files overlapping sibling workers**: `none` — one issue runs at a time.
   - **Already on main**: what the parent's merge already shipped, if any.
-  - Procedure step 6 gets one sentence appended: *every issue you file carries
-    the line `Spawned-from: #<N>` in its body, `<N>` being this issue.* That
-    one sentence is what makes a follow-up a descendant; without it the
-    follow-up is out of scope and the tree silently stops growing. Issues a
-    sub-skill filed in steps 1-5 (`gh-flow:issue`, `gh-pr:reply`, ...) are
-    the worker's too: before the final report, append the line with
+  - `<PROMOTION_RULE>` is the `gh-flow:wave` fill: triage by
+    `references/triage.md` — fix in place, decline with a reason, or file a
+    child issue only for a large real defect — and the final report gains the
+    lines `fixed-in-place:` and `declined:`. A child issue carries the line
+    `Spawned-from: #<N>` in its body, `<N>` being this issue; that line is what
+    makes it a descendant, and without it the tree silently stops growing.
+    Issues a sub-skill filed in steps 1-5 (`gh-flow:issue`, `gh-pr:reply`, ...)
+    are the worker's too: before the final report, append the line with
     `gh issue edit` to any of them that lacks it, and list them all under
     `follow-ups:`.
   - The final report's first word is `wave-worker` and its `live check:` line
     names what `gh-verify:merged` should prove in a fresh clone.
 - **The coordinator.** Every `Skill(gh-issue:issue-create, "--no-ask ...")` it
-  makes — today only for a `gh-verify:merged` failure — puts
+  makes — today only for a real defect `gh-verify:merged` found — puts
   `Spawned-from: #<N>` in the body, `<N>` being the issue whose PR failed. What
-  to promote and why a failed creation is fatal are `gh-flow:drain`'s
-  `references/promotion.md`; this file adds only the marker.
+  to file and why a failed creation is fatal are `references/triage.md`; this
+  file adds only the marker.
 
 ## Querying the children of `#<N>`
 

@@ -26,6 +26,11 @@ remote <remote>). Wave <w>. Carry this one issue to a merged PR, then report.
 - Merge only through `Skill(gh-pr:merge, ...)`. No raw gh merge command, no
   gh-pr:merge-emergency, no admin flag. If gh-pr:merge refuses, stop there and
   report `[FAIL] not merged` with its reason; leave the PR open for a human.
+- Review diffs are taken against `<remote>/<base>`, never the local base
+  branch — it may be stale and would re-review PRs already merged.
+- Never put `rm` inside `sh -c`, `eval`, `$(...)` or `xargs ... sh -c`. Run it
+  as a standalone one-line command, only on a literal path or on a variable
+  assigned from `mktemp` in that same command.
 
 ## This issue (variable)
 - Already on main: <routes / functions / files that exist — do not re-implement>
@@ -47,9 +52,7 @@ remote <remote>). Wave <w>. Carry this one issue to a merged PR, then report.
 4. `Skill(gh-resolve:outdated, "<PR>")`, or `Skill(gh-resolve:conflict, "<PR>")`
    when it reports conflicts. Re-run the repo's tests after any rebase.
 5. <MERGE_STEP>
-6. File every deferred item (unfixed review finding, TODO/FIXME/ponytail:,
-   skipped test, "follow-up") as an issue via `Skill(gh-issue:issue-create, ...)`,
-   by the rules of gh-flow:drain's references/promotion.md.
+6. <PROMOTION_RULE>
 
 ## Final report (fixed) — your last message, exactly this shape
 waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
@@ -71,6 +74,24 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
   must print `MERGED <oid>`. Report that oid. Never judge by `headRefOid` — a
   rebase merge rewrites it, so a merged PR looks unmerged (pitfall 4).
 - `--no-merge` — `Do not merge. Report [OK] pr-only with mergeCommit: none.`
+
+`<PROMOTION_RULE>` is one of:
+
+- `gh-flow:waves` — the pre-#62 step 6, byte for byte, so the line reads:
+
+```
+6. File every deferred item (unfixed review finding, TODO/FIXME/ponytail:,
+   skipped test, "follow-up") as an issue via `Skill(gh-issue:issue-create, ...)`,
+   by the rules of gh-flow:drain's references/promotion.md.
+```
+
+- `gh-flow:wave` — `Triage every review finding, TODO/FIXME/ponytail:, skipped
+  test and "follow-up" by gh-flow:wave's references/triage.md: fix it in this
+  PR, decline it with a reason in the gh-pr:reply reply, or — only for a real
+  defect or BLOCKER too large to fix here — file it via
+  Skill(gh-issue:issue-create, "--no-ask ...") with the body line
+  Spawned-from: #<N>. Add the final-report lines fixed-in-place: <commit per
+  finding> | none and declined: <finding: reason> | none after follow-ups:.`
 
 The coordinator does not trust the report's `mergeCommit` line either: it
 re-checks it (`references/barrier.md`).

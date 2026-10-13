@@ -36,17 +36,23 @@
   `references/blocked.md` ((a) parent `#<N>` failed, (b) `#<N>` merged,
   (c) re-run `/gh-flow:wave <root>`), and the siblings go on. No `blocked`
   label for this case — the open, unmerged parent re-derives it on resume.
-- **Verify failures become marked issues** (F-5). `gh-verify:merged` failing is
-  filed with `gh-issue:issue-create --no-ask` carrying `Spawned-from: #<N>`, and
-  queued as a descendant within the caps.
+- **Verify failures follow triage** (F-5). A real defect `gh-verify:merged`
+  finds is filed with `gh-issue:issue-create --no-ask` carrying
+  `Spawned-from: #<N>`, and queued as a descendant within the caps; a trivial
+  difference stays in the verify report comment (`references/triage.md`).
 - **A failed marker-issue creation is fatal.** If `gh-issue:issue-create` fails
-  for a verify failure or a promotion, stop:
-  `gh-flow:wave stopped — promotion failed (<reason>)`. The rule and its reason
-  are `gh-flow:drain`'s `references/promotion.md` "Failure is fatal" — an item
-  that vanishes there vanishes from the tree too.
-- **Deferred items become issues.** Workers file them under `gh-flow:drain`'s
-  `references/promotion.md` rules, with the lineage marker; this skill
-  references that file and does not restate it.
+  for a verify finding or a worker's child issue, stop:
+  `gh-flow:wave stopped — promotion failed (<reason>)` — an item that is never
+  filed vanishes from the tree (`references/triage.md`).
+- **Triage, not promote-everything** (#62). Workers fix in place, decline with a
+  reason, or file a child issue only for a large real defect, under
+  `references/triage.md`, and report `fixed-in-place:` / `declined:`. Wave does
+  not use `gh-flow:drain`'s every-item rule — that one is drain's.
+- **Fresh base before each spawn** (#62). The coordinator runs
+  `git pull --ff-only <remote> <base>` in the main checkout, never a bare fetch,
+  so a stale local base cannot make a worker re-review earlier merges. Not
+  fast-forwardable: `gh-flow:wave stopped — base not fast-forwardable (<reason>)`
+  — local changes in the main checkout are never overwritten.
 - **Never reimplement an atom.** Worktrees are `session:worktree-spawn`'s,
   the chain is `gh-flow:issue`'s, merging is `gh-pr:merge`'s, fresh-clone
   verification is `gh-verify:merged`'s, issue filing is `gh-issue:issue-create`'s.

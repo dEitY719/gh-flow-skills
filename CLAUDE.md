@@ -205,7 +205,10 @@ should apply here on the next run, which is the whole point.
     re-checked by the coordinator, only `Spawned-from: #<N>`-marked descendants
     enter the queue (never another open issue), no recursive
     `Skill(gh-flow:wave)`, `--max-depth` / `--max-issues` overflow goes to
-    `Next:`, and a failed marker-issue creation stops the run.
+    `Next:`, a failed marker-issue creation stops the run, findings are
+    triaged by `skills/wave/references/triage.md` (only a large real defect
+    becomes a child issue — not drain's every-item promotion), and the base is
+    `git pull --ff-only`ed before each spawn (#62).
   - `issue` stops at the first failing step and prints a resume hint. It never
     retries a step and never skips one. The soft-fail exceptions
     (`gh-verify:review-all`, the merge-train wake, the metrics comment, the Step
