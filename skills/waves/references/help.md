@@ -11,6 +11,8 @@
 | - | `--issues 1,2,3` | none | Exactly these issues. Combines with the filters above as an intersection |
 | - | `--track N` | the single epic in the set, else the `<issue-url>` issue | Issue that receives the plan comment and every re-plan comment. With no `--track`, not exactly one epic and no `<issue-url>`, the run stops before planning |
 | - | `--max-parallel K` | `4` | At most `K` workers (and worktrees) per wave. Overflow moves to the next wave |
+| - | `--max-issues N` | `20` | Most issues dispatched to workers in one run. The rest are not processed and are listed under `Next:` |
+| - | `--max-waves W` | `5` | Most waves started in one run. The rest are not processed and are listed under `Next:` |
 | - | `--run "<cmd>"` | none | Barrier's app restart command, run in the main checkout (e.g. `make run`). Absent: the live step is `[SKIP]` |
 | - | `--bootstrap "<cmd>"` | `.claude/gh-flow-waves.sh` if present | Per-worktree setup (symlink `.venv`/`.env`, `bun install`, ...), run inside each new worktree. Never hardcoded in the skill |
 | - | `--no-live` | off | Skip `gh-verify:live` at every barrier (the pull still runs) |
@@ -18,6 +20,9 @@
 
 With no `--from` / `--label` / `--issues`, the target set is every open issue in
 the repo that is not labelled `blocked` — with or without an `<issue-url>`.
+Either way, issues this run filed (body line `Filed-by-run: waves #<T>`, `<T>`
+the tracking issue) are left out unless `--issues` names them; they are listed
+under `filed this run` and in `Next:` (`references/plan.md` §1).
 
 ## Usage
 
@@ -26,12 +31,13 @@ the repo that is not labelled `blocked` — with or without an `<issue-url>`.
 - `/gh-flow:waves --label backend --max-parallel 2 --bootstrap "ln -s ../app/.env .env"` — two workers at a time, with a per-worktree setup command.
 - `/gh-flow:waves https://github.com/acme/app/issues/28` — from a folder of clones: find `app`'s main checkout, sweep its open issues, plan on #28.
 - `/gh-flow:waves https://github.com/acme/app/issues/28 --issues 28,30` — the same, but only #28 and #30.
+- `/gh-flow:waves --label backend --max-issues 6 --max-waves 2` — at most six issues over at most two waves; the rest go to `Next:`.
 - `/gh-flow:waves -h` / `--help` / `help` — print this help.
 
 ## What one wave does
 
-spawn worktrees → dispatch one background worker per issue → collect completion
-notifications → barrier (pull, `--run`, serial `gh-verify:live`) → re-query and
+`git pull --ff-only` the base → spawn worktrees → dispatch one background
+worker per issue → collect completion notifications → barrier (pull, `--run`, serial `gh-verify:live`) → re-query and
 re-plan. Plan rules: `references/plan.md`. Worker brief:
 `references/worker-brief.md`. Barrier: `references/barrier.md`.
 
@@ -39,8 +45,8 @@ re-plan. Plan rules: `references/plan.md`. Worker brief:
 
 The plan table (a comment on the tracking issue, a new one per re-plan), a
 `[FAIL]` comment on an issue whose worker failed, a deferral comment on an issue
-whose predecessor failed, issues filed for live failures (via
-`gh-issue:issue-create`), and closing comments on finished epics. PRs, replies
+whose predecessor failed, issues filed for real-defect live failures (via
+`gh-issue:issue-create`, each with `Filed-by-run: waves #<T>`), and closing comments on finished epics. PRs, replies
 and merges are written by the workers' own sub-skills.
 
 ## What this skill will NOT do

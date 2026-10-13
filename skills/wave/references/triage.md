@@ -1,8 +1,9 @@
-# gh-flow:wave — Triage (#62)
+# gh-flow:wave / gh-flow:waves — Triage (#62, #64)
 
 What the worker does with each finding of its own run, and what the coordinator
-does with a `gh-verify:merged` finding. This file is the wave's whole rule; it
-does not defer to `gh-flow:drain`.
+does with a `gh-verify:merged` (wave) or `gh-verify:live` (waves) finding. This
+file is the whole rule for both skills — the single copy; `gh-flow:waves` links
+here and keeps none of its own. Neither defers to `gh-flow:drain`.
 
 ## Why wave differs from drain
 
@@ -12,6 +13,20 @@ issue a worker files with `Spawned-from:` becomes a node it must process next.
 Filing every reviewer remark grew one root into 17 descendants, most of them
 nits or out-of-scope remarks (#62). Wave therefore fixes or declines what it
 can and files a child issue only for a real defect too large for this PR.
+Waves has the same problem one level up: it re-queries every open issue each
+wave and had no run caps, so a filed finding became next-wave work forever
+(#64). It takes the same three branches.
+
+## Child issue, per skill
+
+- **wave** — a child issue carries the body line `Spawned-from: #<N>`, `<N>`
+  being this issue (`references/lineage.md`), and is queued as a descendant
+  within the caps.
+- **waves** — a child issue (a *follow-up*) carries the body line
+  `Filed-by-run: waves #<T>`, `<T>` being the run's tracking issue. It is
+  listed under `filed this run` and `Next:` and is **not** processed in the
+  same run: requery drops open issues carrying the marker for this `<T>`
+  (`gh-flow:waves`'s `references/plan.md` §1).
 
 ## What gets triaged
 
@@ -33,11 +48,12 @@ before its merge step — a fix made after the merge cannot land in this PR:
   the finding is wrong.
 - **child issue** — only for a real defect or BLOCKER **and** large. File it via
   `Skill(gh-issue:issue-create, "--no-ask ...")` with the body line
-  `Spawned-from: #<N>`, `<N>` being this issue (`references/lineage.md`).
+  `Spawned-from: #<N>` (wave) or `Filed-by-run: waves #<T>` (waves) — see
+  "Child issue, per skill".
 
 "Trivial and out of scope" is never a child issue: a trivial remark about code
 an earlier PR merged is that PR's matter, not this one's. A real defect is
-different whatever its scope: wave is the only run that will see it, so it
+different whatever its scope: this run is the only one that will see it, so it
 takes (b) or a child issue even when it sits in earlier-merged code.
 
 ## Small or large
@@ -65,15 +81,17 @@ The worker's final report adds two lines after `follow-ups:`:
 `follow-ups:` lists the child issues only. A decision that filed no issue is
 still traceable through these two lines and the `gh-pr:reply` replies.
 
-## Coordinator: `gh-verify:merged` findings
+## Coordinator: `gh-verify:merged` / `gh-verify:live` findings
 
 The coordinator cannot fix a merged PR (it never runs the chain, NF-1).
 
-- **Real defect** — a child issue via `Skill(gh-issue:issue-create, "--no-ask ...")`
-  with `Spawned-from: #<N>`, `<N>` being the issue whose PR failed. It is
-  queued as a descendant within the caps.
-- **Trivial difference** (wording and the like) — stated in the
-  `gh-verify:merged` PR comment report only. No issue.
+- **Real defect** — a child issue via `Skill(gh-issue:issue-create, "--no-ask ...")`.
+  Wave: with `Spawned-from: #<N>`, `<N>` being the issue whose PR failed; it
+  is queued as a descendant within the caps. Waves: with
+  `Filed-by-run: waves #<T>`; it is listed under `filed this run` and `Next:`,
+  never picked up by this run's requery.
+- **Trivial difference** (wording and the like) — stated in the verify skill's
+  PR comment report only. No issue.
 
 ## A failed creation is fatal
 
@@ -87,3 +105,9 @@ it, and the descendant query cannot find what was never created. So a failed
 - in the coordinator — its own creation failing, or a worker report whose
   failed step is `promotion` (never handled as an ordinary step failure) — the
   run stops: `gh-flow:wave stopped — promotion failed (<reason>)`.
+
+Waves, where a per-issue failure never aborts the run: a worker's first line
+is `waves-worker #<N>: [FAIL] promotion — issue creation failed (<reason>)`,
+recorded as that issue's failure with the item named in its `[FAIL]` comment;
+a coordinator live-failure issue that cannot be filed is named under
+`left open` with its PR and the finding, so the final report still carries it.

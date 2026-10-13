@@ -35,7 +35,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 ## Step 1: Parse Args + Bind Target
 
 `/gh-flow:waves [remote|<issue-url>] [--from N] [--label L] [--issues 1,2,3] [--track N]
-[--max-parallel 4] [--run "<cmd>"] [--bootstrap "<cmd>"] [--no-live] [--no-merge]`.
+[--max-parallel 4] [--max-issues 20] [--max-waves 5] [--run "<cmd>"] [--bootstrap "<cmd>"] [--no-live] [--no-merge]`.
 `-h`/`--help`/`help` 는 `references/help.md`(인자 표·기본값)를 **그대로 출력하고 정지** — API 호출 없음.
 **이슈 URL**(`https://<host>/<owner>/<repo>/issues/<N>`)이면 cwd 나 하위 2단계에서 main 체크아웃을
 읽기 전용으로 찾아 `MAIN`·`[remote]` 로 쓰고, 조율자의 모든 Bash 호출은 `cd "<MAIN>" &&` 로 시작한다
@@ -52,25 +52,25 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 
 대상 조회 → 이미 머지된 범위 확인(main 대조) → 명시 의존성 + 파일 겹침으로 웨이브 편성
 → 계획 표를 추적 이슈 코멘트로 기록. 조회 명령, 의존성 문구 목록, 에픽 판정, 순환 처리,
-`--max-parallel` 분할, 추적 이슈 선택, **재개 규칙**: `references/plan.md` — 편성 전에 읽는다.
-대상 조회 실패는 웨이브를 시작하지 않고 정지한다.
+`--max-parallel` 분할, 추적 이슈 선택, **재개 규칙**: `references/plan.md` — 편성 전에 읽는다. 대상 조회 실패는 웨이브를 시작하지 않고 정지한다.
 
 ## Step 3: Wave Loop
 
 웨이브 1개는 다섯 단계다. 단계 사이에 사용자 확인을 묻지 않는다(무인 기본).
 
-1. **spawn** — 이슈마다 fetch 후 `Skill(session:worktree-spawn, "--task <slug> --base <remote>/<base>")` 1회, 출력된
+1. **spawn** — 첫 웨이브 포함 매 웨이브 spawn 전 `MAIN` 에서 `git pull --ff-only "$REMOTE" <base>`(비-ff 면
+   `gh-flow:waves stopped — base not fast-forwardable (<reason>)`), 이슈마다 `Skill(session:worktree-spawn, "--task <slug> --base <remote>/<base>")` 1회, 출력된
    `Path:` 를 기록하고 조율자는 main 체크아웃에 남는다. 부트스트랩은 `--bootstrap` >
    `.claude/gh-flow-waves.sh` > 없음 순 — 스킬에 하드코딩 금지. 상세: `references/plan.md`.
 2. **dispatch** — 이슈마다 백그라운드 `Agent`(model `opus`) **정확히 1개**, 프롬프트는
-   `references/worker-brief.md` 템플릿을 채운 것. 한 worktree 에 워커 둘 금지(NF-2).
+   `references/worker-brief.md` 템플릿을 채운 것(`<PROMOTION_RULE>` = waves 의 triage 채움, 보고에 `fixed-in-place:`·`declined:`). 한 worktree 에 워커 둘 금지(NF-2).
 3. **collect** — 워커 완료 **알림**을 기다린다. 폴링·sleep 루프 금지. 워커 보고를 그대로
    믿지 않고 `mergeCommit.oid` 로 머지를 직접 확인한다(NF-3): `references/barrier.md`.
 4. **barrier** — 그 웨이브의 모든 워커가 보고한 뒤에만: `git pull --ff-only` →
-   `--run` → PR 별 `Skill(gh-verify:live, "<PR>")` **직렬**(NF-4). live 실패는
-   `Skill(gh-issue:issue-create, "--no-ask ...")` 로 이슈화. 절차·SKIP 규칙: `references/barrier.md`.
-5. **requery** — 대상을 다시 조회한다. 새 이슈나 바뀐 의존성이 있으면 Step 2 로 재계획하고
-   새 계획 코멘트를 남긴다(pitfall 7). 없으면 다음 웨이브.
+   `--run` → PR 별 `Skill(gh-verify:live, "<PR>")` **직렬**(NF-4). live 실패는 실제 결함만
+   `Skill(gh-issue:issue-create, "--no-ask ...")` 로 이슈화, 사소한 차이는 PR 코멘트 리포트에만. 절차·SKIP 규칙: `references/barrier.md`.
+5. **requery** — 대상을 다시 조회한다. 이 실행이 만든 이슈(본문 `Filed-by-run: waves #<T>`)는 빼고 `filed this run`·`Next:` 로.
+   새 이슈나 바뀐 의존성이 있으면 Step 2 로 재계획하고 새 계획 코멘트(pitfall 7). `--max-issues`/`--max-waves` 에 닿으면 남은 대상은 `Next:`.
 
 한 워커의 실패는 그 이슈만 `[FAIL]` + 이슈 코멘트로 끝나고 웨이브의 나머지는 계속된다.
 실패한 선행을 기다리는 후행 이슈는 미루고 `gh-flow:drain` 의 `references/blocked.md`
@@ -91,7 +91,7 @@ PR 은 사람 판단으로 남는다. `--no-merge` 면 PR 까지만 만들고 �
 
 ## Constraints
 
-`references/constraints.md`: 조율자 NF-1, 워커 1개/worktree, oid 판정, 직렬 live, 상태는 GitHub 에만, 웨이브 표는 최종 답이 아니다, 이연 항목 승격(drain 참조), 플러그인 전체 설치.
+`references/constraints.md`: 조율자 NF-1, 워커 1개/worktree, oid 판정, 직렬 live, 상태는 GitHub 에만, 웨이브 표는 최종 답이 아니다, 이연 항목 triage(`gh-flow:wave` 의 `references/triage.md` 공유), 이 실행의 후속 이슈 제외, 실행 상한, ff-only base, 플러그인 전체 설치.
 
 ## Related Skills
 

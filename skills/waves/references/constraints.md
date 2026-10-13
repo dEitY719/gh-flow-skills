@@ -25,16 +25,38 @@
   are the whole state; a fresh session resumes from them
   (`references/plan.md` §6). No progress file.
 - **Re-query every wave** (F-7). The plan moves while it runs (pitfall 7); a
-  plan computed once is wrong by wave 2.
-- **Deferred items become issues.** Workers file them under
-  `gh-flow:drain`'s `references/promotion.md` rules; this skill references that
-  file and does not restate it.
+  plan computed once is wrong by wave 2. Requery serves only issues others
+  opened and changed dependencies (#64 F-3).
+- **This run's follow-ups stay out of this run** (#64 F-3). Every issue the run
+  files — a worker's `follow-ups:`, a coordinator live-failure issue — carries
+  the body line `Filed-by-run: waves #<T>` (`<T>` = the tracking issue), and
+  requery drops open issues carrying it for this `<T>` unless `--issues` names
+  them (`references/plan.md` §1). They are listed by number under
+  `filed this run` and in `Next:`. The marker, not session memory, is the
+  record, so a resume from GitHub alone excludes the same set.
+- **Triage, not promote-everything** (#64 F-1). Workers fix in place, decline
+  with a reason, or file a follow-up only for a large real defect, under
+  `gh-flow:wave`'s `references/triage.md` (shared, not copied), and report
+  `fixed-in-place:` / `declined:`. A live failure is filed only for a real
+  defect; a trivial difference stays in the `gh-verify:live` PR comment report
+  (F-5). Waves does not use `gh-flow:drain`'s every-item rule — that is drain's.
+- **Run caps** (#64 F-4). `--max-issues N` (default `20`) bounds the issues
+  dispatched to workers, `--max-waves W` (default `5`) the waves started, both
+  per invocation. A cap reached leaves the rest unprocessed and listed in
+  `Next:`.
+- **Fresh base before every spawn** (#64 F-6). The coordinator runs
+  `git pull --ff-only "$REMOTE" <base>` in `MAIN` before each wave's spawn —
+  the first wave included, and with `--no-merge` the only pull — never a bare
+  fetch, so a stale local base cannot make a worker re-review earlier merges.
+  First `git symbolic-ref --short HEAD` must print `<base>`. Not on `<base>` or
+  not fast-forwardable: `gh-flow:waves stopped — base not fast-forwardable (<reason>)`
+  — local changes in `MAIN` are never overwritten.
 - **The coordinator works against `MAIN`** — the cwd, or with an `<issue-url>`
   the checkout `references/locate.md` found. Every coordinator Bash call starts
   `cd "<MAIN>" &&` (or uses `git -C`); locating it is read-only and never
   clones.
 - **A per-issue failure never aborts the run.** Only an incomplete plugin
-  install (#47), a list failure, a missing checkout, a missing tracking issue, a failed pull, a failed `--run`, or a wave in which every
+  install (#47), a list failure, a missing checkout, a missing tracking issue, a base not fast-forwardable, a failed pull, a failed `--run`, or a wave in which every
   issue failed ends it.
 - **Bind the target from one remote URL.** Every `gh` call carries
   `GH_HOST="$TARGET_HOST"` and `--repo`/`-R "$TARGET_REPO"`, in the coordinator
