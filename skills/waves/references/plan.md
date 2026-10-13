@@ -7,21 +7,28 @@ LIMIT=1000
 GH_HOST="$TARGET_HOST" gh issue list --repo "$TARGET_REPO" \
   --state open --limit "$LIMIT" [--label "$LABEL"] \
   --json number,title,labels,body --jq '[.[] | {number, title, labels: [.labels[].name],
-    filed_by_run: ((.body // "") | test("(^|\n)Filed-by-run: waves #<T>[ \t\r]*(\n|$)"))}]'
+    filed_by_run: [(.body // "") | match("(?:^|\n)Filed-by-run: waves #([0-9]+)[ \t\r]*(?=\n|$)"; "g")
+      | .captures[0].string | tonumber]}]'
 ```
+
+`filed_by_run` lists every tracking issue a `Filed-by-run:` line names, so the
+query needs no `<T>` and runs before the tracking issue is chosen.
 
 Then drop: numbers below `--from`, numbers outside `--issues`, anything labelled
 `blocked`, and issues this run already finished or failed. A count equal to
 `$LIMIT` means the list was truncated — say so, never claim a clean zero.
 
-**This run's follow-ups are dropped too** (#64 F-3): an issue with
-`filed_by_run` true — its body carries the line `Filed-by-run: waves #<T>`,
+**This run's follow-ups are dropped too** (#64 F-3): an issue whose
+`filed_by_run` contains `<T>` — its body carries the line `Filed-by-run: waves #<T>`,
 `<T>` being this run's tracking issue (§5) — is not a target, unless `--issues`
 names it explicitly (that is how the next run picks it up). Every issue this run
 files carries the line: workers add it (`references/worker-brief.md`), and so
 does the coordinator for a live failure (`references/barrier.md`). The excluded
 numbers are reported under `filed this run` and in `Next:`. Because the marker
-is on GitHub, a fresh session rebuilds the same exclusion (§6). When the
+is on GitHub, a fresh session rebuilds the same exclusion (§6). Within a
+session, also drop every number the run already knows it filed — workers'
+`follow-ups:` and the coordinator's own live-failure issues — marker or not, so
+a body line `gh-issue:issue-create` reworded cannot leak one back in. When the
 tracking issue is not known yet on the first listing (it is the single epic of
 the set), list, choose `<T>` by §5, then apply the drop. Requery is for issues
 other people opened and dependencies that changed, not for this run's output.

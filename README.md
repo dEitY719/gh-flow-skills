@@ -46,7 +46,7 @@ descendants serially and verifies each merge from a fresh clone.
 | Execution | Serial — an internal queue, one issue at a time. | Parallel — per wave, one worktree and one background worker per issue, capped by `--max-parallel`. |
 | What feeds the queue | Lineage only: any issue whose body carries `Spawned-from: #<N>` for an issue in the tree — filed during the run or already there — joins it. | A plan, computed up front from explicit dependency phrases plus file overlap, recorded on a tracking issue and re-queried after every wave. |
 | Verification | Per merge: `gh-verify:merged` — a fresh clone of the merge commit. | Per wave: a barrier — pull main, restart the app (`--run`; absent, the live step is `[SKIP]`), then a serial `gh-verify:live` pass over the wave's PRs. |
-| Caps | `--max-depth 3`, `--max-issues 10`; overflow is listed in `Next:`. | `--max-parallel 4` per wave; overflow moves to the next wave. |
+| Caps | `--max-depth 3`, `--max-issues 10`; overflow is listed in `Next:`. | `--max-parallel 4` per wave; overflow moves to the next wave. `--max-issues 20`, `--max-waves 5` per run; the rest is listed in `Next:`. |
 | One worker fails | That issue reports `[FAIL]`; its descendants are not processed and get a deferral comment; sibling branches continue. | That issue reports `[FAIL]`; its dependants are deferred with a blocked comment; the rest of the wave continues. |
 
 When to use which:
@@ -92,7 +92,7 @@ Each page is generated from a Markdown source under
 | `gh`, authenticated per host | Every skill binds `TARGET_HOST` + `TARGET_REPO` from the remote URL and prefixes each API call with `GH_HOST=` (dEitY719/dotfiles#1403), so GitHub Enterprise remotes work — but only if `gh` is logged into that host. `gh` reports no error when it lands on the wrong host, so this is not optional. |
 | A dedicated worktree on a feature branch | `issue` and `autopilot` refuse to run on the repo's default branch, and neither creates the worktree for you. `waves` and `wave` are the inverse: they run from the main checkout and create one worktree per issue via `session:worktree-spawn`. |
 | The atomic skill plugins | `gh-issue`, `gh-pr`, `gh-verify`, `gh-resolve` (and `session` for `waves` and `wave`). These are compositions; the steps they call live in those repos. |
-| The whole `gh-flow` plugin, not one skill directory | `drain`, `waves` and `wave` read `gh-flow:issue`'s `references/` (`waves` also `gh-flow:drain`'s; `wave` also `gh-flow:waves`'s and `gh-flow:drain`'s) and source `skills/issue/lib/target-binding.sh`. A harness that installs a single skill directory (a Hermes GitHub tap, `npx skills add`) leaves those files missing, so a lone `drain`, `waves` or `wave` stops at target binding with `gh-flow:<skill> stopped — gh-flow plugin incomplete (<missing path>)`. The shared contracts are not vendored into each skill on purpose: copies drift (#45, #47). |
+| The whole `gh-flow` plugin, not one skill directory | `drain`, `waves` and `wave` read `gh-flow:issue`'s `references/` (`waves` also `gh-flow:drain`'s and `gh-flow:wave`'s; `wave` also `gh-flow:waves`'s and `gh-flow:drain`'s) and source `skills/issue/lib/target-binding.sh`. A harness that installs a single skill directory (a Hermes GitHub tap, `npx skills add`) leaves those files missing, so a lone `drain`, `waves` or `wave` stops at target binding with `gh-flow:<skill> stopped — gh-flow plugin incomplete (<missing path>)`. The shared contracts are not vendored into each skill on purpose: copies drift (#45, #47). |
 
 ## Install
 

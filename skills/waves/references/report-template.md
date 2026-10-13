@@ -44,7 +44,9 @@ live-failure issues — by number. Requery kept them out (`references/plan.md`
 §1), so `Next:` names them as the command that continues them, together with
 any `capped` targets, e.g.
 `Next: /gh-flow:waves --issues 210,211 --track 180  (filed this run #210 #211)`.
-`--issues` naming them is what lets the next run take them in.
+`--issues` naming them is what lets the next run take them in. Leave out this
+run's `--label` / `--from`: `--issues` intersects with them, and a follow-up
+rarely carries the label.
 
 `complete` means no actionable target is left: every target is closed, or is
 blocked, failed, deferred on a failure, excluded as a cycle, filed this run,
@@ -58,7 +60,8 @@ follows with whatever finished. One ending, one `Next:`:
 
 - `gh-flow:waves stopped — gh-flow plugin incomplete (<missing path>)` — a
   sibling file (`gh-flow:issue`'s `references/target-binding.md` or
-  `skills/issue/lib/target-binding.sh`, `gh-flow:drain`'s references) cannot be read (#47).
+  `skills/issue/lib/target-binding.sh`, `gh-flow:drain`'s references,
+  `gh-flow:wave`'s `references/triage.md`) cannot be read (#47).
   `Next:` depends on why. `CLAUDE_PLUGIN_ROOT` unset (a harness that does
   not export it, a symlinked skill): export it to the plugin dir, then
   re-run. Set, and the file is still absent: a single-skill install —

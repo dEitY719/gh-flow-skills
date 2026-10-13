@@ -54,7 +54,7 @@ need "$r/constraints.md" "gh-flow:wave\`'s \`references/triage.md\`" 'constraint
 for f in "$r/plan.md" "$r/barrier.md" "$r/report-template.md" "$r/constraints.md" "$r/help.md"; do
     need "$f" 'Filed-by-run: waves #<T>' 'requery marker'
 done
-need "$r/plan.md" 'Filed-by-run: waves #<T>[ \t\r]*(\n|$)' 'requery drop'
+need "$r/plan.md" 'Filed-by-run: waves #([0-9]+)[ \t\r]*(?=\n|$)' 'requery drop'
 need "$r/plan.md" 'unless `--issues`' 'requery drop override'
 need "$r/report-template.md" 'filed this run' 'final report'
 need "$r/report-template.md" 'capped' 'final report'
