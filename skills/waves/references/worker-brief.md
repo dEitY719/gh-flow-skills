@@ -87,7 +87,8 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
   for a real defect or BLOCKER too large to fix here — file it via
   Skill(gh-issue:issue-create, "--no-ask ...") with the body line
   Filed-by-run: waves #<T>. Any issue a sub-skill filed in steps 1-5 that lacks
-  that line gets it via gh issue edit and is listed under follow-ups:. Add the
+  that line gets it via gh issue edit and is listed under follow-ups: — also
+  before a [FAIL] report from any step, or requery takes it as a target. Add the
   final-report lines fixed-in-place: <commit per finding> | none and
   declined: <finding: reason> | none after follow-ups:.`
 
