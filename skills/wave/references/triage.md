@@ -85,11 +85,9 @@ still traceable through these two lines and the `gh-pr:reply` replies.
 
 The coordinator cannot fix a merged PR (it never runs the chain, NF-1).
 
-- **Real defect** — a child issue via `Skill(gh-issue:issue-create, "--no-ask ...")`.
-  Wave: with `Spawned-from: #<N>`, `<N>` being the issue whose PR failed; it
-  is queued as a descendant within the caps. Waves: with
-  `Filed-by-run: waves #<T>`; it is listed under `filed this run` and `Next:`,
-  never picked up by this run's requery.
+- **Real defect** — a child issue via `Skill(gh-issue:issue-create, "--no-ask ...")`,
+  marked and handled as "Child issue, per skill" says; for wave, `<N>` is the
+  issue whose PR failed.
 - **Trivial difference** (wording and the like) — stated in the verify skill's
   PR comment report only. No issue.
 
