@@ -5,7 +5,7 @@
 ```
 LIMIT=1000
 GH_HOST="$TARGET_HOST" gh issue list --repo "$TARGET_REPO" \
-  --state open --limit "$LIMIT" [--label "$LABEL"] \
+  --state open --limit "$LIMIT" [--label "$LABEL"] [--author "$AUTHOR"] \
   --json number,title,labels,body --jq '[.[] | {number, title, labels: [.labels[].name],
     filed_by_run: [(.body // "") | match("(?:^|\n)Filed-by-run: waves #([0-9]+)[ \t\r]*(?=\n|$)"; "g")
       | .captures[0].string | tonumber]}]'
