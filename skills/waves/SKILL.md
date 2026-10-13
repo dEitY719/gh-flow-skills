@@ -46,7 +46,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 `skills/issue/lib/target-binding.sh` 를 source — 기본값을 경로에 끼우는 형태 금지).
 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"` (또는 `-R`).
 없는 remote 는 `origin` 으로 떨어지지 말고 `git remote -v` 를 출력하고 정지한다. 형제 스킬 파일
-(`target-binding.md`/`.sh`)이 없으면 `gh-flow:waves stopped — gh-flow plugin incomplete (<missing path>)`.
+(`target-binding.md`/`.sh`, `gh-flow:wave` 의 `references/triage.md`)가 없으면 `gh-flow:waves stopped — gh-flow plugin incomplete (<missing path>)`.
 
 ## Step 2: Plan
 
