@@ -23,8 +23,9 @@ matters — by default the whole open backlog: it runs independent ones in
 parallel worktrees and verifies each wave live before the next — its reason
 for existing is that a serial sweep cannot parallelize and a parallel run
 without a barrier accumulates unverified merges. It absorbed the former
-`drain` backlog sweep in #65 (`--max-parallel 1 --no-merge` is the old serial
-default); drain's every-item promotion was dropped for triage (#62, #64).
+`drain` backlog sweep in #65 (`--track <T> --max-parallel 1 --max-waves 20
+--no-merge` is the old serial default, minus drain's `--author @me` filter);
+drain's every-item promotion was dropped for triage (#62, #64).
 `wave` is `waves` narrowed to one issue and its descendant tree, run serially
 and verified from a fresh clone (`gh-verify:merged`) instead of a running app:
 its reason for existing is that `waves` re-queries every open issue in the repo,
