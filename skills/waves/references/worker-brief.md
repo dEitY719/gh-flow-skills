@@ -54,7 +54,7 @@ remote <remote>). Wave <w>. Carry this one issue to a merged PR, then report.
 5. <MERGE_STEP>
 6. <PROMOTION_RULE>
 
-## Final report (fixed) — your last message, exactly this shape
+## Final report (fixed) — your last message, exactly this shape plus any lines step 6 adds
 waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
   PR:           #<PR> <url>
   mergeCommit:  <oid | none>
@@ -86,12 +86,15 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
 ```
 
 - `gh-flow:wave` — `Triage every review finding, TODO/FIXME/ponytail:, skipped
-  test and "follow-up" by gh-flow:wave's references/triage.md: fix it in this
-  PR, decline it with a reason in the gh-pr:reply reply, or — only for a real
-  defect or BLOCKER too large to fix here — file it via
+  test and "follow-up" by gh-flow:wave's references/triage.md during step 2,
+  before step 5 merges — a fix made after the merge cannot land in this PR: fix
+  it in this PR, decline it with a reason in the gh-pr:reply reply, or — only
+  for a real defect or BLOCKER too large to fix here — file it via
   Skill(gh-issue:issue-create, "--no-ask ...") with the body line
-  Spawned-from: #<N>. Add the final-report lines fixed-in-place: <commit per
-  finding> | none and declined: <finding: reason> | none after follow-ups:.`
+  Spawned-from: #<N>. Any issue a sub-skill filed in steps 1-5 that lacks that
+  line gets it via gh issue edit and is listed under follow-ups:. Add the
+  final-report lines fixed-in-place: <commit per finding> | none and
+  declined: <finding: reason> | none after follow-ups:.`
 
 The coordinator does not trust the report's `mergeCommit` line either: it
 re-checks it (`references/barrier.md`).

@@ -20,7 +20,8 @@ Every review finding (any reviewer, bots included), every `TODO` / `FIXME` /
 
 ## The three branches
 
-Each item takes exactly one:
+Each item takes exactly one, decided during the worker's `gh-pr:reply` step and
+before its merge step — a fix made after the merge cannot land in this PR:
 
 - **fix-in-place** — commit the fix in this PR, and cite that commit in the
   `gh-pr:reply` reply to the finding. No issue. Applies when either
@@ -41,8 +42,10 @@ earlier PR merged is that PR's matter, not this one's.
 
 An approximate aid, not a hard gate. A fix is **small** when it
 
-- stays inside a skill directory this PR already touched,
-- needs no new helper, no new `tests/*.sh` shim and no new reference file, and
+- stays inside the directories (modules, packages, skills) this PR already
+  touched,
+- needs no new helper, no new test harness or shim and no new doc or
+  reference file, and
 - adds roughly 50 diff lines or fewer.
 
 Exceeding any one makes it **large**.

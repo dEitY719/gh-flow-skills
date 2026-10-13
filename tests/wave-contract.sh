@@ -41,8 +41,8 @@ else
 fi
 
 for s in 'fixed-in-place:' 'declined:'; do
-    cat skills/waves/references/worker-brief.md skills/wave/references/lineage.md |
-        grep -qF -- "$s" || { say "FAIL  report line '$s' missing from the wave brief"; fail=1; }
+    grep -qF -- "$s" skills/waves/references/worker-brief.md ||
+        { say "FAIL  report line '$s' missing from the wave brief"; fail=1; }
 done
 
 if grep -rnF 'promotion.md' skills/wave/; then
