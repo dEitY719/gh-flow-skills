@@ -47,9 +47,13 @@ Starts only when **every** worker of the wave has reported. Never mid-wave.
    `gh-flow:waves stopped — run failed (<reason>)`.
 3. **Live** — one `Skill(gh-verify:live, "<PR>")` per merged PR of this wave,
    **serially** (one server, NF-4). Hand it the worker's `live check` line as the
-   point to verify. A live failure is filed with
-   `Skill(gh-issue:issue-create, "--no-ask <PR, what failed, what was expected>")`;
-   the next re-query picks it up.
+   point to verify. A live failure follows triage (#64 F-5, `gh-flow:wave`'s
+   `references/triage.md` "Coordinator"): only a **real defect** is filed, with
+   `Skill(gh-issue:issue-create, "--no-ask <PR, what failed, what was expected>")`
+   and the body line `Filed-by-run: waves #<T>` (`<T>` = the tracking issue). It
+   goes under `filed this run` and `Next:`; the next re-query does **not** pick
+   it up (`references/plan.md` §1). A **trivial difference** (wording and the
+   like) stays in the `gh-verify:live` PR comment report only — no issue.
 
 ## SKIP rules
 

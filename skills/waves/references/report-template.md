@@ -7,12 +7,13 @@ reads as an unfinished run. Same rule as the sibling skills in this repo.
 ## Per wave
 
 ```
-gh-flow:waves wave <w> (plan rev <r>, <owner/repo> on <remote>)
+gh-flow:waves wave <w>/<max-waves> (plan rev <r>, <i>/<max-issues> issues, <owner/repo> on <remote>)
   #<N>  PR #<P>  [OK] merged <oid7>   live [OK]
   #<N>  PR #<P>  [OK] pr-only         live [SKIP] --no-merge
   #<N>  PR #<P>  [FAIL] not merged    gh-pr:merge refused: <reason>
   #<N>  -        [FAIL] <step>        <reason>
   deferred  #<N> (waits on failed #<M>)
+  triage    fixed-in-place <a>   declined <b>   follow-ups <c>
   filed     #<X> (live failure) #<Y> (follow-up from #<N>)
   barrier   pull [OK]  run [OK|SKIP|FAIL]  live <k>/<m>
 ```
@@ -31,14 +32,24 @@ gh-flow:waves complete  (<owner/repo>, <w> waves, plan rev <r>)
 
 epics closed   #<E> ...
 left open      #<N> — <one line: [FAIL] not merged, awaits human | deferred on #M | blocked: cause | cycle>
-filed this run #<X> ...
+triage         fixed-in-place <a>  declined <b>  (sum of the workers' fixed-in-place: / declined: lines)
+filed this run #<X> ... (each carries Filed-by-run: waves #<T>; not processed in this run)
+capped         #<N> ... (--max-issues <N> | --max-waves <W> reached)
 
 Next: <the single most useful command>
 ```
 
+`filed this run` lists every issue the run filed — workers' `follow-ups:` and
+live-failure issues — by number. Requery kept them out (`references/plan.md`
+§1), so `Next:` names them as the command that continues them, together with
+any `capped` targets, e.g.
+`Next: /gh-flow:waves --issues 210,211 --track 180  (filed this run #210 #211)`.
+`--issues` naming them is what lets the next run take them in.
+
 `complete` means no actionable target is left: every target is closed, or is
-blocked, failed, deferred on a failure, excluded as a cycle, or (with
-`--no-merge`) awaits a human merge — each named under `left open`.
+blocked, failed, deferred on a failure, excluded as a cycle, filed this run,
+capped, or (with `--no-merge`) awaits a human merge — each named under
+`left open`, `filed this run` or `capped`.
 
 ## Stopped endings
 
@@ -63,6 +74,11 @@ follows with whatever finished. One ending, one `Next:`:
   command, restart the app, then re-run (resume picks up from GitHub).
 - `gh-flow:waves stopped — pull failed (<reason>)` — `Next:` reconcile the main
   checkout by hand, then re-run.
+- `gh-flow:waves stopped — base not fast-forwardable (<reason>)` — the
+  pre-spawn `git pull --ff-only` refused (#64 F-6): the main checkout has local
+  changes in the way, its base diverged from `<remote>/<base>`, or it is not on
+  `<base>`. `Next:` commit or clean the main checkout's local changes,
+  reconcile the diverged base by hand, or check out `<base>`, then re-run.
 - `gh-flow:waves stopped — no progress (wave <w>)` — every issue of the wave
   failed. `Next:` the first failure's fix.
 

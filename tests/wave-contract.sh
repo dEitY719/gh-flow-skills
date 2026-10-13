@@ -10,8 +10,8 @@
 #    in a line that forbids it.
 # 4. Triage, not promote-everything (#62): triage.md names its three branches,
 #    the wave fill of the brief carries the fixed-in-place:/declined: report
-#    lines, skills/wave/ never points at drain's promotion.md, and the shared
-#    brief keeps the waves fill of <PROMOTION_RULE> byte-identical.
+#    lines and skills/wave/ never points at drain's promotion.md. The waves
+#    fill of the shared brief is pinned by tests/waves-contract.sh (#64).
 # 5. Fresh base before each spawn (#62): pull --ff-only and its stopped ending.
 set -euo pipefail
 cd -- "$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -51,12 +51,6 @@ if grep -rnF 'promotion.md' skills/wave/; then
 fi
 
 grep -qxF -- '6. <PROMOTION_RULE>' "$b" || { say "FAIL  '6. <PROMOTION_RULE>' missing from $b"; fail=1; }
-# The waves fill, as whole lines: the pre-#62 step 6, byte for byte.
-for s in '6. File every deferred item (unfixed review finding, TODO/FIXME/ponytail:,' \
-         '   skipped test, "follow-up") as an issue via `Skill(gh-issue:issue-create, ...)`,' \
-         "   by the rules of gh-flow:drain's references/promotion.md."; do
-    grep -qxF -- "$s" "$b" || { say "FAIL  waves fill line '$s' missing from $b"; fail=1; }
-done
 
 grep -qF -- "by gh-flow:wave's references/triage.md" "$b" ||
     { say "FAIL  the wave fill in $b does not name gh-flow:wave's references/triage.md"; fail=1; }

@@ -1,4 +1,4 @@
-# gh-flow:waves — Planning (F-2, F-3, F-7) and spawning (F-4)
+# gh-flow:waves — Planning (F-2, F-3, F-7, #64) and spawning (F-4)
 
 ## 1. List the target set
 
@@ -6,12 +6,31 @@
 LIMIT=1000
 GH_HOST="$TARGET_HOST" gh issue list --repo "$TARGET_REPO" \
   --state open --limit "$LIMIT" [--label "$LABEL"] \
-  --json number,title,labels --jq '[.[] | {number, title, labels: [.labels[].name]}]'
+  --json number,title,labels,body --jq '[.[] | {number, title, labels: [.labels[].name],
+    filed_by_run: ((.body // "") | test("(^|\n)Filed-by-run: waves #<T>[ \t\r]*(\n|$)"))}]'
 ```
 
 Then drop: numbers below `--from`, numbers outside `--issues`, anything labelled
 `blocked`, and issues this run already finished or failed. A count equal to
 `$LIMIT` means the list was truncated — say so, never claim a clean zero.
+
+**This run's follow-ups are dropped too** (#64 F-3): an issue with
+`filed_by_run` true — its body carries the line `Filed-by-run: waves #<T>`,
+`<T>` being this run's tracking issue (§5) — is not a target, unless `--issues`
+names it explicitly (that is how the next run picks it up). Every issue this run
+files carries the line: workers add it (`references/worker-brief.md`), and so
+does the coordinator for a live failure (`references/barrier.md`). The excluded
+numbers are reported under `filed this run` and in `Next:`. Because the marker
+is on GitHub, a fresh session rebuilds the same exclusion (§6). When the
+tracking issue is not known yet on the first listing (it is the single epic of
+the set), list, choose `<T>` by §5, then apply the drop. Requery is for issues
+other people opened and dependencies that changed, not for this run's output.
+
+**Run caps** (#64 F-4), per invocation: `--max-issues N` (default `20`) issues
+dispatched to workers, `--max-waves W` (default `5`) waves started. A wave that
+would pass `N` keeps the lowest numbers that fit; once either cap is reached no
+further wave starts, and every target left is listed under `capped` and in
+`Next:` — not processed, not failed.
 
 **A failure here stops the run before the wave starts** (same rule as
 `gh-flow:drain`'s `references/loop.md`). Planning over an unknown state is how work
@@ -70,7 +89,7 @@ gh-flow:waves plan (<owner/repo> on <remote>) — rev <r>
 |------|-------|------------|-------------------|-----------------|
 | 1    | #189  | -          | app/routes/x.py   | GET /x          |
 
-excluded: #A #B (cycle), #C (blocked)
+excluded: #A #B (cycle), #C (blocked), #D (filed this run)
 ```
 
 Re-planning posts a **new** comment with `rev` + 1; never edit the old one.
@@ -80,7 +99,8 @@ Re-planning posts a **new** comment with `rev` + 1; never edit the old one.
 A fresh session re-invoked with the same command re-derives everything: closed
 issues drop out of step 1, merged predecessors satisfy their edges, and the
 newest `gh-flow:waves plan` comment on the tracking issue shows where the last
-run was. An open issue that already has an open PR from an earlier run — one
+run was, and the `Filed-by-run: waves #<T>` lines re-derive which open issues
+the run filed and must keep out (§1). An open issue that already has an open PR from an earlier run — one
 query per plan, matched on `closes` — is not re-implemented:
 
 ```bash
@@ -100,9 +120,17 @@ reply step on a worktree checked out on that PR's branch. No state file.
 
 ## 7. Spawn (F-4)
 
-Per wave, first `git fetch "$REMOTE" <default-branch>` in the main checkout —
-the previous wave's merges are on the remote, and `session:worktree-spawn`
-branches from a local ref that is stale until fetched. Then per issue:
+Per wave, before any spawn — the first wave included — fast-forward the main
+checkout (#64 F-6): check `git symbolic-ref --short HEAD` prints
+`<default-branch>`, then `git pull --ff-only "$REMOTE" <default-branch>`. The
+first wave has no barrier pull before it, and with `--no-merge` (or a wave that
+merged nothing) the barrier does not pull at all, so this is what keeps a stale
+local base from making the first wave's self-review re-review earlier merges.
+After a barrier pull it is a no-op. Not on `<default-branch>`, local changes in
+the way, or a diverged base stops the run:
+`gh-flow:waves stopped — base not fast-forwardable (<reason>)` — local changes
+in `MAIN` are never overwritten. The pull also updates `$REMOTE/<default-branch>`,
+which `session:worktree-spawn` branches from. Then per issue:
 `Skill(session:worktree-spawn, "--task issue-<N> --base $REMOTE/<default-branch>")`
 (explicit, so a non-`origin` remote or non-`main` default is honoured). Record the `Path:` and
 `Branch:` it prints. Do **not** follow its `cd` (or `EnterWorktree`) — the

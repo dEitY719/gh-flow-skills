@@ -78,14 +78,18 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
 
 `<PROMOTION_RULE>` is one of:
 
-- `gh-flow:waves` — the pre-#62 step 6, byte for byte. The slot takes the text
-  after `6. `; the filled step reads:
-
-```
-6. File every deferred item (unfixed review finding, TODO/FIXME/ponytail:,
-   skipped test, "follow-up") as an issue via `Skill(gh-issue:issue-create, ...)`,
-   by the rules of gh-flow:drain's references/promotion.md.
-```
+- `gh-flow:waves` — the slot takes this text (no `6. ` prefix), so the filled
+  step reads `6. Triage ...`; `<T>` is the run's tracking issue: `Triage every
+  review finding, TODO/FIXME/ponytail:, skipped test and "follow-up" by
+  gh-flow:wave's references/triage.md (shared by wave and waves) during step 2,
+  before step 5 merges — a fix made after the merge cannot land in this PR: fix
+  it in this PR, decline it with a reason in the gh-pr:reply reply, or — only
+  for a real defect or BLOCKER too large to fix here — file it via
+  Skill(gh-issue:issue-create, "--no-ask ...") with the body line
+  Filed-by-run: waves #<T>. Any issue a sub-skill filed in steps 1-5 that lacks
+  that line gets it via gh issue edit and is listed under follow-ups:. Add the
+  final-report lines fixed-in-place: <commit per finding> | none and
+  declined: <finding: reason> | none after follow-ups:.`
 
 - `gh-flow:wave` — the slot takes this text (no `6. ` prefix), so the filled
   step reads `6. Triage ...`: `Triage every review finding, TODO/FIXME/ponytail:, skipped
