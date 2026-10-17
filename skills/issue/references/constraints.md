@@ -88,7 +88,7 @@
   intentional and must soft-fail (never block the flow). If a future
   variant of Step 2.6 needs to mutate PR labels or body, route through
   `_gh_pr_edit_safe_label` / `_gh_pr_edit_safe_body`
-  (`shell-common/functions/gh_pr_edit_safe.sh`); plain `gh pr edit
+  (`shell-common/lib/gh_pr_edit_safe.sh`); plain `gh pr edit
   --add-label` / `--body-file` silently exits 1 on repos with classic
   Projects attached (issue dEitY719/dotfiles#326 Bug B).
 - Do NOT preface or summarize beyond the compact report.

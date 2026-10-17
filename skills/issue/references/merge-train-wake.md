@@ -144,7 +144,7 @@ never the checkout at `$HOME/dotfiles` — but crontab always calls
 because a worktree is torn down after its PR merges while the crontab entry
 is permanent. `SHELL_COMMON` is already canonicalized to the main checkout
 by the shell loader (`_dotfiles_root_canonicalize`,
-`shell-common/functions/dotfiles_root.sh:110`) in the common case; the
+`shell-common/lib/dotfiles_root.sh:127`) in the common case; the
 script's `${SHELL_COMMON:-${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common}`
 chain falls to the `$HOME/dotfiles` tier only when neither variable is set.
 Setting `DOTFILES_ROOT_NO_CANONICALIZE=1` (`_resolve_dotfiles_root_canonical`

@@ -4,7 +4,7 @@ origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
 
     # plugin-root resolution: https://github.com/dEitY719/harness-skills/blob/main/references/plugin-root.md
     _SC="${DOTFILES_ROOT:-$HOME/dotfiles}/shell-common"                              # tier 1
-    if [ ! -f "$_SC/functions/gh_host.sh" ]; then
+    if [ ! -f "$_SC/lib/gh_host.sh" ]; then
         [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || {                                        # tier 5
             printf '[gh-flow:autopilot] no shell-common under %s, and CLAUDE_PLUGIN_ROOT is unset. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
                 "$_SC" >&2
@@ -15,7 +15,7 @@ origin 시스템은 하드코딩하지 않고 SSOT 함수로 해석한다.
     unset -f _gh_resolve_host 2>/dev/null || :
     unalias _gh_resolve_host 2>/dev/null || :
     export SHELL_COMMON="$_SC"                                                       # before the load
-    [ -f "$_SC/functions/gh_host.sh" ] && . "$_SC/functions/gh_host.sh"
+    [ -f "$_SC/lib/gh_host.sh" ] && . "$_SC/lib/gh_host.sh"
     [ "$(command -v _gh_resolve_host 2>/dev/null)" = _gh_resolve_host ] || {         # tier 5
         unset SHELL_COMMON
         printf '[gh-flow:autopilot] %s did not load a usable shell-common. On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
