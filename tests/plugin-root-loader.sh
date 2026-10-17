@@ -94,7 +94,7 @@ for f in "${tracked[@]}"; do
 		-e 's/^[[:space:]]*unset -f _[A-Za-z0-9_]+ 2>\/dev\/null \|\| :$/UNSETF/' \
 		-e 's/^[[:space:]]*unalias _[A-Za-z0-9_]+ 2>\/dev\/null \|\| :$/UNALIAS/' \
 		-e 's/^[[:space:]]*export SHELL_COMMON=.*$/EXPORT/' \
-		-e 's/^[[:space:]]*(\[ -f "[^"]+" \] && )?\. "\$[A-Za-z0-9_]+\/functions\/.*$/LOAD/' \
+		-e 's/^[[:space:]]*(\[ -f "[^"]+" \] && )?\. "\$[A-Za-z0-9_]+\/lib\/.*$/LOAD/' \
 		-e 's/^[[:space:]]*(if )?\[ "\$\(command -v _[A-Za-z0-9_]+ 2>\/dev\/null\)" !?= _[A-Za-z0-9_]+ \].*$/PROOF/' \
 		-e 's/^[[:space:]]*unset SHELL_COMMON$/UNSETVAR/' \
 		"$f" | grep -E '^(UNSETF|UNALIAS|EXPORT|LOAD|PROOF|UNSETVAR)$' | tr '\n' ' ') || :
@@ -118,8 +118,8 @@ done
 #    just rejected.
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
-mkdir -p "$TMP/root/lib/vendor/shell-common/functions" "$TMP/bin"
-: > "$TMP/root/lib/vendor/shell-common/functions/gh_host.sh"
+mkdir -p "$TMP/root/lib/vendor/shell-common/lib" "$TMP/bin"
+: > "$TMP/root/lib/vendor/shell-common/lib/gh_host.sh"
 printf '#!/bin/sh\nprintf imposter\n' > "$TMP/bin/_gh_resolve_host"
 chmod +x "$TMP/bin/_gh_resolve_host"
 
