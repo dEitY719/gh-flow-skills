@@ -13,6 +13,9 @@
 #    lines and skills/wave/ never points at the deleted promotion.md. The waves
 #    fill of the shared brief is pinned by tests/waves-contract.sh (#64).
 # 5. Fresh base before each spawn (#62): pull --ff-only and its stopped ending.
+# 6. Reuse mode + --no-enter spawn (#71): every worktree-spawn call in wave and
+#    waves passes --no-enter, MAIN comes from --git-common-dir, and the two
+#    reuse-mode endings stay pinned.
 set -euo pipefail
 cd -- "$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 fail=0
@@ -64,5 +67,20 @@ grep -qF -- 'pull --ff-only' skills/wave/SKILL.md ||
     { say "FAIL  'pull --ff-only' missing from skills/wave/SKILL.md"; fail=1; }
 grep -qF -- 'gh-flow:wave stopped — base not fast-forwardable' skills/wave/references/report-template.md ||
     { say 'FAIL  base not fast-forwardable ending missing from report-template.md'; fail=1; }
+
+if grep -rnE 'Skill\(session:worktree-spawn, "' skills/wave/ skills/waves/ | grep -vF -- '"--no-enter '; then
+    say 'FAIL  a worktree-spawn call above lacks --no-enter (#71)'; fail=1
+fi
+grep -rqF -- 'Skill(session:worktree-spawn, "--no-enter' skills/wave/SKILL.md skills/waves/references/plan.md ||
+    { say 'FAIL  --no-enter spawn missing from wave SKILL.md / waves plan.md (#71)'; fail=1; }
+for f in skills/wave/SKILL.md skills/wave/references/spawn.md skills/wave/references/lineage.md; do
+    grep -qF -- '--git-common-dir' "$f" ||
+        { say "FAIL  MAIN from --git-common-dir missing from $f (#71)"; fail=1; }
+done
+for s in 'gh-flow:wave stopped — running in an unrelated worktree' 'gh-flow:wave stopped — worktree not rebasable onto <base>'; do
+    for f in skills/wave/references/report-template.md skills/wave/references/spawn.md; do
+        grep -qF -- "$s" "$f" || { say "FAIL  '$s' missing from $f (#71)"; fail=1; }
+    done
+done
 
 [ "$fail" = 0 ] && say 'OK    wave contract' || exit 1

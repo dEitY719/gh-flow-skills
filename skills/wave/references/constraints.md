@@ -55,6 +55,25 @@
   — local changes in the main checkout are never overwritten. The pull moves
   only the checked-out branch, so first `git symbolic-ref --short HEAD` must
   print `<base>`; any other branch is the same stop, reason `not on <base>`.
+  Reuse mode is the one exception (#71): started inside the root issue's own
+  linked worktree, the coordinator never pulls `MAIN` (the user's checkout,
+  maybe on another branch) — it runs `git fetch <remote> <base>` and spawns
+  from `<remote>/<base>` instead (`references/spawn.md`).
+- **Spawn never moves the coordinator** (#71). Every spawn is
+  `Skill(session:worktree-spawn, "--no-enter --task issue-<N> --base <remote>/<base>")`;
+  without `--no-enter` Claude Code's `EnterWorktree` moves the session and the
+  next descendant's spawn fails (dEitY719/session-skills#38).
+- **Reuse only the root issue's own worktree** (#71). A linked worktree
+  (`--git-dir` differs from `--git-common-dir`) is adopted as the root's
+  `Path:` only when its branch is `wt/issue-<N>/<k>` or
+  `wt/<agent>/<k>-issue-<N>`; any other branch stops the run with
+  `gh-flow:wave stopped — running in an unrelated worktree (<branch>)`, and a
+  branch that cannot sit on `<remote>/<base>` with
+  `gh-flow:wave stopped — worktree not rebasable onto <base>`. A dirty tree is
+  a resume: warn, never clean. The coordinator edits and commits nothing in
+  the shared root worktree (NF-2), and descendants always get a sibling
+  worktree. `MAIN`, and the brief's `<main-path>`, come from
+  `--git-common-dir`, never from the cwd.
 - **Never reimplement an atom.** Worktrees are `session:worktree-spawn`'s,
   the chain is `gh-flow:issue`'s, merging is `gh-pr:merge`'s, fresh-clone
   verification is `gh-verify:merged`'s, issue filing is `gh-issue:issue-create`'s.

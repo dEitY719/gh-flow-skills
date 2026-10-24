@@ -29,7 +29,7 @@ metadata:
 파이프라인으로 다시 처리한다. 레포의 다른 열린 이슈는 절대 건드리지 않는다. `gh-flow:waves`
 의 "단일 이슈 + 자손 트리 · 직렬 · fresh-clone 검증" 판이다 — 이슈 집합의 의존성 웨이브 ·
 병렬 · live 장벽은 `waves` 몫이다. 새 로직은 **자손 큐 · 상한** 둘뿐이고 나머지는 원자 스킬 호출이다.
-**전제조건**: 조율자는 저장소의 **main 체크아웃**(기본 브랜치)에서 돈다 — worktree 는 워커 몫.
+**전제조건**: 조율자는 저장소의 **main 체크아웃**(기본 브랜치)에서 돈다 — worktree 는 워커 몫. 예외: 루트 이슈의 worktree 안에서 시작하면 그 worktree 를 재사용한다(#71, `references/spawn.md`).
 **gh-flow 플러그인 전체 설치** 필수(#47).
 
 **조율자는 `gh-flow:issue` 를 절대 직접 부르지 않는다** — `--help` 조회로도 부르지 않는다
@@ -52,9 +52,10 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 이슈 1건마다 아래 다섯 단계, 단계 사이에 사용자 확인을 묻지 않는다(무인 기본).
 루트가 이미 닫혀 있으면 1~4 를 건너뛰고 5 만 한다 — 자손이 없으면 `complete`.
 
-1. **spawn** — main 체크아웃에서 `git symbolic-ref --short HEAD` 가 `<base>` 인지 확인(아니면 아래 정지, 사유 `not on <base>`), `git pull --ff-only <remote> <base>` 후 `Skill(session:worktree-spawn, "--task issue-<N> --base <remote>/<base>")`
-   1회. 비-ff 면 `gh-flow:wave stopped — base not fast-forwardable (<reason>)`(로컬 변경 보호). `Path:` 를 기록하고 조율자는 main 체크아웃에 남는다(`cd` 를 따라가지 않는다).
-   직전 머지가 반영된 base 에서 시작하고, 리뷰가 stale 로컬 base 로 앞선 PR 을 재리뷰하지 않게 하려는 것이다. 절차: `gh-flow:waves` 의 `references/plan.md` §7 — 단 그 `git fetch` 대신 위 pull, wave 에는 `--bootstrap` 이 없어 부트스트랩은 `.claude/gh-flow-waves.sh`(있을 때만) > 없음.
+1. **spawn** — 절차·모드 판정: `references/spawn.md`(첫 spawn 전에 읽는다). `MAIN` 은 항상 `--git-common-dir` 로 구한다.
+   main 모드: `git symbolic-ref --short HEAD` 가 `<base>` 인지 확인(아니면 정지, 사유 `not on <base>`), `git pull --ff-only <remote> <base>` 후 `Skill(session:worktree-spawn, "--no-enter --task issue-<N> --base <remote>/<base>")`
+   1회. 비-ff 면 `gh-flow:wave stopped — base not fast-forwardable (<reason>)`(로컬 변경 보호). `Path:` 를 기록하고 조율자 cwd 는 바뀌지 않는다(`--no-enter`, `cd` 금지).
+   재사용 모드(루트 이슈 브랜치의 linked worktree): 루트는 spawn·pull 없이 현재 경로를 `Path:` 로 쓰고 `<remote>/<base>` 위 rebase 가능성만 본다. 자손은 pull 대신 `git fetch` 후 같은 `--no-enter` spawn 으로 sibling worktree. 무관한 worktree 면 정지.
 2. **dispatch** — 백그라운드 `Agent`(model `opus`) **정확히 1개**. 프롬프트는 `gh-flow:waves` 의
    `references/worker-brief.md` 템플릿을 채운 것 — wave 의 채움·차이(계보 마커 지시 포함):
    `references/lineage.md`, `<PROMOTION_RULE>` 는 `references/triage.md`(현장 수정 / 거절 / 자식 이슈). 한 worktree 에 워커 둘 금지(NF-2).
