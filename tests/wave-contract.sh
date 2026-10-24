@@ -71,8 +71,10 @@ grep -qF -- 'gh-flow:wave stopped — base not fast-forwardable' skills/wave/ref
 if grep -rnE 'Skill\(session:worktree-spawn, "' skills/wave/ skills/waves/ | grep -vF -- '"--no-enter '; then
     say 'FAIL  a worktree-spawn call above lacks --no-enter (#71)'; fail=1
 fi
-grep -rqF -- 'Skill(session:worktree-spawn, "--no-enter' skills/wave/SKILL.md skills/waves/references/plan.md ||
-    { say 'FAIL  --no-enter spawn missing from wave SKILL.md / waves plan.md (#71)'; fail=1; }
+for f in skills/wave/SKILL.md skills/waves/references/plan.md; do
+    grep -qF -- 'Skill(session:worktree-spawn, "--no-enter' "$f" ||
+        { say "FAIL  --no-enter spawn missing from $f (#71)"; fail=1; }
+done
 for f in skills/wave/SKILL.md skills/wave/references/spawn.md skills/wave/references/lineage.md; do
     grep -qF -- '--git-common-dir' "$f" ||
         { say "FAIL  MAIN from --git-common-dir missing from $f (#71)"; fail=1; }
