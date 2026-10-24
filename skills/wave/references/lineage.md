@@ -20,6 +20,8 @@ is not a marker. One parent per issue — the first `Spawned-from:` line wins.
   - `description: "wave #<N>"`, and the opening line names `gh-flow:wave` and
     the issue's depth instead of a wave number.
   - **Files overlapping sibling workers**: `none` — one issue runs at a time.
+  - `<main-path>` is `MAIN` from `--git-common-dir` (`references/spawn.md`),
+    never the coordinator's cwd — in reuse mode that cwd is the root worktree.
   - **Already on main**: what the parent's merge already shipped, if any.
   - `<PROMOTION_RULE>` is the `gh-flow:wave` fill: triage by
     `references/triage.md` — fix in place, decline with a reason, or file a

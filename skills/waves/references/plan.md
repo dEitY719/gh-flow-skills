@@ -146,10 +146,11 @@ the way, or a diverged base stops the run:
 `gh-flow:waves stopped — base not fast-forwardable (<reason>)` — local changes
 in `MAIN` are never overwritten. The pull also updates `$REMOTE/<default-branch>`,
 which `session:worktree-spawn` branches from. Then per issue:
-`Skill(session:worktree-spawn, "--task issue-<N> --base $REMOTE/<default-branch>")`
+`Skill(session:worktree-spawn, "--no-enter --task issue-<N> --base $REMOTE/<default-branch>")`
 (explicit, so a non-`origin` remote or non-`main` default is honoured). Record the `Path:` and
-`Branch:` it prints. Do **not** follow its `cd` (or `EnterWorktree`) — the
-coordinator stays in the main checkout for the barrier. Branch naming is that
+`Branch:` it prints. `--no-enter` keeps the coordinator's cwd fixed — without it
+Claude Code's `EnterWorktree` moves the session (dEitY719/session-skills#38). Do
+**not** follow its `cd` either — the coordinator stays in the main checkout for the barrier. Branch naming is that
 skill's.
 
 Bootstrap, in the new worktree, first match wins:

@@ -72,6 +72,13 @@ with whatever finished. One ending, one `Next:`:
   the way, its base diverged from `<remote>/<base>`, or it is not on `<base>`.
   `Next:` commit or clean the main checkout's local changes, reconcile the
   diverged base by hand, or check out `<base>`, then re-run on the root.
+- `gh-flow:wave stopped — running in an unrelated worktree (<branch>)` — the
+  run started in a linked worktree whose branch is not the root issue's
+  (`references/spawn.md`). `Next:` re-run from the main checkout or from the
+  root issue's own worktree.
+- `gh-flow:wave stopped — worktree not rebasable onto <base>` — reuse mode, and
+  the root worktree's branch conflicts with `<remote>/<base>`. `Next:` rebase
+  the branch by hand (or `/gh-resolve:conflict` on its PR), then re-run.
 
 ## The terminal strings are a hook contract
 

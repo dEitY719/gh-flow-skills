@@ -22,6 +22,21 @@
     "note": "scope proof: only marked descendants; unmarked open issues stay untouched"
   },
   {
+    "query": "지금 wt/issue-71/1 worktree 안이야. 여기서 /gh-flow:wave 71 돌려서 머지까지 하고 파생 이슈도 처리해",
+    "should_trigger": true,
+    "note": "reuse mode (#71): root runs in this worktree, no spawn or pull; descendants go to sibling worktrees"
+  },
+  {
+    "query": "I'm already in the worktree for issue 71 (branch wt/claude/1-issue-71) - carry it to merged and its spawned follow-ups",
+    "should_trigger": true,
+    "note": "reuse mode, worktree-spawn branch form (#71)"
+  },
+  {
+    "query": "/gh-flow:wave 71 from inside the worktree of issue 40",
+    "should_trigger": true,
+    "note": "unrelated worktree (#71): triggers, then stops with 'running in an unrelated worktree (<branch>)'"
+  },
+  {
     "query": "이 이슈 8개 의존성 순서대로 웨이브 나눠서 병렬로 처리해줘",
     "should_trigger": false,
     "note": "a set of issues in dependency waves -> gh-flow:waves"
