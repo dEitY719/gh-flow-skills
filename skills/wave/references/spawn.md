@@ -6,6 +6,11 @@ issue** (reuse mode) — e.g. a session a watcher opened with
 `gwt spawn --wt-name issue-<N>` (dEitY719/dotfiles#2281). Decide once, before
 the first spawn, and keep the mode for the whole run.
 
+**Requires** `session:worktree-spawn` from session-skills 0.1.8 or later
+(dEitY719/session-skills#38: `--no-enter`, main-based sibling paths) and Git
+2.31+ (`--path-format=absolute`; older Git returns a relative path and the
+mode check below silently picks main mode).
+
 ## 0. Detect the mode and find `MAIN`
 
 ```sh
@@ -65,12 +70,13 @@ Any other non-zero is not a conflict (`merge-tree --write-tree` needs Git 2.38+)
 print a `[WARN]` line and go on — the worker's rebase step decides. A clean
 merge only approximates a clean rebase; the worker's `gh-resolve:*` step is the
 real proof. A dirty tree is a resume of the same issue: allow it with a
-`[WARN]` line, never clean it.
+`[WARN]` line, never clean it. The merge-tree check covers committed state
+only — uncommitted changes in a dirty resume are not part of it.
 
 If the root already has an open PR (`references/lineage.md` "Resume"), its
 `headRefName` must equal `$BR` — the worker resumes that PR in this worktree.
 A different head branch is the unrelated-worktree stop above, with `<branch>`
-= `$BR`.
+= `$BR` (the report's `Next:` names the PR's own head branch).
 
 The root worktree is then shared by the coordinator and the root's single
 worker. The coordinator edits and commits nothing there — one worker per
@@ -82,7 +88,9 @@ worktree (NF-2) still holds; the coordinator only reads and runs `gh`.
 After dEitY719/session-skills#38 that skill computes the sibling path from the
 main checkout even when called from inside a worktree. Never pull `MAIN`: it is
 the user's checkout and may be on another branch; the fetch plus a remote-ref
-base gives the same freshness.
+base gives the same freshness. The printed `Path:` must not lie under the root
+worktree (`git rev-parse --show-toplevel`): a nested path means a pre-#38
+`session:worktree-spawn` — fail that issue `[FAIL] spawn`, never dispatch into it.
 
 ## 3. Both modes
 

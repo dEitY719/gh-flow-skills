@@ -85,4 +85,15 @@ for s in 'gh-flow:wave stopped — running in an unrelated worktree' 'gh-flow:wa
     done
 done
 
+# The reuse-mode branch regex, from spawn.md with <N>=71: a table, not a grep.
+re=$(sed -n 's/.*grep -Eqx "\(wt\/issue-<N>[^"]*\)".*/\1/p' skills/wave/references/spawn.md)
+[ -n "$re" ] || { say 'FAIL  reuse-mode branch regex not found in spawn.md (#71)'; fail=1; }
+re=${re//<N>/71}
+for row in 'wt/issue-71/1:y' 'wt/claude/1-issue-71:y' 'wt/claude/1-issue-7:n' 'wt/issue-710/1:n' \
+    'wt/claude/1-issue-171:n' 'wt/claude/1-issue-711:n' ':n' 'main:n'; do
+    b=${row%:*}; want=${row##*:}
+    printf '%s\n' "$b" | grep -Eqx "$re" && got=y || got=n
+    [ "$got" = "$want" ] || { say "FAIL  branch '$b': reuse regex says $got, want $want (#71)"; fail=1; }
+done
+
 [ "$fail" = 0 ] && say 'OK    wave contract' || exit 1
