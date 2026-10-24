@@ -12,6 +12,7 @@ the first spawn, and keep the mode for the whole run.
 GIT_DIR_ABS=$(git rev-parse --path-format=absolute --git-dir)
 GIT_COMMON=$(git rev-parse --path-format=absolute --git-common-dir)
 MAIN=$(dirname "$GIT_COMMON")     # the real main checkout, from either mode
+# shortcut: wrong for a submodule or bare-repo layout (common dir is not <main>/.git); use `git worktree list --porcelain`'s first entry if wave must run there
 BR=$(git symbolic-ref --short HEAD 2>/dev/null || echo '')
 ```
 
@@ -59,8 +60,17 @@ git merge-base --is-ancestor <remote>/<base> HEAD ||
     git merge-tree --write-tree HEAD <remote>/<base> >/dev/null
 ```
 
-Non-zero: `gh-flow:wave stopped — worktree not rebasable onto <base>`. A dirty
-tree is a resume of the same issue: allow it with a `[WARN]` line, never clean it.
+Exit 1 (conflict): `gh-flow:wave stopped — worktree not rebasable onto <base>`.
+Any other non-zero is not a conflict (`merge-tree --write-tree` needs Git 2.38+):
+print a `[WARN]` line and go on — the worker's rebase step decides. A clean
+merge only approximates a clean rebase; the worker's `gh-resolve:*` step is the
+real proof. A dirty tree is a resume of the same issue: allow it with a
+`[WARN]` line, never clean it.
+
+If the root already has an open PR (`references/lineage.md` "Resume"), its
+`headRefName` must equal `$BR` — the worker resumes that PR in this worktree.
+A different head branch is the unrelated-worktree stop above, with `<branch>`
+= `$BR`.
 
 The root worktree is then shared by the coordinator and the root's single
 worker. The coordinator edits and commits nothing there — one worker per
