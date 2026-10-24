@@ -13,7 +13,7 @@ GIT_DIR_ABS=$(git rev-parse --path-format=absolute --git-dir)
 GIT_COMMON=$(git rev-parse --path-format=absolute --git-common-dir)
 MAIN=$(dirname "$GIT_COMMON")     # the real main checkout, from either mode
 # shortcut: wrong for a submodule or bare-repo layout (common dir is not <main>/.git); use `git worktree list --porcelain`'s first entry if wave must run there
-BR=$(git symbolic-ref --short HEAD 2>/dev/null || echo '')
+BR=$(git symbolic-ref --short HEAD 2>/dev/null || true)
 ```
 
 `GIT_DIR_ABS` = `GIT_COMMON` is the main checkout (main mode). Different is a
