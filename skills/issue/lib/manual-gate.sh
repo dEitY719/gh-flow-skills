@@ -43,13 +43,12 @@ esac
 _mg_set=${GH_FLOW_EXCLUDE_LABELS-wontfix,not-implement,manual}
 
 set -f  # the set is split unquoted below; never let `*` glob against the cwd
+IFS=,    # only the set split uses IFS; `read` below overrides it per call
+_mg_cr=$(printf '\r')
 while IFS= read -r _mg_label || [ -n "$_mg_label" ]; do
-    _mg_label=$(printf '%s' "$_mg_label" | tr -d '\r')
+    _mg_label=${_mg_label%"$_mg_cr"}
     [ -n "$_mg_label" ] || continue
-    _mg_ifs=$IFS
-    IFS=,
     for _mg_x in $_mg_set; do
-        IFS=$_mg_ifs
         _mg_x=${_mg_x#"${_mg_x%%[! ]*}"}  # trim leading spaces
         _mg_x=${_mg_x%"${_mg_x##*[! ]}"}  # trim trailing spaces
         if [ -n "$_mg_x" ] && [ "$_mg_x" = "$_mg_label" ]; then
@@ -57,7 +56,6 @@ while IFS= read -r _mg_label || [ -n "$_mg_label" ]; do
             exit 0
         fi
     done
-    IFS=$_mg_ifs
 done
 
 printf 'pass\n'
