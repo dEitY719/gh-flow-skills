@@ -11,7 +11,7 @@ Step 2.1 touches a file (dEitY719/gh-flow-skills#36).
 
 ```
 Step 1     Parse Args + target binding (GH_HOST / TARGET_REPO / REMOTE)
-Step 1.5   Origin trust gate      <- here, and only here
+Step 1.5   Exclude-label gate, then origin trust gate   <- here, and only here
 Step 2     6x Skill() chain (zero-prose zone - untouched)
 Step 3     Report
 ```
@@ -68,9 +68,9 @@ printf '%s\n' "$labels" |
 | Verdict | Action |
 |---|---|
 | `pass` | go on to the origin check below |
-| `excluded <label>` | stop: zero edits, no comment, report `[BLOCK] Step 1.5: label gate (<label>)`, exit 2 |
+| `excluded <label>` | stop: zero edits, no comment, report `[BLOCK] Step 1.5: label gate  (excluded label: <label>)`, exit 2 |
 | `skip lookup-failed` | stop the same way, reason `label lookup failed` — never fail-open (NF-1): starting a human-only issue costs more than one re-run |
-| any, with `--force-manual` | gate skipped, report `[SKIP] Step 1.5: label gate (--force-manual)` |
+| any, with `--force-manual` | gate skipped, report `[SKIP] Step 1.5: label gate  (--force-manual)` |
 
 Matching is whole-name equality (`manual-later` is not `manual`), non-ASCII
 names allowed; the header of `lib/manual-gate.sh` is the full contract and

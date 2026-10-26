@@ -116,7 +116,8 @@ Bash calls share no variables, so the block re-fills and re-proves
 `$CLAUDE_PLUGIN_ROOT` itself (`<skill-base-dir>` is this skill's base dir). Fold the labels into the child-confirm `gh issue view` above
 (`--json body,state,labels`) rather than paying a second call per child.
 
-- **Root** `excluded <label>` — no worktree, no worker:
+- **Root** (`OPEN` only — a root already closed is never gated, it is only
+  descended through, like a `CLOSED` child) `excluded <label>` — no worktree, no worker:
   `gh-flow:wave stopped — excluded label (<label>)`. `skip lookup-failed` —
   `gh-flow:wave stopped — label lookup failed (<reason>)`. Never fail-open
   (NF-1): starting a human-only issue costs more than a re-run.

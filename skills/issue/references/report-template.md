@@ -10,6 +10,7 @@ If all steps succeeded:
 
 ```
 gh-flow:issue complete (#<N>)
+  [OK] Step 1.5: label gate             (no exclude label)
   [SKIP] Step 1.5: origin gate          (claude - trusted)
   [OK] Step 1: gh-issue:implement       (<n files changed>, <n tests passed>)
   [OK] Step 2: gh-pr:commit                (<sha> "<subject>")

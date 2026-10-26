@@ -39,7 +39,8 @@ should be checkable — "`#42` is closed", "`gh auth status` lists the host",
 **The label is mandatory for a real block, and it is what a re-run can see.**
 `gh-flow:waves`'s list query (`plan.md` §1) reads the `labels` projection, so a
 block recorded only as a comment is invisible and the issue is retried on the
-next run (`gh-flow:wave` uses only the label-less deferral form below):
+next run (`gh-flow:wave` uses only the label-less deferral form below, and the
+`manual` label of "Human-only work"):
 
 ```
 GH_HOST="$TARGET_HOST" gh label create blocked --repo "$TARGET_REPO" \
