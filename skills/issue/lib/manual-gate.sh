@@ -22,8 +22,8 @@
 # Reads   GH_FLOW_EXCLUDE_LABELS — comma-separated exclude set (F-2). Unset
 #         means the default `wontfix,not-implement,manual`; set-but-empty means
 #         an empty set, i.e. exclude nothing, because an explicit override is
-#         honoured as written. Spaces around each comma are trimmed; spaces
-#         inside a label name are kept.
+#         honoured as written. Spaces around each comma are trimmed, tabs and
+#         CRs anywhere are dropped; spaces inside a label name are kept.
 # Output  one line: `pass` | `excluded <label>` | `skip lookup-failed`.
 #         `<label>` is the first label (in input order) that is in the set.
 # Exit    0 on every verdict — exclusion is a routing decision, not an error.
@@ -40,7 +40,8 @@ case ${1:-0} in
     *) printf 'skip lookup-failed\n'; exit 0 ;;
 esac
 
-_mg_set=${GH_FLOW_EXCLUDE_LABELS-wontfix,not-implement,manual}
+# Tabs/CRs (an env value sourced from a CRLF .env) would silently never match.
+_mg_set=$(printf '%s' "${GH_FLOW_EXCLUDE_LABELS-wontfix,not-implement,manual}" | tr -d '\t\r')
 
 set -f  # the set is split unquoted below; never let `*` glob against the cwd
 IFS=,    # only the set split uses IFS; `read` below overrides it per call

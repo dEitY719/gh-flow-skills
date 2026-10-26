@@ -45,7 +45,7 @@ gh-flow:issue blocked at Step 1.5 (#<N>) - label gate
   no files edited, no commit, no PR.
 
 Next: /gh-flow:issue <N> --force-manual  (only if the issue is implementable after all)
-      | <lookup failed: gh auth status on the host, then /gh-flow:issue <N>>
+      | <lookup failed: check the issue number exists, then gh auth status on the host, then /gh-flow:issue <N>>
 ```
 
 Step 4 (`gh-verify:review-all`) is soft-fail — its row uses `[SKIP]`/`[WARN]`
