@@ -5,7 +5,7 @@
 | # | Name | Default | Description |
 |---|------|---------|-------------|
 | 1 | `[remote]` or `-h`/`--help`/`help` | `origin` | Git remote whose URL binds `TARGET_HOST` + `TARGET_REPO`. Passed to every worker. A missing remote stops the run — no silent `origin` fallback |
-| 1 | `<issue-url>` | none | `https://<host>/<owner>/<repo>/issues/<N>` instead of a remote: locate that repo's main checkout in the cwd or up to two levels below it, bind its matching remote, sweep every open non-`blocked` issue, and default the tracking issue to `<N>`. `references/locate.md` |
+| 1 | `<issue-url>` | none | `https://<host>/<owner>/<repo>/issues/<N>` instead of a remote: locate that repo's main checkout in the cwd or up to two levels below it, bind its matching remote, sweep every open issue that is neither `blocked` nor exclude-labelled, and default the tracking issue to `<N>`. `references/locate.md` |
 | - | `--from N` | none | Lower bound: open issues numbered below `N` are skipped |
 | - | `--label L` | none | Only issues carrying label `L` |
 | - | `--author A` | none | Only issues opened by `A` (`@me` for yourself), passed to `gh issue list --author`. Use it on a shared repo: without it every open issue is implemented and, by default, merged |
@@ -21,9 +21,21 @@
 
 With no `--from` / `--label` / `--author` / `--issues`, the target set is every open issue in
 the repo that is not labelled `blocked` — with or without an `<issue-url>`.
+Issues carrying an exclude label (human-only work; `GH_FLOW_EXCLUDE_LABELS`,
+default `wontfix,not-implement,manual`) are always dropped, even when
+`--issues` names them, and each is reported as `excluded (label): #<N> <label>`
+(`references/plan.md` §1, dEitY719/gh-flow-skills#70). There is no
+`--force-manual` here — run such an issue by hand with
+`/gh-flow:issue <N> --force-manual`.
 Either way, issues this run filed (body line `Filed-by-run: waves #<T>`, `<T>`
 the tracking issue) are left out unless `--issues` names them; they are listed
 under `filed this run` and in `Next:` (`references/plan.md` §1).
+
+## Environment
+
+| Variable | Default | Effect |
+|---|---|---|
+| `GH_FLOW_EXCLUDE_LABELS` | `wontfix,not-implement,manual` | Comma-separated exclude set applied at planning (`references/plan.md` §1). Replaces the default wholesale; the empty string excludes nothing. Exact names only. Shared with `gh-flow:issue` / `gh-flow:wave` through `gh-flow:issue`'s `lib/manual-gate.sh` |
 
 ## Usage
 

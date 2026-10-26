@@ -3,6 +3,13 @@
 - Never invoke implementation modes other than `direct`.
 - Never retry a failed step. Human decides retry or fix.
 - Never skip a step. All 6 or stop.
+- **The Step 1.5 exclude-label gate runs before the origin gate and skips,
+  never fails open (dEitY719/gh-flow-skills#70 NF-1).** An exclude label
+  (`GH_FLOW_EXCLUDE_LABELS`, default `wontfix,not-implement,manual`) or a label
+  lookup that failed stops before Step 2.1 with exit 2 and zero edits; only
+  `--force-manual` lets it through. The verdict comes from
+  `lib/manual-gate.sh` — the one SSOT `gh-flow:wave` and `gh-flow:waves` call
+  too; never re-derive the match inline.
 - **The Step 1.5 origin gate judges; it never edits the issue (D-7).** A blocked
   issue is fixed by its author, by hand or through `gh-issue:issue-create`. An
   automatic rewrite only makes a wrong spec look plausible and quietly replaces

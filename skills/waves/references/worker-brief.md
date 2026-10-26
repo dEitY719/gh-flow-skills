@@ -43,6 +43,11 @@ remote <remote>). Wave <w>. Carry this one issue to a merged PR, then report.
 ## Procedure (fixed)
 1. `Skill(gh-flow:issue, "<N> <remote>")` — the full chain. It must end with
    `gh-flow:issue complete (#<N>)`; a `stopped at step` report is a [FAIL].
+   If the issue turns out to be human-only work no PR can finish (a runbook,
+   another machine's local setup, a manual console step) — whether
+   gh-flow:issue stops on it or you see it first — stop there without a PR and
+   report `[FAIL] manual — <why no PR can finish it>`; put the human steps in
+   `blocked:`. The coordinator labels the issue so no run picks it up again.
 2. Wait until the reviewers' comments have landed (gh-flow:issue deferred its
    reply by 4 min; a blocking `gh pr checks <PR> --watch -R <owner/repo>` covers
    most of that wait — no foreground sleep), then run
@@ -56,7 +61,7 @@ remote <remote>). Wave <w>. Carry this one issue to a merged PR, then report.
 6. <PROMOTION_RULE>
 
 ## Final report (fixed) — your last message, exactly this shape plus any lines step 6 adds
-waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason>
+waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason> | [FAIL] manual — <reason>
   PR:           #<PR> <url>
   mergeCommit:  <oid | none>
   tests:        <passed>/<total> (<command>)

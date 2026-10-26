@@ -31,6 +31,7 @@ gh-flow:wave complete  (<owner/repo>, root #<R>, <n> issues, depth <d>)
 filed this run #<X> ... (each with its Spawned-from parent)
 deferred       #<C> (parent #<M> failed)
 overflow       #<E> (depth > <max-depth>) #<F> (> <max-issues> issues)
+excluded       #<G> (excluded: manual) #<H> (label lookup failed)
 
 Next: <overflow and failed issue numbers, as the command that continues them>
 ```
@@ -39,6 +40,10 @@ Rows are in processing order, so the `parent` column draws the tree. A root
 already closed at start has the row `| #<R> | - | - | - | [SKIP] closed |`.
 `merged-verify` is `[OK]`, `[FAIL] filed #<X>`, `[SKIP] --no-verify`,
 `[SKIP] --no-merge`, or `[FAIL] <step>` when there was no merge to verify.
+
+`excluded` lists every descendant the exclude-label gate skipped
+(`references/lineage.md` "Exclude-label gate", dEitY719/gh-flow-skills#70);
+`Next:` names them with their reason too, never as work the run will retry.
 
 `Next:` names every overflow and every failed issue by number — e.g.
 `Next: /gh-flow:wave 62 --max-depth 1  (overflow #70 #71; failed #63: merge refused, awaits human)`.
@@ -60,6 +65,14 @@ with whatever finished. One ending, one `Next:`:
   `skills/issue/lib/target-binding.sh`, a `gh-flow:waves` reference) cannot be read (#47). `CLAUDE_PLUGIN_ROOT` unset: export it to the
   plugin dir, then re-run. Set, and the file still absent: install the whole
   `gh-flow` plugin (README "Install"), then re-run.
+- `gh-flow:wave stopped — excluded label (<label>)` — the root carries an
+  exclude label (`GH_FLOW_EXCLUDE_LABELS`, default
+  `wontfix,not-implement,manual`); no worktree was made. `Next:` none if the
+  issue is human-only; otherwise remove the label, or run
+  `/gh-flow:issue <N> --force-manual` by hand in a worktree.
+- `gh-flow:wave stopped — label lookup failed (<reason>)` — the root's labels
+  could not be read, so the run did not start (never fail-open). `Next:`
+  `gh auth status` on `$TARGET_HOST`, then re-run on the root.
 - `gh-flow:wave stopped — target mismatch (<url> vs <remote>)` — `Next:` the
   same command with the remote that points at the URL's repo.
 - `gh-flow:wave stopped — descendant query failed (<reason>)` — `Next:` the fix

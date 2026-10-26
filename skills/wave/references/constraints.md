@@ -19,6 +19,14 @@
   queue only through an exact `Spawned-from: #<N>` line whose `<N>` is an issue
   already in this run's tree (`references/lineage.md`). Every other open issue
   in the repo is out of scope, however related it looks.
+- **Exclude labels are skipped before spawn** (dEitY719/gh-flow-skills#70 F-4,
+  NF-1). The root and every descendant go through `gh-flow:issue`'s
+  `lib/manual-gate.sh` before a worktree exists — never an inline re-derived
+  match. An excluded or unreadable root stops the run
+  (`gh-flow:wave stopped — excluded label (<label>)` / `label lookup failed`);
+  an excluded or unreadable descendant is skipped with its subtree and named
+  under `excluded` and `Next:`. Never fail-open, never `--force-manual` in a
+  brief.
 - **No recursion** (F-6). Descendants run in one internal breadth-first queue;
   `Skill(gh-flow:wave, ...)` is never called. Caps and termination are decided in
   that one loop.
@@ -36,6 +44,9 @@
   `references/blocked.md` ((a) parent `#<N>` failed, (b) `#<N>` merged,
   (c) re-run `/gh-flow:wave <root>`), and the siblings go on. No `blocked`
   label for this case — the open, unmerged parent re-derives it on resume.
+  The one exception is a worker's `[FAIL] manual` (human-only work): that issue
+  also gets the `manual` label, soft-failing, by `gh-flow:waves`'s
+  `references/blocked.md` "Human-only work" (dEitY719/gh-flow-skills#70 F-6).
 - **Verify failures follow triage** (F-5). A real defect `gh-verify:merged`
   finds is filed with `gh-issue:issue-create --no-ask` carrying
   `Spawned-from: #<N>`, and queued as a descendant within the caps; a trivial

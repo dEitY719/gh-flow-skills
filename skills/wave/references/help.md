@@ -11,6 +11,12 @@
 | - | `--no-merge` | off | Workers stop at a green, synced PR; nothing merges, every verify step is `[SKIP] --no-merge`, and only the root runs — its descendants are listed under `Next:` |
 | - | `--no-verify` | off | Skip `gh-verify:merged` after each merge |
 
+## Environment
+
+| Variable | Default | Effect |
+|---|---|---|
+| `GH_FLOW_EXCLUDE_LABELS` | `wontfix,not-implement,manual` | Comma-separated exclude set. The root, or any descendant, carrying one of these labels is skipped before a worktree is made: the root ends the run with `gh-flow:wave stopped — excluded label (<label>)`, a descendant is listed under `excluded` and `Next:`. A failed label lookup skips the same way. Shared with `gh-flow:issue` / `gh-flow:waves` (`gh-flow:issue`'s `lib/manual-gate.sh`) |
+
 ## Usage
 
 - `/gh-flow:wave 58` — #58 to a merged, fresh-clone-verified PR, then every issue spawned from it (and from those), up to depth 3 and 10 issues.
@@ -38,6 +44,8 @@ own sub-skills.
 ## What this skill will NOT do
 
 - Touch an open issue without a `Spawned-from:` line pointing into this run's tree.
+- Start an issue carrying an exclude label, or one whose labels cannot be read.
+  There is no `--force-manual` here; that flag belongs to a hand-run `/gh-flow:issue`.
 - Call `gh-flow:issue` from the coordinator — not even for `--help`. Workers do.
 - Call itself recursively. Descendants run in one internal queue loop.
 - Merge by any path except a worker's `Skill(gh-pr:merge, ...)`. A refusal is

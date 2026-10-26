@@ -33,6 +33,20 @@ stops it before Step 1 runs:
 - `[BLOCK] Step 1.5: origin gate  (<harness> - N check(s) failed)` — see the
   block report below. Nothing after it ran.
 
+The exclude-label gate (dEitY719/gh-flow-skills#70) runs before the origin gate
+and adds one row above it, `[OK] Step 1.5: label gate  (no exclude label)` or
+`[SKIP] Step 1.5: label gate  (--force-manual)`. When it stops the run, emit
+only this, as plain assistant text, and exit 2 — no comment is posted:
+
+```
+gh-flow:issue blocked at Step 1.5 (#<N>) - label gate
+  [BLOCK] Step 1.5: label gate  (excluded label: <label>)   [or: (label lookup failed)]
+  no files edited, no commit, no PR.
+
+Next: /gh-flow:issue <N> --force-manual  (only if the issue is implementable after all)
+      | <lookup failed: gh auth status on the host, then /gh-flow:issue <N>>
+```
+
 Step 4 (`gh-verify:review-all`) is soft-fail — its row uses `[SKIP]`/`[WARN]`
 for the gate's degraded cases (the delegated skill reports the per-lane
 detail):
