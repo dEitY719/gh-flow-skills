@@ -15,8 +15,32 @@ GH_HOST="$TARGET_HOST" gh issue list --repo "$TARGET_REPO" \
 query needs no `<T>` and runs before the tracking issue is chosen.
 
 Then drop: numbers below `--from`, numbers outside `--issues`, anything labelled
-`blocked`, and issues this run already finished or failed. A count equal to
+`blocked`, anything carrying an exclude label (below), and issues this run
+already finished or failed. A count equal to
 `$LIMIT` means the list was truncated — say so, never claim a clean zero.
+
+**Exclude labels** (dEitY719/gh-flow-skills#70 F-3) mark human-only work — a
+runbook, another machine's local setup — that no PR can finish. Each
+candidate's `labels` from the list above goes through `gh-flow:issue`'s
+`lib/manual-gate.sh`, the SSOT for the verdict (set `GH_FLOW_EXCLUDE_LABELS`,
+default `wontfix,not-implement,manual`):
+
+```
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" ] ||
+    { printf 'gh-flow:waves stopped — gh-flow plugin incomplete (skills/issue/lib/manual-gate.sh)\n'; exit 1; }
+printf '%s\n' <the candidate's label names, one per line> |
+    sh "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" 0
+# -> "pass" | "excluded <label>"
+```
+
+The labels came from a list query that succeeded, so the lookup status is `0`;
+a failed list query already stopped the run (below). An issue `--issues` names
+explicitly is dropped the same way — naming it is not an override, there is no
+`--force-manual` here — but always with its reason. Every dropped issue is one
+report line `excluded (label): #<N> <label>` (`references/report-template.md`)
+and is not a dependency anyone waits on: a dependant of an excluded issue is
+deferred with the three-part comment of `references/blocked.md`, label-less.
 
 **This run's follow-ups are dropped too** (#64 F-3): an issue whose
 `filed_by_run` contains `<T>` — its body carries the line `Filed-by-run: waves #<T>`,
@@ -104,7 +128,7 @@ gh-flow:waves plan (<owner/repo> on <remote>) — rev <r>
 |------|-------|------------|-------------------|-----------------|
 | 1    | #189  | -          | app/routes/x.py   | GET /x          |
 
-excluded: #A #B (cycle), #C (blocked), #D (filed this run)
+excluded: #A #B (cycle), #C (blocked), #D (filed this run), #E (label: manual)
 ```
 
 Re-planning posts a **new** comment with `rev` + 1; never edit the old one.

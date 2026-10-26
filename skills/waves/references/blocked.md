@@ -57,6 +57,31 @@ takes the three-part comment **without** the label: the open, unmerged
 predecessor already re-derives the dependency on resume (`barrier.md`,
 `gh-flow:wave`'s `references/constraints.md`).
 
+## Human-only work — the `manual` label (dEitY719/gh-flow-skills#70 F-6)
+
+A worker that reports `[FAIL] manual — <reason>` found that no PR can finish
+the issue (a runbook, another machine's local setup). The coordinator —
+`gh-flow:waves` or `gh-flow:wave` — then labels the issue `manual` instead of
+`blocked`, so the exclude-label gate (`gh-flow:issue`'s `lib/manual-gate.sh`)
+drops it before any worktree on every later run, and posts the three-part
+comment above with the worker's `blocked:` text as (c). Unlike `blocked`, this
+is a **soft** failure: the `manual` label is provisioned per repo by
+dEitY719/gh-setup-skills#23 and may not exist yet, so a failed create or add is
+one `[WARN]` and the comment is still posted:
+
+```
+GH_HOST="$TARGET_HOST" gh label create manual --repo "$TARGET_REPO" \
+  --color c5def5 --description "human-only work - gh-flow skips it" 2>/dev/null || true
+GH_HOST="$TARGET_HOST" gh issue edit "$N" --repo "$TARGET_REPO" --add-label manual ||
+  printf '[WARN] #%s: manual label not applied (soft)\n' "$N"
+GH_HOST="$TARGET_HOST" gh issue comment "$N" --repo "$TARGET_REPO" --body-file <file>
+```
+
+A repo whose `GH_FLOW_EXCLUDE_LABELS` does not contain `manual` will not skip
+it on the next run; the comment is what still explains the stop. The issue is
+reported `[FAIL] manual` (under `left open` / in the tree table), its
+dependants or descendants are deferred as for any failure.
+
 ## Not blocked
 
 - A PR is open and waiting for a human merge (`--no-merge`, or a

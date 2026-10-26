@@ -33,6 +33,50 @@ unblocked by a human in one flag rather than issue by issue (F-8).
 the gate, so such issues are run by hand with this flag. A `--trust-origin` run whose issue really does have a blocking
 defect is a risk the human explicitly accepted: proceed, no warning.
 
+## Exclude-label gate — runs first (dEitY719/gh-flow-skills#70)
+
+Before the origin check, Step 1.5 asks a cheaper question: **is this issue
+human-only work?** A label in the exclude set — default
+`wontfix,not-implement,manual`, replaced wholesale by the comma-separated
+`GH_FLOW_EXCLUDE_LABELS` (set-but-empty excludes nothing) — means no PR can
+finish it (a runbook, another machine's local setup), so the chain must not
+start. `gh-flow:wave` / `gh-flow:waves` apply the same gate before they spawn a
+worktree; this is the backstop for a direct call and for anything that slips
+past them. `TODO` is deliberately not in the default: in this family it is an
+ordinary backlog label, and excluding it would empty every `/gh-flow:waves` run.
+
+`--force-manual` skips this gate (and only this gate) — a human who calls
+`/gh-flow:issue N --force-manual` has decided the issue is implementable after
+all. Same shape as `--trust-origin`: `gh-flow:wave` / `gh-flow:waves` workers
+have no pass-through for it.
+
+```sh
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
+if [ -z "${CLAUDE_PLUGIN_ROOT:-}" ] ||
+    [ ! -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" ]; then
+    printf '[gh-flow:issue] cannot locate skills/issue/lib/manual-gate.sh under CLAUDE_PLUGIN_ROOT (%s). On Claude Code this is a broken install; on any other harness export CLAUDE_PLUGIN_ROOT=<plugin dir> first.\n' \
+        "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
+    exit 1                                   # broken gate: exit 1, not 2
+fi
+labels=$(GH_HOST="$TARGET_HOST" gh issue view <N> --repo "$TARGET_REPO" \
+    --json labels --jq '.labels[].name' 2>/dev/null); rc=$?
+printf '%s\n' "$labels" |
+    sh "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" "$rc"
+# -> "pass" | "excluded <label>" | "skip lookup-failed"
+```
+
+| Verdict | Action |
+|---|---|
+| `pass` | go on to the origin check below |
+| `excluded <label>` | stop: zero edits, no comment, report `[BLOCK] Step 1.5: label gate (<label>)`, exit 2 |
+| `skip lookup-failed` | stop the same way, reason `label lookup failed` — never fail-open (NF-1): starting a human-only issue costs more than one re-run |
+| any, with `--force-manual` | gate skipped, report `[SKIP] Step 1.5: label gate (--force-manual)` |
+
+Matching is whole-name equality (`manual-later` is not `manual`), non-ASCII
+names allowed; the header of `lib/manual-gate.sh` is the full contract and
+`lib/manual-gate.selfcheck.sh` its proof. The label gate posts no comment: the
+label itself already explains the skip to the next reader.
+
 ## Procedure
 
 `<N>` is the issue number; `GH_HOST`/`TARGET_HOST`/`TARGET_REPO` are Step 1's

@@ -40,6 +40,13 @@
   `fixed-in-place:` / `declined:`. A live failure is filed only for a real
   defect; a trivial difference stays in the `gh-verify:live` PR comment report
   (F-5). There is no every-item promotion rule in the plugin since #65.
+- **Exclude labels never start** (dEitY719/gh-flow-skills#70 F-3, F-6). An
+  issue carrying a label in `GH_FLOW_EXCLUDE_LABELS` (default
+  `wontfix,not-implement,manual`) is dropped at planning — `--issues` is no
+  override — by `gh-flow:issue`'s `lib/manual-gate.sh`, never an inline match,
+  and reported `excluded (label): #<N> <label>`. A worker's `[FAIL] manual`
+  gets the `manual` label and the three-part comment; a missing label is a
+  `[WARN]`, never a skipped comment (`references/blocked.md`).
 - **Run caps** (#64 F-4). `--max-issues N` (default `20`) bounds the issues
   dispatched to workers, `--max-waves W` (default `5`) the waves started, both
   per invocation. A cap reached leaves the rest unprocessed and listed in

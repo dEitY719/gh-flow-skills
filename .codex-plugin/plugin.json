@@ -1,6 +1,6 @@
 {
   "name": "gh-flow",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "One-shot issue-to-PR compositions: the ordinary chain, a spec-driven autopilot, dependency waves over a set of issues or the whole backlog, and a single-issue descendant wave.",
   "author": {
     "name": "dEitY719",

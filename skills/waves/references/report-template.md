@@ -35,6 +35,7 @@ left open      #<N> — <one line: [FAIL] not merged, awaits human | deferred on
 triage         fixed-in-place <a>  declined <b>  (sum of the workers' fixed-in-place: / declined: lines)
 filed this run #<X> ... (each carries Filed-by-run: waves #<T>; not processed in this run)
 capped         #<N> ... (--max-issues <N> | --max-waves <W> reached)
+excluded (label): #<N> <label>   (one line per issue dropped by the exclude-label gate)
 
 Next: <the single most useful command>
 ```
@@ -48,8 +49,14 @@ any `capped` targets, e.g.
 run's `--label` / `--from`: `--issues` intersects with them, and a follow-up
 rarely carries the label.
 
+`excluded (label)` lines name every candidate `references/plan.md` §1 dropped
+for an exclude label (dEitY719/gh-flow-skills#70), including ones `--issues`
+named. They are not work for `Next:`. An issue a worker reported
+`[FAIL] manual` is listed under `left open` as `#<N> — manual: <reason>`
+(`references/blocked.md`, label applied or `[WARN]`).
+
 `complete` means no actionable target is left: every target is closed, or is
-blocked, failed, deferred on a failure, excluded as a cycle, filed this run,
+excluded by label, blocked, failed, deferred on a failure, excluded as a cycle, filed this run,
 capped, or (with `--no-merge`) awaits a human merge — each named under
 `left open`, `filed this run` or `capped`.
 

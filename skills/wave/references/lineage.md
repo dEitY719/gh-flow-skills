@@ -93,6 +93,43 @@ unknown state is how a child gets dropped.
 - Under `--no-merge`, children of a `pr-only` issue are never queued either:
   the parent's change is not on base yet. Their `OPEN` numbers go to `Next:`.
 
+## Exclude-label gate (dEitY719/gh-flow-skills#70 F-4)
+
+Human-only work (a runbook, another machine's local setup) is labelled, not
+discovered by a worker after its worktree exists. Before **every** spawn — the
+root, and each issue popped from the queue — and again when a child is queued,
+the coordinator runs `gh-flow:issue`'s `lib/manual-gate.sh`, the SSOT for the
+verdict (exclude set `GH_FLOW_EXCLUDE_LABELS`, default
+`wontfix,not-implement,manual`; header of the script for the full contract):
+
+```
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
+[ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" ] ||
+    { printf 'gh-flow:wave stopped — gh-flow plugin incomplete (skills/issue/lib/manual-gate.sh)\n'; exit 1; }
+labels=$(GH_HOST="$TARGET_HOST" gh issue view <C> --repo "$TARGET_REPO" \
+    --json labels --jq '.labels[].name' 2>/dev/null); rc=$?
+printf '%s\n' "$labels" | sh "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" "$rc"
+# -> "pass" | "excluded <label>" | "skip lookup-failed"
+```
+
+Bash calls share no variables, so the block re-fills and re-proves
+`$CLAUDE_PLUGIN_ROOT` itself (`<skill-base-dir>` is this skill's base dir). Fold the labels into the child-confirm `gh issue view` above
+(`--json body,state,labels`) rather than paying a second call per child.
+
+- **Root** `excluded <label>` — no worktree, no worker:
+  `gh-flow:wave stopped — excluded label (<label>)`. `skip lookup-failed` —
+  `gh-flow:wave stopped — label lookup failed (<reason>)`. Never fail-open
+  (NF-1): starting a human-only issue costs more than a re-run.
+- **Descendant** with either verdict — not queued and not processed; it does
+  not count toward `--max-issues`. Listed under `excluded` in the report and in
+  `Next:` as `#<C> (excluded: <label>)` / `#<C> (label lookup failed)`. Its own
+  children are not queried: a skipped parent's change is not on base. A
+  `CLOSED` child is never gated — it is only descended through.
+
+The gate never edits the issue. `gh-flow:issue`'s own Step 1.5 runs the same
+script again inside the worker as a backstop; `--force-manual` is a human's
+flag and is never put in a brief.
+
 ## Resume
 
 No progress file exists (NF-6). A fresh session re-invoked on the same root

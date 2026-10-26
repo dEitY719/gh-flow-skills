@@ -51,7 +51,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
 
 ## Step 2: Plan
 
-대상 조회 → 이미 머지된 범위 확인(main 대조) → 명시 의존성 + 파일 겹침으로 웨이브 편성
+대상 조회(제외 라벨은 `skills/issue/lib/manual-gate.sh` 로 `excluded (label)`, #70) → 이미 머지된 범위 확인(main 대조) → 명시 의존성 + 파일 겹침으로 웨이브 편성
 → 계획 표를 추적 이슈 코멘트로 기록. 조회 명령, 의존성 문구 목록, 에픽 판정, 순환 처리,
 `--max-parallel` 분할, 추적 이슈 선택, **재개 규칙**: `references/plan.md` — 편성 전에 읽는다. 대상 조회 실패는 웨이브를 시작하지 않고 정지한다.
 
@@ -74,7 +74,7 @@ PR 별 `gh-verify:live`)을 치고 대상을 재조회해 다음 웨이브로 �
    새 이슈나 바뀐 의존성이 있으면 Step 2 로 재계획하고 새 계획 코멘트(pitfall 7). `--max-issues`/`--max-waves` 에 닿으면 남은 대상은 `Next:`.
 
 한 워커의 실패는 그 이슈만 `[FAIL]` + 이슈 코멘트로 끝나고 웨이브의 나머지는 계속된다.
-실패한 선행을 기다리는 후행 이슈는 미루고 `references/blocked.md` 형식으로 사유를 코멘트한다(복사 금지, 참조만).
+실패한 선행을 기다리는 후행 이슈는 미루고 `references/blocked.md` 형식으로 사유를 코멘트한다(복사 금지, 참조만). 워커가 `[FAIL] manual` 이면 `manual` 라벨 + 같은 3단 코멘트(소프트 실패, `references/blocked.md`).
 
 ## Step 4: Merge Policy
 
@@ -91,7 +91,7 @@ PR 은 사람 판단으로 남는다. `--no-merge` 면 PR 까지만 만들고 �
 
 ## Constraints
 
-`references/constraints.md`: 조율자 NF-1, 워커 1개/worktree, oid 판정, 직렬 live, 상태는 GitHub 에만, 웨이브 표는 최종 답이 아니다, 이연 항목 triage(`gh-flow:wave` 의 `references/triage.md` 공유), 이 실행의 후속 이슈 제외, 실행 상한, ff-only base, 플러그인 전체 설치.
+`references/constraints.md`: 조율자 NF-1, 워커 1개/worktree, oid 판정, 직렬 live, 상태는 GitHub 에만, 웨이브 표는 최종 답이 아니다, 이연 항목 triage(`gh-flow:wave` 의 `references/triage.md` 공유), 이 실행의 후속 이슈 제외, 실행 상한, ff-only base, 제외 라벨 게이트, 플러그인 전체 설치.
 
 ## Related Skills
 

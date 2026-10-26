@@ -37,8 +37,7 @@ metadata:
 
 ## Step 1: Parse Args + Bind Target
 
-`/gh-flow:wave <issue-number|issue-url> [remote] [--max-depth 3] [--max-issues 10] [--no-merge] [--no-verify]`.
-`-h`/`--help`/`help` 는 `references/help.md` 를 **그대로 출력하고 정지** — API 호출 없음.
+`/gh-flow:wave <issue-number|issue-url> [remote] [--max-depth 3] [--max-issues 10] [--no-merge] [--no-verify]`. `-h`/`--help`/`help` 는 `references/help.md` 를 **그대로 출력하고 정지** — API 호출 없음.
 
 **대상 바인딩** — `gh-flow:issue` 의 `references/target-binding.md` 의 **bash 블록만** 그대로 쓴다(복사 금지, SSOT:
 `$CLAUDE_PLUGIN_ROOT` 가드 → `[ -f ]` 증명 → `skills/issue/lib/target-binding.sh` source, 기본값을 경로에 끼우는 형태 금지). 모든 `gh` 호출은 `GH_HOST="$TARGET_HOST" gh ... --repo "$TARGET_REPO"`.
@@ -51,6 +50,8 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 큐 = `[(ROOT, depth 0)]`. 반복은 **내부 큐 루프**다 — `Skill(gh-flow:wave, ...)` 재귀 자기호출 금지.
 이슈 1건마다 아래 다섯 단계, 단계 사이에 사용자 확인을 묻지 않는다(무인 기본).
 루트가 이미 닫혀 있으면 1~4 를 건너뛰고 5 만 한다 — 자손이 없으면 `complete`.
+**제외 라벨 게이트**(#70) — spawn 전에 이슈마다 `skills/issue/lib/manual-gate.sh` 판정(`references/lineage.md` "Exclude-label gate"). 루트가 걸리면
+worktree 없이 `gh-flow:wave stopped — excluded label (<label>)`, 자손은 처리 없이 `Next:` 에 사유와 나열. 조회 실패도 건너뜀(fail-open 금지).
 
 1. **spawn** — 절차·모드 판정: `references/spawn.md`(첫 spawn 전에 읽는다). `MAIN` 은 항상 `--git-common-dir` 로 구한다.
    main 모드: `git symbolic-ref --short HEAD` 가 `<base>` 인지 확인(아니면 정지, 사유 `not on <base>`), `git pull --ff-only <remote> <base>` 후 `Skill(session:worktree-spawn, "--no-enter --task issue-<N> --base <remote>/<base>")`
@@ -71,7 +72,7 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 **상한** — 자식 깊이가 `--max-depth` 를 넘거나 처리 수가 `--max-issues` 에 닿으면 그 이슈는
 처리하지 않고 overflow 로 모아 최종 `Next:` 에 번호로 나열한다(F-7).
 
-**실패 전파** — 워커 실패나 `gh-pr:merge` 거절은 그 이슈만 `[FAIL]` + 이슈 코멘트로 끝난다.
+**실패 전파** — 워커 실패나 `gh-pr:merge` 거절은 그 이슈만 `[FAIL]` + 이슈 코멘트로 끝난다. 워커가 `[FAIL] manual` 이면 `manual` 라벨도 붙인다(소프트 실패, #70).
 그 이슈의 자손은 처리하지 않고 `gh-flow:waves` 의 `references/blocked.md` 3단 형식으로 사유를
 코멘트한다(참조만). 형제 자손은 계속 처리한다.
 
@@ -84,14 +85,13 @@ host/repo 가 바인딩과 다르면 둘 다 출력하고 정지한다. 형제 �
 
 ## Step 4: Report
 
-종료 시 트리 표(부모 → 자식) × PR → mergeCommit → merged-verify + `Next:` 한 줄(overflow ·
-실패 이슈): `references/report-template.md`. 마지막은 `gh-flow:wave complete` 또는
-`gh-flow:wave stopped —` (훅 계약). 평문 어시스턴트 텍스트 — `Bash` heredoc 이나 `Write` 금지.
+종료 시 트리 표 × PR → mergeCommit → merged-verify + `Next:`(overflow · 실패 · 제외): `references/report-template.md`.
+마지막은 `gh-flow:wave complete` 또는 `gh-flow:wave stopped —` (훅 계약). 평문 — `Bash` heredoc 이나 `Write` 금지.
 
 ## Constraints
 
 `references/constraints.md`: 조율자 NF-1, 워커 1개/worktree, oid 판정, 머지 위임, 마커 자손만,
-상한, 마커 이슈 생성 실패는 치명, 상태는 GitHub 에만, 이연 항목 triage(`references/triage.md`), ff-only base, 플러그인 전체 설치.
+상한, 마커 이슈 생성 실패는 치명, 상태는 GitHub 에만, 이연 항목 triage(`references/triage.md`), ff-only base, 제외 라벨 게이트, 플러그인 전체 설치.
 
 ## Related Skills
 
