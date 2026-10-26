@@ -54,7 +54,13 @@ chk "lookup rc 0 is evaluated" "$(printf 'bug\n' | gate 0)" "pass"
 
 # 6. Glob characters are literal, CRLF is stripped, a missing final newline
 #    still counts.
-chk "glob in set is literal" "$(GH_FLOW_EXCLUDE_LABELS='*' gate <<<'manual')" "pass"
+# Run the glob case where `*` WOULD expand (a dir holding a file named
+# `manual`), so removing `set -f` turns this red.
+_gd=$(mktemp -d)
+: >"$_gd/manual"
+chk "glob in set is literal" "$(cd "$_gd" && GH_FLOW_EXCLUDE_LABELS='*' gate <<<'manual')" "pass"
+rm -rf "$_gd"
+chk "tab/CR in env stripped" "$(GH_FLOW_EXCLUDE_LABELS=$'\tmanual\r' gate <<<'manual')" "excluded manual"
 chk "glob label is literal" "$(printf '*\n' | gate)" "pass"
 chk "CRLF stripped" "$(printf 'manual\r\n' | gate)" "excluded manual"
 chk "no trailing newline" "$(printf 'manual' | gate)" "excluded manual"

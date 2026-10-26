@@ -65,7 +65,10 @@ the issue (a runbook, another machine's local setup). The coordinator —
 `gh-flow:waves` or `gh-flow:wave` — then labels the issue `manual` instead of
 `blocked`, so the exclude-label gate (`gh-flow:issue`'s `lib/manual-gate.sh`)
 drops it before any worktree on every later run, and posts the three-part
-comment above with the worker's `blocked:` text as (c). Unlike `blocked`, this
+comment above with the worker's `blocked:` text as (c), plus the undo: the
+`manual` label came from a worker's judgment, not a human's, so (c) always
+ends with "if this is implementable after all, remove the `manual` label and
+re-run". Unlike `blocked`, this
 is a **soft** failure: the `manual` label is provisioned per repo by
 dEitY719/gh-setup-skills#23 and may not exist yet, so a failed create or add is
 one `[WARN]` and the comment is still posted:
