@@ -45,9 +45,11 @@ remote <remote>). Wave <w>. Carry this one issue to a merged PR, then report.
    `gh-flow:issue complete (#<N>)`; a `stopped at step` report is a [FAIL].
    If the issue turns out to be human-only work no PR can finish (a runbook,
    another machine's local setup, a manual console step) — whether
-   gh-flow:issue stops on it or you see it first — stop there without a PR and
-   report `[FAIL] manual — <why no PR can finish it>`; put the human steps in
-   `blocked:`. The coordinator labels the issue so no run picks it up again.
+   gh-flow:issue's label gate reports an excluded label or you see it first —
+   stop there without a PR and report `[FAIL] manual — <why no PR can finish it>`;
+   put the human steps in `blocked:`. The coordinator labels the issue so no run
+   picks it up again. A `label lookup failed` block is NOT manual: report it as
+   an ordinary `[FAIL] Step 1.5 — label lookup failed`.
 2. Wait until the reviewers' comments have landed (gh-flow:issue deferred its
    reply by 4 min; a blocking `gh pr checks <PR> --watch -R <owner/repo>` covers
    most of that wait — no foreground sleep), then run

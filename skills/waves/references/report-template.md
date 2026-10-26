@@ -58,7 +58,7 @@ named. They are not work for `Next:`. An issue a worker reported
 `complete` means no actionable target is left: every target is closed, or is
 excluded by label, blocked, failed, deferred on a failure, excluded as a cycle, filed this run,
 capped, or (with `--no-merge`) awaits a human merge — each named under
-`left open`, `filed this run` or `capped`.
+`left open`, `filed this run`, `capped` or `excluded (label)`.
 
 ## Stopped endings
 

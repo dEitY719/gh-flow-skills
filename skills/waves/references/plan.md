@@ -29,18 +29,21 @@ default `wontfix,not-implement,manual`):
 [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] || case "<skill-base-dir>" in /*) CLAUDE_PLUGIN_ROOT=$(cd -P -- "<skill-base-dir>/../.." 2>/dev/null && pwd) ;; esac  # tier 2, agent-filled (#41)
 [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -f "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" ] ||
     { printf 'gh-flow:waves stopped — gh-flow plugin incomplete (skills/issue/lib/manual-gate.sh)\n'; exit 1; }
-printf '%s\n' <the candidate's label names, one per line> |
+printf '%s\n' '<label 1>' '<label 2>' ... |   # one single-quoted word per label
     sh "$CLAUDE_PLUGIN_ROOT/skills/issue/lib/manual-gate.sh" 0
 # -> "pass" | "excluded <label>"
 ```
 
+Quote each label as its own single-quoted word (a `'` inside a name becomes
+`'\''`): an unquoted `on hold` splits into two labels, and a `(`, `;` or `$` in
+a name breaks or runs as shell.
 The labels came from a list query that succeeded, so the lookup status is `0`;
 a failed list query already stopped the run (below). An issue `--issues` names
 explicitly is dropped the same way — naming it is not an override, there is no
 `--force-manual` here — but always with its reason. Every dropped issue is one
 report line `excluded (label): #<N> <label>` (`references/report-template.md`)
-and is not a dependency anyone waits on: a dependant of an excluded issue is
-deferred with the three-part comment of `references/blocked.md`, label-less.
+and is never dispatched, so a dependant of an excluded issue cannot start: it
+is deferred with the three-part comment of `references/blocked.md`, label-less.
 
 **This run's follow-ups are dropped too** (#64 F-3): an issue whose
 `filed_by_run` contains `<T>` — its body carries the line `Filed-by-run: waves #<T>`,
