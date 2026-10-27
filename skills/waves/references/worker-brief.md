@@ -86,6 +86,10 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason> | [FA
   post-merge check, so `gh-pr:merge` Step 5 must not dispatch its own verify
   session too. Needs a gh-pr release containing
   [dEitY719/gh-pr-skills#90](https://github.com/dEitY719/gh-pr-skills/issues/90).
+- unverified run — the same text without ` --no-post-verify`, used only when the
+  coordinator will not verify this merge: wave `--no-verify`, waves `--no-live`
+  or waves without `--run` (live step `[SKIP]`). `gh-pr:merge`'s own post-merge
+  verify is then the only check, so it must not be switched off.
 - `--no-merge` — `Do not merge. Report [OK] pr-only with mergeCommit: none.`
 
 `<PROMOTION_RULE>` is one of:
