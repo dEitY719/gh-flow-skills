@@ -16,7 +16,7 @@
 | - | `--max-waves W` | `5` | Most waves started in one run. The rest are not processed and are listed under `Next:` |
 | - | `--run "<cmd>"` | none | Barrier's app restart command, run in the main checkout (e.g. `make run`). Absent: the live step is `[SKIP]` |
 | - | `--bootstrap "<cmd>"` | `.claude/gh-flow-waves.sh` if present | Per-worktree setup (symlink `.venv`/`.env`, `bun install`, ...), run inside each new worktree. Never hardcoded in the skill |
-| - | `--no-live` | off | Skip `gh-verify:live` at every barrier (the pull still runs) |
+| - | `--no-live` | off | Skip `gh-verify:live` at every barrier (the pull still runs) — no post-merge check at all, since the merge passes `--no-post-verify`; the same holds with no `--run` |
 | - | `--no-merge` | off | Workers stop at a green, synced PR; nothing merges and every live step is `[SKIP]` |
 
 With no `--from` / `--label` / `--author` / `--issues`, the target set is every open issue in
