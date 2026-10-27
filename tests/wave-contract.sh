@@ -16,8 +16,8 @@
 # 6. Reuse mode + --no-enter spawn (#71): every worktree-spawn call in wave and
 #    waves passes --no-enter, MAIN comes from --git-common-dir, and the two
 #    reuse-mode endings stay pinned.
-# 7. One verification point (#74): every gh-pr:merge call passes
-#    --no-post-verify, the --no-merge variant never calls it, constraints say so.
+# 7. One verification point (#74): constraints say the merge passes
+#    --no-post-verify (the brief checks are in waves-contract.sh).
 set -euo pipefail
 cd -- "$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 fail=0
@@ -98,17 +98,8 @@ for row in 'wt/issue-71/1:y' 'wt/claude/1-issue-71:y' 'wt/claude/1-issue-7:n' 'w
     [ "$got" = "$want" ] || { say "FAIL  branch '$b': reuse regex says $got, want $want (#71)"; fail=1; }
 done
 
-# One verification point (#74): the brief's merge passes --no-post-verify so
-# gh-pr:merge does not dispatch its own post-merge verify; --no-merge never merges.
-b=skills/waves/references/worker-brief.md
-grep -qF -- 'Skill(gh-pr:merge, "<PR> rebase <remote> --no-post-verify")' "$b" ||
-    { say "FAIL  MERGE_STEP default in $b lacks --no-post-verify (#74)"; fail=1; }
-if grep -rnE 'Skill\(gh-pr:merge, "' skills/wave/ skills/waves/ | grep -vF -- '--no-post-verify")'; then
-    say 'FAIL  a gh-pr:merge call above lacks --no-post-verify (#74)'; fail=1
-fi
-if grep -F -- '- `--no-merge` —' "$b" | grep -qF 'gh-pr:merge'; then
-    say "FAIL  the --no-merge MERGE_STEP in $b calls gh-pr:merge (#74)"; fail=1
-fi
+# One verification point (#74): the shared brief's --no-post-verify merge and
+# the gh-pr:merge sweep over skills/wave/ + skills/waves/ live in waves-contract.sh.
 grep -qF -- '--no-post-verify' skills/wave/references/constraints.md ||
     { say "FAIL  single verification point (--no-post-verify) missing from skills/wave/references/constraints.md (#74)"; fail=1; }
 

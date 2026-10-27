@@ -109,16 +109,13 @@ need "$r/plan.md" 'A failure here stops the run before the wave starts' 'list-qu
 
 # One verification point (#74): the brief's merge passes --no-post-verify so
 # gh-pr:merge does not dispatch its own post-merge verify; --no-merge never merges.
-b=skills/waves/references/worker-brief.md
-grep -qF -- 'Skill(gh-pr:merge, "<PR> rebase <remote> --no-post-verify")' "$b" ||
-    { say "FAIL  MERGE_STEP default in $b lacks --no-post-verify (#74)"; fail=1; }
+need "$b" 'Skill(gh-pr:merge, "<PR> rebase <remote> --no-post-verify")' 'MERGE_STEP default (#74)'
 if grep -rnE 'Skill\(gh-pr:merge, "' skills/wave/ skills/waves/ | grep -vF -- '--no-post-verify")'; then
     say 'FAIL  a gh-pr:merge call above lacks --no-post-verify (#74)'; fail=1
 fi
 if grep -F -- '- `--no-merge` —' "$b" | grep -qF 'gh-pr:merge'; then
     say "FAIL  the --no-merge MERGE_STEP in $b calls gh-pr:merge (#74)"; fail=1
 fi
-grep -qF -- '--no-post-verify' skills/waves/references/constraints.md ||
-    { say "FAIL  single verification point (--no-post-verify) missing from skills/waves/references/constraints.md (#74)"; fail=1; }
+need "$r/constraints.md" '--no-post-verify' 'single verification point (#74)'
 
 [ "$fail" = 0 ] && say 'OK    waves contract' || exit 1
