@@ -15,8 +15,9 @@
   `Skill(gh-pr:merge, ...)`, whose approval and protection gates apply. No raw
   gh merge command anywhere, no `gh-pr:merge-emergency` by any path. A refusal
   is `[FAIL] not merged`; its dependents are deferred. `--no-merge` merges
-  nothing. The merge passes `--no-post-verify`: `gh-verify:live` is the one
-  post-merge check (`references/worker-brief.md` `<MERGE_STEP>`, #74).
+  nothing. When the live step will run, the merge passes `--no-post-verify`:
+  `gh-verify:live` is the one post-merge check (`references/worker-brief.md`
+  `<MERGE_STEP>`, #74).
 - **Never reimplement an atom.** Worktrees are `session:worktree-spawn`'s,
   the chain is `gh-flow:issue`'s, CI repair is `gh-resolve:ci-fail`'s, live
   verification is `gh-verify:live`'s, issue filing is `gh-issue:issue-create`'s.

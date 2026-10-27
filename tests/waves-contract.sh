@@ -108,12 +108,15 @@ done
 need "$r/plan.md" 'A failure here stops the run before the wave starts' 'list-query stop'
 
 # One verification point (#74): the brief's merge passes --no-post-verify so
-# gh-pr:merge does not dispatch its own post-merge verify; --no-merge never merges.
+# gh-pr:merge does not dispatch its own post-merge verify, except in an unverified
+# run (wave --no-verify, waves --no-live / no --run); --no-merge never merges.
 need "$b" 'Skill(gh-pr:merge, "<PR> rebase <remote> --no-post-verify")' 'MERGE_STEP default (#74)'
 if grep -rnE 'Skill\(gh-pr:merge, "' skills/wave/ skills/waves/ | grep -vF -- '--no-post-verify")'; then
     say 'FAIL  a gh-pr:merge call above lacks --no-post-verify (#74)'; fail=1
 fi
-if grep -F -- '- `--no-merge` —' "$b" | grep -qF 'gh-pr:merge'; then
+need "$b" 'unverified run — the same text without ` --no-post-verify`' 'unverified-run MERGE_STEP (#74)'
+# The whole --no-merge bullet (to the next bullet or blank line), not its first line only.
+if awk '/^- `--no-merge` —/{on=1;print;next} on&&(/^- /||/^$/){exit} on' "$b" | grep -qF 'gh-pr:merge'; then
     say "FAIL  the --no-merge MERGE_STEP in $b calls gh-pr:merge (#74)"; fail=1
 fi
 need "$r/constraints.md" '--no-post-verify' 'single verification point (#74)'

@@ -9,7 +9,7 @@
 | - | `--max-depth D` | `3` | Deepest descendant generation processed (root = 0). A child deeper than `D` is not processed and is listed under `Next:` |
 | - | `--max-issues K` | `10` | Most issues processed in one run, root included. The rest of the queue is listed under `Next:` |
 | - | `--no-merge` | off | Workers stop at a green, synced PR; nothing merges, every verify step is `[SKIP] --no-merge`, and only the root runs — its descendants are listed under `Next:` |
-| - | `--no-verify` | off | Skip `gh-verify:merged` after each merge — no post-merge check at all, since the merge passes `--no-post-verify` |
+| - | `--no-verify` | off | Skip `gh-verify:merged` after each merge — the merge then omits `--no-post-verify`, so `gh-pr:merge`'s own post-merge verify runs instead |
 
 ## Environment
 
