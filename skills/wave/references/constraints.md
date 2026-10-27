@@ -14,7 +14,9 @@
   `Skill(gh-pr:merge, ...)`, whose approval and protection gates apply. No raw
   gh merge command anywhere, no `gh-pr:merge-emergency` by any path. A refusal
   is `[FAIL] not merged`, the PR stays for a human, and that issue's
-  descendants are not processed. `--no-merge` merges nothing.
+  descendants are not processed. `--no-merge` merges nothing. The merge passes
+  `--no-post-verify`: `gh-verify:merged` is the one post-merge check
+  (`gh-flow:waves`'s `references/worker-brief.md` `<MERGE_STEP>`, #74).
 - **Only marked descendants are processed** (F-3). An open issue enters the
   queue only through an exact `Spawned-from: #<N>` line whose `<N>` is an issue
   already in this run's tree (`references/lineage.md`). Every other open issue

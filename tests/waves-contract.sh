@@ -18,6 +18,8 @@
 # 7. Fresh base before every spawn (F-6): pull --ff-only and its stopped ending.
 # 8. drain is gone (#65): skills/drain/ absent, no live reference to it in
 #    skills/, docs or a manifest, and blocked.md lives here and is what wave and waves point at.
+# 9. One verification point (#74): every gh-pr:merge call passes
+#    --no-post-verify, the --no-merge variant never calls it, constraints say so.
 set -euo pipefail
 cd -- "$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 fail=0
@@ -104,5 +106,19 @@ for f in skills/waves/SKILL.md "$r/barrier.md" skills/wave/SKILL.md skills/wave/
     need "$f" 'references/blocked.md' 'blocked form'
 done
 need "$r/plan.md" 'A failure here stops the run before the wave starts' 'list-query stop'
+
+# One verification point (#74): the brief's merge passes --no-post-verify so
+# gh-pr:merge does not dispatch its own post-merge verify; --no-merge never merges.
+b=skills/waves/references/worker-brief.md
+grep -qF -- 'Skill(gh-pr:merge, "<PR> rebase <remote> --no-post-verify")' "$b" ||
+    { say "FAIL  MERGE_STEP default in $b lacks --no-post-verify (#74)"; fail=1; }
+if grep -rnE 'Skill\(gh-pr:merge, "' skills/wave/ skills/waves/ | grep -vF -- '--no-post-verify")'; then
+    say 'FAIL  a gh-pr:merge call above lacks --no-post-verify (#74)'; fail=1
+fi
+if grep -F -- '- `--no-merge` —' "$b" | grep -qF 'gh-pr:merge'; then
+    say "FAIL  the --no-merge MERGE_STEP in $b calls gh-pr:merge (#74)"; fail=1
+fi
+grep -qF -- '--no-post-verify' skills/waves/references/constraints.md ||
+    { say "FAIL  single verification point (--no-post-verify) missing from skills/waves/references/constraints.md (#74)"; fail=1; }
 
 [ "$fail" = 0 ] && say 'OK    waves contract' || exit 1
