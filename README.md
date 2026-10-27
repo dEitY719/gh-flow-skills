@@ -12,7 +12,8 @@ that owns it (`gh-issue:implement`, `gh-pr:commit`, `gh-pr:create`,
 here reimplements an atom, and **nothing here merges a PR by itself** — that
 stays a human decision. There are two explicit exceptions, and neither merges
 anything itself: `waves` and `wave` (which merge by default) have each worker delegate to `gh-pr:merge` —
-the approval and label gates still apply. A `gh-pr:merge` refusal is
+the approval and label gates still apply, and `--no-post-verify` leaves the run's own
+`gh-verify:merged` / `gh-verify:live` as the single post-merge check (#74). A `gh-pr:merge` refusal is
 reported `[FAIL] not merged` and the PR is left for a human; `waves --no-merge`
 and `wave --no-merge` merge nothing; `gh-pr:merge-emergency` is never called by any path.
 

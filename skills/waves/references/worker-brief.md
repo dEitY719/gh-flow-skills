@@ -77,10 +77,15 @@ waves-worker #<N>: [OK] merged | [OK] pr-only | [FAIL] <step> — <reason> | [FA
 `<MERGE_STEP>` is one of:
 
 - default —
-  `Skill(gh-pr:merge, "<PR> rebase <remote>")`, then prove it:
+  `Skill(gh-pr:merge, "<PR> rebase <remote> --no-post-verify")`, then prove it:
   `GH_HOST=<host> gh pr view <PR> -R <owner/repo> --json state,mergeCommit --jq '.state + " " + (.mergeCommit.oid // "")'`
   must print `MERGED <oid>`. Report that oid. Never judge by `headRefOid` — a
   rebase merge rewrites it, so a merged PR looks unmerged (pitfall 4).
+  `--no-post-verify` is the single-verification-point rule (#74): the
+  coordinator's `gh-verify:merged` (wave) / `gh-verify:live` (waves) is the one
+  post-merge check, so `gh-pr:merge` Step 5 must not dispatch its own verify
+  session too. Needs a gh-pr release containing
+  [dEitY719/gh-pr-skills#90](https://github.com/dEitY719/gh-pr-skills/issues/90).
 - `--no-merge` — `Do not merge. Report [OK] pr-only with mergeCommit: none.`
 
 `<PROMOTION_RULE>` is one of:
